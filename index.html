@@ -186,9 +186,10 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="kv"><span>নাম</span><b>The Black Ghost</b></div>
       <div class="kv"><span>অ্যাকাউন্ট</span><b id="profileAcct">লগইন করা নেই</b></div>
       <div class="kv"><span>আমার প্ল্যান</span><b id="profilePlan">—</b></div>
+      <div class="kv" id="profileTrial" style="display:none"><span>🎁 ফ্রি ট্রায়াল</span><b id="profileTrialTxt"></b></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" class="noprint">
         <button class="btn small" id="loginOpenBtn" type="button">👤 লগইন / সাইন আপ</button>
-        <button class="btn small gold" id="planOpenBtn" type="button">💎 প্ল্যান কিনুন</button>
+        <button class="btn small gold" id="planOpenBtn" type="button">💎 প্রিমিয়াম কিনুন</button>
         <button class="btn small danger" id="logoutBtn" type="button" style="display:none">লগআউট</button>
       </div>
       <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
@@ -565,7 +566,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       </div>
       <h3>হিসাব কোথায় থাকে</h3>
       <div id="syncBox"></div>
-      <p class="hint" style="margin-top:6px">লগইন করলে হিসাব তোমার অ্যাকাউন্টে সিঙ্ক থাকে — ফোন বদলালেও একই জিমেইল/নম্বর দিয়ে লগইন করলেই সব হিসাব ফিরে আসবে। দুই ফোনে আলাদা আলাদা হিসাব থাকলে লগইনের সময় দুটোই একসাথে যোগ হয়ে যায় — কোনো এন্ট্রিই হারায় না, একটার বদলে আরেকটা বসে না। লগইন ছাড়া ব্যবহার করলে হিসাব শুধু এই ফোনেই থাকে। ইন্টারনেট ছাড়াও সব কাজ চলে — অনলাইন হলেই সিঙ্ক হয়ে যায়।</p>
+      <p class="hint" style="margin-top:6px">লগইন করলে হিসাব তোমার অ্যাকাউন্টে সিঙ্ক থাকে — ফোন বদলালেও একই জিমেইল/নম্বর দিয়ে লগইন করলেই সব হিসাব ফিরে আসবে। দুই ফোনে আলাদা আলাদা হিসাব থাকলে লগইনের সময় দুটোই একসাথে যোগ হয়ে যায় — কোনো এন্ট্রিই হারায় না, একটার বদলে আরেকটা বসে না। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। ইন্টারনেট ছাড়াও সব কাজ চলে — অনলাইন হলেই সিঙ্ক হয়ে যায়।</p>
       <h3>ফোনে ইনস্টল</h3>
       <p class="hint" style="margin-bottom:6px">Chrome ব্রাউজারে এই পেজ খুলে ওপরের <b>“📲 ফোনে ইনস্টল করুন”</b> বোতামে চাপ দাও। বোতামে কাজ না হলে: Chrome-এর ⋮ মেনু → <b>Install app / Add to Home screen</b> — তাহলে হোম স্ক্রিনে আইকন আসবে, অন্য অ্যাপের মতো খুলবে, ইন্টারনেট ছাড়াই চলবে।</p>
     </div>
@@ -579,15 +580,24 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </div>
 </div>
 
-<!-- PAYWALL -->
+<!-- PAYWALL — shown ONLY after login, when the 7-day free trial has ended and
+     no paid plan is active. The plan list + payment form stay hidden until the
+     user taps the one "প্রিমিয়াম কিনুন" button. -->
 <div id="paywall" style="display:none;position:fixed;inset:0;z-index:55;background:var(--bg);overflow-y:auto">
   <div style="max-width:640px;margin:0 auto;padding:26px 16px 60px">
     <div style="text-align:center;margin-bottom:14px">
       <div class="logo" style="margin:0 auto 10px">BG</div>
       <h2 style="margin:0 0 4px;font-size:1.35rem">Black Ghost Hisab</h2>
-      <p style="color:var(--muted);margin:0">এই অ্যাপ ব্যবহার করতে একটা প্ল্যান চালু থাকতে হবে। নিচে থেকে প্ল্যান বেছে পেমেন্ট করে রিকোয়েস্ট পাঠান — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।</p>
+      <p style="color:var(--muted);margin:0">আপনার ফ্রি ট্রায়াল শেষ হয়ে গেছে। আবার পুরো অ্যাপ ব্যবহার করতে একটা প্ল্যান কিনুন — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।</p>
     </div>
-    <div class="panel" style="margin-top:0">
+    <div style="max-width:340px;margin:0 auto 16px;text-align:center">
+      <input type="password" id="pwAdminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
+      <button class="btn small ghost" id="pwAdminBtn" type="button" style="margin-top:6px">🔐 Admin Panel</button>
+    </div>
+    <button class="btn gold" id="pwBuyBtn" type="button" style="width:100%;font-size:1.12rem;min-height:3.3rem">💎 প্রিমিয়াম কিনুন</button>
+    <button class="btn ghost" id="pwCloseBtn" type="button" style="width:100%;margin-top:8px;display:none">← ফিরে যান (পরে কিনবো)</button>
+    <div id="pwBuySection" style="display:none">
+    <div class="panel">
       <h2>💎 প্ল্যান বেছে নিন</h2>
       <div id="pwPlans"></div>
     </div>
@@ -618,14 +628,45 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       </div>
       <p id="pwCodeMsg" style="margin:0;font-weight:700"></p>
     </div>
-    <div class="panel">
-      <h2>ইতিমধ্যে অ্যাকাউন্ট আছে?</h2>
-      <p class="hint">যে জিমেইল / নম্বর দিয়ে পেমেন্ট রিকোয়েস্ট পাঠিয়েছেন, সেটা দিয়েই লগইন করুন — Admin অনুমোদন দিলে এই অ্যাকাউন্টেই প্ল্যান চালু হবে।</p>
-      <button class="btn gold" id="pwLoginBtn" type="button">👤 লগইন / সাইন আপ</button>
+    </div><!-- /pwBuySection -->
+    <button class="btn ghost" id="pwSwitchBtn" type="button" style="width:100%;margin-top:16px">অন্য অ্যাকাউন্ট দিয়ে লগইন করুন</button>
+  </div>
+</div>
+
+<!-- LOGIN GATE — the very first screen. The app requires an account: until
+     login succeeds this covers everything (no plans, no payment form, no
+     paywall). Views: loading (until auth resolves) / login / device-limit. -->
+<div id="gate" style="position:fixed;inset:0;z-index:58;background:var(--bg);overflow-y:auto">
+  <div style="max-width:480px;margin:0 auto;padding:34px 16px 60px">
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="logo" style="margin:0 auto 10px">BG</div>
+      <h2 style="margin:0 0 4px;font-size:1.35rem">Black Ghost Hisab</h2>
+      <p style="color:var(--muted);margin:0">হিসাব খাতা ও প্রোডাক্ট স্টক — সব হিসাব অটোমেটিক</p>
     </div>
-    <div style="max-width:340px;margin:20px auto 0;text-align:center">
-      <input type="password" id="pwAdminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
-      <button class="btn small ghost" id="pwAdminBtn" type="button" style="margin-top:6px">🔐 Admin Panel</button>
+    <div id="gateLoading" class="panel" style="text-align:center;margin-top:0">
+      <p style="font-weight:800;font-size:1.1rem;margin:8px 0 2px">⏳ লোড হচ্ছে…</p>
+      <p class="hint" style="margin:0">একটু অপেক্ষা করুন</p>
+    </div>
+    <div id="gateLogin" class="panel" style="display:none;margin-top:0">
+      <h2>লগইন / অ্যাকাউন্ট খুলুন</h2>
+      <p class="hint">অ্যাপ ব্যবহার করতে অ্যাকাউন্ট লাগবে। নতুন অ্যাকাউন্টে প্রথম <b>৭ দিন সম্পূর্ণ ফ্রি ট্রায়াল</b> — কোনো পেমেন্ট লাগবে না।</p>
+      <p id="gateNote" style="display:none;margin:0 0 10px;font-weight:700;color:var(--out)"></p>
+      <div class="seg" id="gAuthModeSeg" style="margin-bottom:12px">
+        <button type="button" data-v="login" class="sel-gold">লগইন</button>
+        <button type="button" data-v="signup">নতুন অ্যাকাউন্ট (সাইন আপ)</button>
+      </div>
+      <div class="field" id="gAuthNameWrap" style="display:none"><label for="gAuthName">তোমার নাম</label><input type="text" id="gAuthName" placeholder="নাম লিখুন" autocomplete="name" /></div>
+      <div class="field"><label for="gAuthId">জিমেইল অথবা ফোন নম্বর</label><input type="text" id="gAuthId" placeholder="example@gmail.com অথবা 01XXXXXXXXX" autocomplete="username" /></div>
+      <div class="field"><label for="gAuthPass">পাসওয়ার্ড</label><input type="password" id="gAuthPass" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="current-password" /></div>
+      <p id="gAuthMsg" style="margin:0 0 10px;font-weight:700;color:var(--out)"></p>
+      <button class="btn" id="gAuthGo" type="button" style="width:100%">লগইন করুন</button>
+      <p class="hint" style="margin-top:10px">একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে — বারবার লগইন করতে হবে না। লগইনের সময় একবার ইন্টারনেট লাগে; এরপর হিসাবের সব কাজ অফলাইনেও চলে। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে।</p>
+    </div>
+    <div id="gateDevices" class="panel" style="display:none;margin-top:0">
+      <h2>📱 ডিভাইস সীমা পূর্ণ</h2>
+      <p class="hint">এই অ্যাকাউন্টে ইতিমধ্যে ২টি ডিভাইসে লগইন আছে — একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসেই লগইন থাকতে পারে। নিচের যেকোনো একটা ডিভাইস থেকে লগআউট করলেই এই ডিভাইসে লগইন হয়ে যাবে।</p>
+      <div id="gateDevList"></div>
+      <button class="btn ghost" id="gateSwitchBtn" type="button" style="width:100%;margin-top:10px">অন্য অ্যাকাউন্ট দিয়ে লগইন করুন</button>
     </div>
   </div>
 </div>
@@ -696,7 +737,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="field"><label for="pinNew">নতুন PIN</label><input type="password" id="pinNew" inputmode="numeric" placeholder="নতুন PIN" autocomplete="off" /></div>
       <div class="field"><label>&nbsp;</label><button class="btn ghost" id="pinSave" type="button" style="width:100%">PIN সেভ করুন</button></div>
     </div>
-    <p class="hint" style="margin-top:10px">দ্রষ্টব্য: প্ল্যানের মেয়াদ শেষ হলে ব্যবহারকারীর অ্যাপ আবার অটোমেটিক লক হয়ে যাবে। Admin (এই ডিভাইসে PIN দিয়ে ঢুকলে) সবসময় ফুল অ্যাক্সেস পায়।</p>
+    <p class="hint" style="margin-top:10px">দ্রষ্টব্য: প্ল্যানের মেয়াদ শেষ হলে ব্যবহারকারীর অ্যাপ আবার অটোমেটিক লক হয়ে যাবে। মালিকের Gmail অ্যাকাউন্ট সবসময় ফ্রি অ্যাক্সেস পায়; PIN শুধু এই প্যানেলটা খোলে — অ্যাপের অ্যাক্সেস দেয় না, আর অন্য ব্যবহারকারীদের তথ্য শুধু মালিকের Gmail লগইনেই লোড হয়।</p>
   </div>
 </div>
 
@@ -726,7 +767,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <button class="btn" id="authGo" type="button">লগইন করুন</button>
         <button class="btn ghost" id="authClose" type="button">বন্ধ করুন</button>
       </div>
-      <p class="hint" style="margin-top:10px">অ্যাকাউন্ট ছাড়াও ব্যবহার করা যায় — তবে তখন হিসাব শুধু এই ফোনেই থাকবে। লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকবে, যেকোনো ফোনে লগইন করলেই পেয়ে যাবে। লগইন/সাইন আপের সময় একবার ইন্টারনেট লাগে; হিসাবের কাজ অফলাইনেও চলে।</p>
+      <p class="hint" style="margin-top:10px">নতুন অ্যাকাউন্টে প্রথম ৭ দিন সম্পূর্ণ ফ্রি ট্রায়াল — তারপর প্ল্যান কিনলেই চলবে। একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে। লগইন/সাইন আপের সময় একবার ইন্টারনেট লাগে; হিসাবের সব কাজ অফলাইনেও চলে।</p>
     </div>
   </div>
 </div>
@@ -908,13 +949,25 @@ function mergeData(a,b){
 }
 function addTomb(p,id){var t=p+id;if(DB.tombs.indexOf(t)<0)DB.tombs.push(t);}
 function persistLocal(){try{localStorage.setItem(curKey,JSON.stringify(DB));}catch(e){}}
-var syncState='অতিথি মোড — হিসাব শুধু এই ফোনে সেভ হচ্ছে';
+var syncState='লগইন করা নেই';
 var currentUser=null, fbReady=false, fsDb=null, pushTimer=null;
+/* ---------- LOGIN-FIRST FLOW STATE ---------- */
+var authResolved=false; /* the gate shows a loading state until the first auth callback fires */
+var OWNER_EMAILS=['torikul20250@gmail.com','torikul40yt@gmail.com'];
+function isOwner(){return !!currentUser&&OWNER_EMAILS.indexOf(String(currentUser.email||'').toLowerCase())>=0;}
+var gateNote=''; /* one-off message on the login gate (e.g. this device was logged out elsewhere) */
+var pwVoluntary=false, pwBuyOpen=false; /* paywall opened on purpose from Profile / buy section expanded */
+/* ---------- DEVICE LIMIT (max 2 devices per account; owner exempt) ---------- */
+var DEVICES=[], deviceBlocked=false, deviceConfirmed=false;
+function deviceId(){try{var id=localStorage.getItem('bgh_device_id');if(!id){id='dev_'+uid()+Math.random().toString(36).slice(2,6);localStorage.setItem('bgh_device_id',id);}return id;}catch(e){return 'dev_session';}}
+function deviceLabel(){var ua=navigator.userAgent||'';var plat=/Android/i.test(ua)?'Android ফোন':(/iPhone|iPad/i.test(ua)?'iPhone/iPad':(/Windows/i.test(ua)?'Windows কম্পিউটার':(/Macintosh|Mac OS/i.test(ua)?'Mac কম্পিউটার':'অন্য ডিভাইস')));var br=/Edg\//.test(ua)?'Edge':(/Chrome\//.test(ua)?'Chrome':(/Firefox\//.test(ua)?'Firefox':(/Safari\//.test(ua)?'Safari':'ব্রাউজার')));return plat+' • '+br;}
+function loadDevices(){DEVICES=[];try{var raw=localStorage.getItem(curKey+'_devices');if(raw){var a=JSON.parse(raw);if(Array.isArray(a))DEVICES=a;}}catch(e){}}
+function saveDevicesLocal(){try{localStorage.setItem(curKey+'_devices',JSON.stringify(DEVICES));}catch(e){}}
 function saveLocal(){DB.updatedAt=Date.now();DB.rev=num(DB.rev)+1;persistLocal();schedulePush();renderAll();}
 function setSync(txt){
   syncState=txt;
   var b=$('syncBox');
-  if(b)b.innerHTML='<div class="kv"><span>অ্যাকাউন্ট</span><b>'+(currentUser?esc(currentUser.label):'লগইন করা নেই (অতিথি)')+'</b></div><div class="kv"><span>সিঙ্ক অবস্থা</span><b>'+esc(txt)+'</b></div><div class="kv"><span>মোট এন্ট্রি</span><b>'+(DB.txs.length+DB.logs.length)+' টি</b></div>';
+  if(b)b.innerHTML='<div class="kv"><span>অ্যাকাউন্ট</span><b>'+(currentUser?esc(currentUser.label):'লগইন করা নেই')+'</b></div><div class="kv"><span>সিঙ্ক অবস্থা</span><b>'+esc(txt)+'</b></div><div class="kv"><span>মোট এন্ট্রি</span><b>'+(DB.txs.length+DB.logs.length)+' টি</b></div>';
   var at=$('acctBtnTxt');if(at)at.textContent=currentUser?currentUser.label:'লগইন / সাইন আপ';
   var pa=$('profileAcct');if(pa)pa.textContent=currentUser?currentUser.label:'লগইন করা নেই';
   var lo=$('logoutBtn');if(lo)lo.style.display=currentUser?'':'none';
@@ -942,13 +995,16 @@ var FB_CONFIG={apiKey:'AIzaSyAsid6V5zUzhJyP1YZgGMPVo1-AE70lw7g',authDomain:'st-n
 function userDoc(){return fsDb.collection(HISABI_COLLECTION).doc(currentUser.uid);}
 function initFirebase(){
   if(fbReady){syncNow();return;}
-  if(typeof firebase==='undefined'){setSync(currentUser?'সিঙ্ক লোড হয়নি — হিসাব এই ফোনে সেভ হচ্ছে':'অতিথি মোড — হিসাব শুধু এই ফোনে সেভ হচ্ছে');return;}
+  if(typeof firebase==='undefined'){authResolved=true;setSync(currentUser?'সিঙ্ক লোড হয়নি — হিসাব এই ফোনে সেভ হচ্ছে':'লগইন করা নেই');renderAccess();return;}
   try{
     if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);
     fsDb=firebase.firestore();
     fbReady=true;
+    /* Stay logged in: LOCAL persistence keeps the session across reloads and
+       app restarts until the user explicitly taps Log Out. */
+    try{firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});}catch(e){}
     firebase.auth().onAuthStateChanged(onAuthChanged);
-  }catch(e){setSync('সিঙ্ক চালু হয়নি — হিসাব এই ফোনে সেভ হচ্ছে');}
+  }catch(e){authResolved=true;setSync('সিঙ্ক চালু হয়নি — হিসাব এই ফোনে সেভ হচ্ছে');renderAccess();}
 }
 function identLabel(u){
   if(!u||!u.email)return '';
@@ -956,19 +1012,24 @@ function identLabel(u){
   return u.email;
 }
 function onAuthChanged(u){
+  authResolved=true;
   if(u){
-    currentUser={uid:u.uid,label:identLabel(u),name:u.displayName||''};
+    currentUser={uid:u.uid,label:identLabel(u),name:u.displayName||'',email:u.email||''};
     curKey=LS_KEY+'_'+u.uid; /* this account's own on-device cache — never shared */
-    loadLocal();loadSub();loadReqs();
+    loadLocal();loadSub();loadReqs();loadDevices();
+    deviceBlocked=false;deviceConfirmed=false;gateNote='';
     mergeGuest(u.uid);
+    ensureTrial();
     renderAll();
     setSync('লগইন হয়েছে — সিঙ্ক হচ্ছে…');
     syncNow();
     checkFreeList();
     flushOutbox();
   }else{
-    currentUser=null;curKey=LS_KEY;loadLocal();loadSub();loadReqs();renderAll();
-    setSync('অতিথি মোড — হিসাব শুধু এই ফোনে সেভ হচ্ছে');
+    currentUser=null;curKey=LS_KEY;loadLocal();loadSub();loadReqs();
+    DEVICES=[];deviceBlocked=false;deviceConfirmed=false;pwVoluntary=false;pwBuyOpen=false;
+    renderAll();
+    setSync('লগইন করা নেই');
   }
 }
 /* First login on this phone: fold any guest entries into the account with
@@ -1018,15 +1079,63 @@ function syncNow(){
     if(!currentUser||currentUser.uid!==uidAtStart){finish(false);return;}
     if(snap.exists){
       var cd=snap.data()||{};
+      if(processDevices(cd)==='blocked'){finish(false);return;}
       var merged=mergeData(DB,cd);
       if(JSON.stringify(merged)!==JSON.stringify(DB)){DB=merged;persistLocal();renderAll();}
       adoptCloudPlan(cd);
+      ensureTrial();
+    }else{
+      processDevices({});
     }
     var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,targetAmt:DB.targetAmt,targetU:DB.targetU,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
-      sub:subPayload(),plans:PLANS,planCfgU:CFG.u||0,payNum:CFG.payNumber||'',planReqs:PLANREQS,planReqsU:PLANREQS_U};
+      sub:subPayload(),plans:PLANS,planCfgU:CFG.u||0,payNum:CFG.payNumber||'',planReqs:PLANREQS,planReqsU:PLANREQS_U,devices:DEVICES};
     userDoc().set(payload).then(function(){finish(true);},function(){finish(false);});
   }).catch(function(){finish(false);});
 }
+/* ---------- DEVICE LIMIT ENFORCEMENT ----------
+   Runs inside syncNow on every cloud read. Returns 'blocked' when this
+   device may not proceed (2 devices already registered and this is not one
+   of them). A network/read failure never reaches here — syncNow's catch
+   just skips the check, so nobody is ever locked out by a read error, and
+   owner accounts skip the check entirely. */
+function deviceRemovedLogout(){
+  deviceConfirmed=false;deviceBlocked=false;DEVICES=[];
+  gateNote='এই ডিভাইস থেকে লগআউট করা হয়েছে';
+  if(typeof firebase!=='undefined'&&fbReady){firebase.auth().signOut().catch(function(){});}
+  toast('এই ডিভাইস থেকে লগআউট করা হয়েছে');
+}
+function processDevices(cd){
+  if(!currentUser||isOwner())return 'ok';
+  var myId=deviceId();
+  if(!cd||!Array.isArray(cd.devices)){
+    /* No device list in the cloud yet (new account / legacy doc): register
+       this device locally; the payload write in syncNow stores it. */
+    if(!deviceConfirmed){
+      DEVICES=DEVICES.filter(function(d){return d&&d.id!==myId;});
+      DEVICES.push({id:myId,label:deviceLabel(),lastSeen:Date.now()});
+      deviceConfirmed=true;deviceBlocked=false;saveDevicesLocal();
+    }
+    return 'ok';
+  }
+  var cloud=cd.devices,mine=null,i;
+  for(i=0;i<cloud.length;i++)if(cloud[i]&&cloud[i].id===myId)mine=cloud[i];
+  if(deviceConfirmed&&!mine){deviceRemovedLogout();return 'blocked';}
+  if(mine){mine.lastSeen=Date.now();DEVICES=cloud;deviceConfirmed=true;deviceBlocked=false;saveDevicesLocal();return 'ok';}
+  if(cloud.length>=2){DEVICES=cloud;deviceBlocked=true;saveDevicesLocal();renderAccess();return 'blocked';}
+  cloud.push({id:myId,label:deviceLabel(),lastSeen:Date.now()});
+  DEVICES=cloud;deviceConfirmed=true;deviceBlocked=false;saveDevicesLocal();return 'ok';
+}
+/* On the device-limit screen: log one registered device out, freeing its
+   slot, then this device registers itself via the normal sync. */
+window.devLogout=function(id){
+  if(!currentUser||!fbReady||!fsDb){toast('⚠️ ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
+  var rest=DEVICES.filter(function(d){return d&&d.id!==id;});
+  userDoc().set({devices:rest},{merge:true}).then(function(){
+    DEVICES=rest;saveDevicesLocal();deviceBlocked=false;deviceConfirmed=false;
+    toast('✅ ওই ডিভাইস থেকে লগআউট হয়েছে — এখন এই ডিভাইসে লগইন হচ্ছে');
+    syncNow();
+  }).catch(function(){toast('⚠️ হয়নি — ইন্টারনেট চেক করে আবার চেষ্টা করুন');});
+};
 function schedulePush(){
   if(!currentUser)return;
   if(pushTimer)clearTimeout(pushTimer);
@@ -1053,14 +1162,25 @@ try{var _cfgRaw=localStorage.getItem('bgh_cfg');if(_cfgRaw){var _c=JSON.parse(_c
 function refreshPlans(){PLANS=(CFG.plans&&CFG.plans.length)?CFG.plans:DEFAULT_PLANS;}
 refreshPlans();
 function saveCfg(){try{localStorage.setItem('bgh_cfg',JSON.stringify(CFG));}catch(e){} refreshPlans();}
-function blankSub(){return{status:'none',planName:'',expiresAt:0,free:false,history:[],redeemed:[],u:0};}
+function blankSub(){return{status:'none',planName:'',expiresAt:0,free:false,history:[],redeemed:[],u:0,trialStart:0};}
 var SUB=blankSub();
 function loadSub(){
   SUB=blankSub();
-  try{var raw=localStorage.getItem(curKey+'_sub');if(raw){var s=JSON.parse(raw);if(s&&typeof s==='object'){SUB.status=s.status||'none';SUB.planName=s.planName||'';SUB.expiresAt=num(s.expiresAt);SUB.free=!!s.free;SUB.history=Array.isArray(s.history)?s.history:[];SUB.redeemed=Array.isArray(s.redeemed)?s.redeemed:[];SUB.u=num(s.u);}}}catch(e){}
+  try{var raw=localStorage.getItem(curKey+'_sub');if(raw){var s=JSON.parse(raw);if(s&&typeof s==='object'){SUB.status=s.status||'none';SUB.planName=s.planName||'';SUB.expiresAt=num(s.expiresAt);SUB.free=!!s.free;SUB.history=Array.isArray(s.history)?s.history:[];SUB.redeemed=Array.isArray(s.redeemed)?s.redeemed:[];SUB.u=num(s.u);SUB.trialStart=num(s.trialStart);}}}catch(e){}
 }
 function saveSubLocal(){try{localStorage.setItem(curKey+'_sub',JSON.stringify(SUB));}catch(e){}}
-function subPayload(){return{status:SUB.status,planName:SUB.planName,expiresAt:SUB.expiresAt,free:SUB.free,history:SUB.history,redeemed:SUB.redeemed,u:SUB.u};}
+function subPayload(){return{status:SUB.status,planName:SUB.planName,expiresAt:SUB.expiresAt,free:SUB.free,history:SUB.history,redeemed:SUB.redeemed,u:SUB.u,trialStart:SUB.trialStart};}
+/* ---------- 7-DAY FREE TRIAL ----------
+   trialStart is stamped at the account's FIRST login and stored in the
+   user's own hisabi_users doc (inside `sub`) as well as locally, so the
+   same account keeps the same trial start on every device / reinstall. */
+var TRIAL_DAYS=7;
+function ensureTrial(){
+  if(!currentUser||isOwner())return;
+  if(!num(SUB.trialStart)){SUB.trialStart=Date.now();saveSubLocal();}
+}
+function trialActive(){return num(SUB.trialStart)>0&&Date.now()<num(SUB.trialStart)+TRIAL_DAYS*DAYMS;}
+function trialDaysLeft(){if(!num(SUB.trialStart))return 0;var ms=num(SUB.trialStart)+TRIAL_DAYS*DAYMS-Date.now();return ms>0?Math.ceil(ms/DAYMS):0;}
 /* The signed-in user's OWN pending plan requests, stored in their doc as
    planReqs (+ planReqsU stamp). The Admin Panel reads them from each user's
    doc, approves/rejects (which removes the request and bumps planReqsU), and
@@ -1073,8 +1193,14 @@ function adoptCloudPlan(cd){
   if(!cd)return;
   if(cd.sub&&num(cd.sub.u)>SUB.u){
     var s=cd.sub;
-    SUB={status:s.status||'none',planName:s.planName||'',expiresAt:num(s.expiresAt),free:!!s.free,history:Array.isArray(s.history)?s.history:[],redeemed:Array.isArray(s.redeemed)?s.redeemed:[],u:num(s.u)};
+    SUB={status:s.status||'none',planName:s.planName||'',expiresAt:num(s.expiresAt),free:!!s.free,history:Array.isArray(s.history)?s.history:[],redeemed:Array.isArray(s.redeemed)?s.redeemed:[],u:num(s.u),trialStart:num(s.trialStart)||num(SUB.trialStart)};
     saveSubLocal();
+  }
+  /* Trial start: the EARLIEST value wins — the trial began at the account's
+     first ever login, so a second device adopts that same start, never a
+     fresh one. */
+  if(cd.sub&&num(cd.sub.trialStart)&&(!num(SUB.trialStart)||num(cd.sub.trialStart)<num(SUB.trialStart))){
+    SUB.trialStart=num(cd.sub.trialStart);saveSubLocal();
   }
   if(Array.isArray(cd.plans)&&cd.plans.length&&num(cd.planCfgU)>CFG.u){CFG.plans=cd.plans;CFG.u=num(cd.planCfgU);saveCfg();}
   if(cd.payNum&&num(cd.planCfgU)>CFG.u){CFG.payNumber=String(cd.payNum);CFG.u=num(cd.planCfgU);saveCfg();}
@@ -1104,7 +1230,7 @@ function authErr(e){
   if(c==='auth/email-already-in-use')return 'এই জিমেইল/নম্বর দিয়ে আগেই অ্যাকাউন্ট আছে — “লগইন” চাপুন।';
   if(c==='auth/weak-password')return 'পাসওয়ার্ড আরো শক্ত দিন (কমপক্ষে ৬ অক্ষর)।';
   if(c==='auth/invalid-email')return 'জিমেইলটা ঠিকমতো লিখুন।';
-  if(c==='auth/network-request-failed')return 'ইন্টারনেট সংযোগ নেই — নেট চালু করে আবার চেষ্টা করুন।';
+  if(c==='auth/network-request-failed')return 'লগইন করতে ইন্টারনেট লাগবে — ওয়াইফাই/ডেটা চালু করে আবার চেষ্টা করুন';
   if(c==='auth/too-many-requests')return 'অনেকবার ভুল চেষ্টা হয়েছে — কিছুক্ষণ পরে আবার চেষ্টা করুন।';
   if(c==='auth/operation-not-allowed')return 'লগইন সিস্টেম এখনো চালু হয়নি — কিছুক্ষণ পরে আবার চেষ্টা করুন।';
   return 'হয়নি — আবার চেষ্টা করুন।'+(c?' ('+c+')':'');
@@ -1134,38 +1260,68 @@ $('authClose2').addEventListener('click',closeAuth);
 $('authModal').addEventListener('click',function(e){if(e.target===this)closeAuth();});
 function doLogout(){
   closeAuth();
-  if(typeof firebase!=='undefined'&&fbReady){firebase.auth().signOut().catch(function(){});}
-  else{currentUser=null;curKey=LS_KEY;loadLocal();renderAll();setSync('অতিথি মোড — হিসাব শুধু এই ফোনে সেভ হচ্ছে');}
-  toast('লগআউট হয়েছে — তোমার হিসাব অ্যাকাউন্টে নিরাপদ আছে');
+  pwVoluntary=false;pwBuyOpen=false;
+  var finishLogout=function(){
+    if(typeof firebase!=='undefined'&&fbReady){firebase.auth().signOut().catch(function(){});}
+    else{currentUser=null;authResolved=true;curKey=LS_KEY;loadLocal();renderAll();setSync('লগইন করা নেই');}
+    toast('লগআউট হয়েছে — তোমার হিসাব অ্যাকাউন্টে নিরাপদ আছে');
+  };
+  /* Log Out frees this device's slot, so another phone can log in. */
+  if(currentUser&&fbReady&&fsDb&&!isOwner()){
+    var rest=DEVICES.filter(function(d){return d&&d.id!==deviceId();});
+    DEVICES=rest;saveDevicesLocal();deviceConfirmed=false;
+    var done=false;var go=function(){if(!done){done=true;finishLogout();}};
+    userDoc().set({devices:rest},{merge:true}).then(go,go);
+    setTimeout(go,1200); /* never let a slow network hang the logout */
+  }else finishLogout();
 }
 $('logoutBtn').addEventListener('click',doLogout);
 $('logoutBtn2').addEventListener('click',doLogout);
-$('authGo').addEventListener('click',function(){
-  var msg=$('authMsg');msg.textContent='';
-  if(typeof firebase==='undefined'||!fbReady){msg.textContent='লগইনের জন্য ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন।';return;}
-  if(!navigator.onLine){msg.textContent='ইন্টারনেট সংযোগ নেই — নেট চালু করে আবার চেষ্টা করুন।';return;}
-  var idf=identToEmail($('authId').value);
+/* One submit path for BOTH login forms: the first-screen gate ('g') and the
+   account modal ('m'). Login/signup needs internet the first time — offline
+   shows a clear message instead of hanging or a raw Firebase error. */
+var OFFLINE_LOGIN_MSG='লগইন করতে ইন্টারনেট লাগবে — ওয়াইফাই/ডেটা চালু করে আবার চেষ্টা করুন';
+function submitAuth(scope){
+  var g=(scope==='g');
+  var msg=$(g?'gAuthMsg':'authMsg');msg.textContent='';
+  if(typeof firebase==='undefined'||!fbReady||!navigator.onLine){msg.textContent=OFFLINE_LOGIN_MSG;return;}
+  var idf=identToEmail($(g?'gAuthId':'authId').value);
   if(!idf){msg.textContent='সঠিক জিমেইল অথবা ফোন নম্বর লিখুন।';return;}
-  var pw=$('authPass').value||'';
+  var pw=$(g?'gAuthPass':'authPass').value||'';
   if(pw.length<6){msg.textContent='পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।';return;}
-  var btn=$('authGo');btn.disabled=true;var oldTxt=btn.textContent;btn.textContent='অপেক্ষা করুন…';
+  var mode=g?gAuthMode:authMode;
+  var btn=$(g?'gAuthGo':'authGo');btn.disabled=true;var oldTxt=btn.textContent;btn.textContent='অপেক্ষা করুন…';
   var done=function(){btn.disabled=false;btn.textContent=oldTxt;};
   var auth=firebase.auth();
-  if(authMode==='login'){
+  if(mode==='login'){
     auth.signInWithEmailAndPassword(idf.email,pw).then(function(){
       done();closeAuth();toast('✅ লগইন হয়েছে — তোমার হিসাব এসে গেছে');
     }).catch(function(e){done();msg.textContent=authErr(e);});
   }else{
-    var nm=$('authName').value.trim();
+    var nm=$(g?'gAuthName':'authName').value.trim();
     auth.createUserWithEmailAndPassword(idf.email,pw).then(function(cred){
       if(nm&&cred.user)return cred.user.updateProfile({displayName:nm});
     }).then(function(){
       if(currentUser&&nm)currentUser.name=nm;
       done();closeAuth();syncNow();
-      toast('✅ অ্যাকাউন্ট তৈরি হয়েছে — স্বাগতম!');
+      toast('✅ অ্যাকাউন্ট তৈরি হয়েছে — ৭ দিনের ফ্রি ট্রায়াল শুরু হয়েছে!');
     }).catch(function(e){done();msg.textContent=authErr(e);});
   }
-});
+}
+$('authGo').addEventListener('click',function(){submitAuth('m');});
+$('gAuthGo').addEventListener('click',function(){submitAuth('g');});
+/* Gate login/signup mode toggle (mirrors the modal's setAuthMode). */
+var gAuthMode='login';
+function setGAuthMode(m){
+  gAuthMode=m;
+  $('gAuthModeSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===m?'sel-gold':'';});
+  $('gAuthNameWrap').style.display=m==='signup'?'':'none';
+  $('gAuthGo').textContent=m==='signup'?'অ্যাকাউন্ট খুলুন':'লগইন করুন';
+  $('gAuthPass').setAttribute('autocomplete',m==='signup'?'new-password':'current-password');
+  $('gAuthMsg').textContent='';
+}
+$('gAuthModeSeg').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setGAuthMode(b.getAttribute('data-v'));});});
+$('gateSwitchBtn').addEventListener('click',function(){doLogout();});
 
 /* ---------- AUTO CALCULATIONS ---------- */
 function totals(list){var i=0,o=0,sv=0,us=0;list.forEach(function(t){if(t.type==='in')i+=num(t.amount);else if(t.type==='out')o+=num(t.amount);else if(t.type==='save')sv+=num(t.amount);else if(t.type==='unsave')us+=num(t.amount);});return{inn:i,out:o,save:sv,unsave:us,bal:i+us-o-sv};}
@@ -1357,22 +1513,44 @@ window.delLog=function(id){
 /* ---------- ACCESS / PAYWALL / PLANS ---------- */
 function fmtDate(ms){var d=new Date(num(ms));if(isNaN(d.getTime()))return '—';return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
 function isAdmin(){try{return sessionStorage.getItem('bgh_admin')==='1';}catch(e){return false;}}
-function planActive(){return !!SUB.free||num(SUB.expiresAt)>Date.now();}
-function hasAccess(){return isAdmin()||planActive();}
+function planActive(){return isOwner()||!!SUB.free||trialActive()||num(SUB.expiresAt)>Date.now();}
+/* The Admin PIN ONLY opens the Admin Panel UI — it never grants app access
+   and never unlocks the paywall. App access comes from the authenticated
+   identity and plan state alone: owner Gmail (always free), an active
+   7-day trial, an admin free grant, or an approved paid plan. The panel's
+   cross-user data additionally requires an owner sign-in (see admLoadAll)
+   and is owner-only under the Firestore rules. */
+function hasAccess(){return planActive();}
 function planStatusText(){
-  if(isAdmin())return '👑 Admin — ফুল অ্যাক্সেস';
+  if(isOwner())return '👑 মালিকের অ্যাকাউন্ট — সবসময় ফ্রি';
   if(SUB.free)return '🎁 ফ্রি অ্যাক্সেস (Admin দিয়েছেন)';
   if(num(SUB.expiresAt)>Date.now())return '✅ '+(SUB.planName||'প্ল্যান')+' — মেয়াদ শেষ: '+fmtDate(SUB.expiresAt);
+  if(trialActive())return '🎁 ফ্রি ট্রায়াল — আর '+fmt(trialDaysLeft())+' দিন বাকি';
   if(num(SUB.expiresAt))return '⛔ প্ল্যানের মেয়াদ শেষ ('+fmtDate(SUB.expiresAt)+')';
+  if(num(SUB.trialStart))return '⛔ ফ্রি ট্রায়াল শেষ হয়ে গেছে';
   return 'কোনো প্ল্যান চালু নেই';
 }
 function renderAccess(){
   var pp=$('profilePlan');if(pp)pp.textContent=planStatusText();
+  var pt=$('profileTrial');
+  if(pt){
+    if(currentUser&&!isOwner()&&trialActive()&&!SUB.free&&num(SUB.expiresAt)<=Date.now()){
+      pt.style.display='';
+      var ptt=$('profileTrialTxt');if(ptt)ptt.textContent='আর '+fmt(trialDaysLeft())+' দিন বাকি (মোট ৭ দিন ফ্রি)';
+    }else pt.style.display='none';
+  }
   var pn=$('payNumTxt');if(pn)pn.textContent=CFG.payNumber||'01568559982';
+  renderGate();
   var pw=$('paywall');if(!pw)return;
-  if(hasAccess()){pw.style.display='none';return;}
+  /* The paywall exists ONLY for a logged-in user whose trial ended with no
+     active plan (or who opened it on purpose from Profile to buy early). */
+  if(!currentUser||deviceBlocked){pw.style.display='none';return;}
+  if(hasAccess()&&!pwVoluntary){pw.style.display='none';return;}
   pw.style.display='block';
-  $('pwPlans').innerHTML=PLANS.map(function(p){return '<div class="kv"><span>💎 <b>'+esc(p.name)+'</b> — '+fmt(num(p.days))+' দিন</span><b>'+money(num(p.price))+'</b></div>';}).join('');
+  $('pwBuySection').style.display=pwBuyOpen?'':'none';
+  $('pwBuyBtn').style.display=pwBuyOpen?'none':'';
+  $('pwCloseBtn').style.display=pwVoluntary?'':'none';
+  $('pwPlans').innerHTML=PLANS.map(function(p){return '<div class="kv"><span>💎 <b>'+esc(p.name)+'</b></span><b>'+money(num(p.price))+'</b></div>';}).join('');
   var sel=$('buyPlan'),cur=sel.value;
   sel.innerHTML=PLANS.map(function(p,i){return '<option value="'+i+'">'+esc(p.name)+' — '+money(num(p.price))+'</option>';}).join('');
   if(cur!==''&&num(cur)<PLANS.length)sel.value=cur;
@@ -1380,10 +1558,30 @@ function renderAccess(){
   if(currentUser&&!$('buyIdent').value)$('buyIdent').value=currentUser.label.replace('📱 ','');
   var mb=$('myReqBox');
   if(mb){
-    if(!currentUser)mb.innerHTML='<p class="hint" style="margin:0">রিকোয়েস্ট পাঠাতে আগে লগইন / সাইন আপ করুন।</p>';
-    else if(PLANREQS.length)mb.innerHTML='<h3 style="margin:6px 0 4px">আমার পাঠানো রিকোয়েস্ট</h3>'+PLANREQS.map(function(r){return '<div class="kv"><span>'+esc(r.date||'')+' • '+esc(r.planName||'')+' • '+money(num(r.amount))+' • TrxID: '+esc(r.trx||'')+'</span><b><span class="badge warn">⏳ Admin-এর অপেক্ষায়</span></b></div>';}).join('');
+    if(PLANREQS.length)mb.innerHTML='<h3 style="margin:6px 0 4px">আমার পাঠানো রিকোয়েস্ট</h3>'+PLANREQS.map(function(r){return '<div class="kv"><span>'+esc(r.date||'')+' • '+esc(r.planName||'')+' • '+money(num(r.amount))+' • TrxID: '+esc(r.trx||'')+'</span><b><span class="badge warn">⏳ Admin-এর অপেক্ষায়</span></b></div>';}).join('');
     else mb.innerHTML='';
   }
+}
+/* The login gate is the first screen: loading until auth resolves, then the
+   login form (no account = no app), or the device-limit list when blocked. */
+function renderGate(){
+  var g=$('gate');if(!g)return;
+  var ld=$('gateLoading'),li=$('gateLogin'),dv=$('gateDevices');
+  if(!authResolved){g.style.display='block';ld.style.display='';li.style.display='none';dv.style.display='none';return;}
+  if(currentUser&&deviceBlocked){g.style.display='block';ld.style.display='none';li.style.display='none';dv.style.display='';renderGateDevices();return;}
+  if(!currentUser){
+    g.style.display='block';ld.style.display='none';li.style.display='';dv.style.display='none';
+    var n=$('gateNote');
+    if(gateNote){n.textContent=gateNote;n.style.display='';}else n.style.display='none';
+    return;
+  }
+  g.style.display='none';
+}
+function renderGateDevices(){
+  var box=$('gateDevList');if(!box)return;
+  box.innerHTML=DEVICES.map(function(d){
+    return '<div class="rowitem"><div class="r1"><div><b>📱 '+esc(d.label||'ডিভাইস')+'</b><div class="meta">শেষ লগইন: '+fmtDate(d.lastSeen)+'</div></div></div><div class="iconbtns"><button class="btn small danger" type="button" onclick="devLogout(\''+esc(d.id)+'\')">লগআউট করুন</button></div></div>';
+  }).join('')||'<p class="hint">ডিভাইসের তালিকা পাওয়া যায়নি।</p>';
 }
 function syncBuyAmount(){var p=PLANS[num($('buyPlan').value)];if(p)$('buyAmount').value=num(p.price);}
 $('buyPlan').addEventListener('change',syncBuyAmount);
@@ -1392,10 +1590,13 @@ $('copyPayNum').addEventListener('click',function(){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(n).then(function(){toast('📋 নম্বর কপি হয়েছে: '+n);},function(){toast('নম্বর: '+n);});
   else toast('নম্বর: '+n);
 });
-$('pwLoginBtn').addEventListener('click',openAuth);
+$('pwBuyBtn').addEventListener('click',function(){pwBuyOpen=true;renderAccess();});
+$('pwCloseBtn').addEventListener('click',function(){pwVoluntary=false;pwBuyOpen=false;renderAccess();});
+$('pwSwitchBtn').addEventListener('click',function(){doLogout();});
 $('planOpenBtn').addEventListener('click',function(){
-  if(hasAccess())toast('আপনার প্ল্যান: '+planStatusText());
-  else{renderAccess();window.scrollTo({top:0});toast('💎 প্ল্যান কিনতে নিচের ফর্মটা পূরণ করুন');}
+  if(isOwner()||SUB.free){toast('আপনার অ্যাক্সেস: '+planStatusText());return;}
+  pwVoluntary=true;pwBuyOpen=true;renderAccess();window.scrollTo({top:0});
+  toast('💎 প্ল্যান বেছে পেমেন্ট করে রিকোয়েস্ট পাঠান');
 });
 $('buySend').addEventListener('click',function(){
   var msg=$('buyMsg');msg.textContent='';
@@ -1457,7 +1658,7 @@ $('supSend').addEventListener('click',function(){
   var st=$('supMsgStatus'),name=$('supName').value.trim(),message=$('supMsg').value.trim();
   function say(t,ok){st.textContent=t;st.style.color=ok?'var(--in)':'var(--out)';}
   if(!name||!message){say('⚠️ নাম আর মেসেজ — দুটোই লিখুন');return;}
-  var obj={name:name,message:message,account:currentUser?currentUser.label:'অতিথি',date:todayStr(),ts:Date.now()};
+  var obj={name:name,message:message,account:currentUser?currentUser.label:'লগইন করা নেই',date:todayStr(),ts:Date.now()};
   if(typeof firebase==='undefined'||!fbReady||!fsDb||!navigator.onLine){
     var b=msgOutbox();b.push(obj);msgOutboxSave(b);
     say('📥 ইন্টারনেট নেই — মেসেজটা এই ফোনে সেভ থাকলো, নেট এলেই পাঠিয়ে দেওয়া হবে',true);$('supMsg').value='';return;
@@ -1514,6 +1715,14 @@ function identKeyOf(raw){
 function admLoadAll(){
   if(typeof firebase==='undefined'||!fbReady||!fsDb){
     $('admReqBox').innerHTML='<p class="hint">Firebase লোড হয়নি — ইন্টারনেট চালু করে 🔄 রিফ্রেশ চাপুন।</p>';
+    $('admUsersBox').innerHTML='';$('admMsgBox').innerHTML='';$('admVoucherBox').innerHTML='';return;
+  }
+  /* Cross-user data (requests, user list, messages, vouchers) loads ONLY for
+     a signed-in OWNER account. The PIN merely opens this panel's UI; the
+     Firestore rules enforce the same owner-only rule server-side, so the
+     PIN alone can never read another user's data. */
+  if(!isOwner()){
+    $('admReqBox').innerHTML='<p class="hint">🔒 অন্য ব্যবহারকারীদের তথ্য (রিকোয়েস্ট, ইউজার তালিকা, মেসেজ, ভাউচার) দেখতে মালিকের Gmail (torikul20250@gmail.com অথবা torikul40yt@gmail.com) দিয়ে লগইন করুন।</p>';
     $('admUsersBox').innerHTML='';$('admMsgBox').innerHTML='';$('admVoucherBox').innerHTML='';return;
   }
   $('admReqBox').innerHTML='<p class="hint">লোড হচ্ছে…</p>';$('admUsersBox').innerHTML='<p class="hint">লোড হচ্ছে…</p>';
@@ -1697,6 +1906,7 @@ $('vCreate').addEventListener('click',function(){
   var code=$('vCode').value.trim().toUpperCase().replace(/\s+/g,'');
   if(!code){say('⚠️ কোড লিখুন');return;}
   if(typeof firebase==='undefined'||!fbReady||!fsDb){say('⚠️ ইন্টারনেট লাগবে');return;}
+  if(!isOwner()){say('⚠️ ভাউচার বানাতে মালিকের Gmail দিয়ে লগইন করতে হবে');return;}
   var ref=fsDb.collection('hisabi_vouchers').doc(code);
   ref.get().then(function(snap){
     if(snap.exists){say('⚠️ এই কোড আগেই আছে — অন্য কোড দিন');return;}
@@ -2675,7 +2885,7 @@ function netUpdate(){
   var on=navigator.onLine,pill=$('netPill');
   pill.className='pill '+(on?'on':'off');
   $('netTxt').textContent=on?'অনলাইন':'অফলাইন — ফোনে চলছে';
-  if(!on)setSync(currentUser?'অফলাইন — হিসাব ফোনে সেভ আছে, অনলাইন হলেই সিঙ্ক হবে':'অফলাইন — হিসাব ফোনে সেভ হচ্ছে');
+  if(!on)setSync(currentUser?'অফলাইন — হিসাব ফোনে সেভ আছে, অনলাইন হলেই সিঙ্ক হবে':'অফলাইন — লগইন করতে ইন্টারনেট লাগবে');
 }
 window.addEventListener('online',function(){netUpdate();initFirebase();flushOutbox();});
 window.addEventListener('offline',netUpdate);
@@ -2710,7 +2920,11 @@ updOpenTotal();
 renderAll();
 netUpdate();
 initFirebase();
-setInterval(function(){renderAccess();},60000);
+setInterval(function(){renderAccess();if(currentUser&&deviceConfirmed&&!deviceBlocked)syncNow();},60000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&currentUser)syncNow();});
+/* If Firebase never resolves (blocked CDN / very slow network), stop showing
+   the loading state and fall back to the login screen + its offline message. */
+setTimeout(function(){if(!authResolved){authResolved=true;renderAccess();}},9000);
 })();
 </script>
 </body>
