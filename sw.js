@@ -1,5 +1,5 @@
-var CACHE = 'blackghosthisab-v4';
-var CORE = ['./index.html', './assets/manifest.webmanifest', './assets/icon-192.png', './assets/icon-512.png'];
+var CACHE = 'blackghosthisab-v5';
+var CORE = ['./index.html', './assets/manifest.webmanifest', './assets/icon-192.png', './assets/icon-512.png', './assets/qrcode.min.js'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); }));
 });

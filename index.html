@@ -169,6 +169,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div id="bookBar" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       <p class="hint" id="bookHint" style="margin:8px 0 0"></p>
     </div>
+    <button class="btn gold noprint" id="shareAppBtn" type="button" style="width:100%;margin:0 0 14px;font-size:1.05rem;min-height:3rem">📤 অ্যাপ শেয়ার করুন</button>
     <div class="cards" id="dashCards"></div>
     <div class="panel">
       <h2>আজকের হিসাব — <span id="todayLabel"></span></h2>
@@ -205,6 +206,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" class="noprint">
         <button class="btn small" id="loginOpenBtn" type="button">👤 লগইন / সাইন আপ</button>
         <button class="btn small gold" id="planOpenBtn" type="button">💎 প্রিমিয়াম কিনুন</button>
+        <button class="btn small" id="shareAppBtn2" type="button">📤 অ্যাপ শেয়ার করুন</button>
         <button class="btn small danger" id="logoutBtn" type="button" style="display:none">লগআউট</button>
       </div>
       <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
@@ -728,6 +730,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <p class="hint">প্ল্যান, পেমেন্ট রিকোয়েস্ট আর ফ্রি অ্যাক্সেস এখান থেকে নিয়ন্ত্রণ করুন। অন্য ব্যবহারকারীদের তথ্য (রিকোয়েস্ট, ইউজার তালিকা, মেসেজ, ভাউচার) সার্ভার থেকে আসে বলে এই অংশটুকু দেখতে ইন্টারনেট লাগবে — এটাই অ্যাপের একমাত্র অনলাইন-নির্ভর অংশ; নিজের সব হিসাব অফলাইনেই চলে।</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
       <button class="btn small" id="admRefresh" type="button">🔄 রিফ্রেশ</button>
+      <button class="btn small gold" id="shareAppBtn3" type="button">📤 অ্যাপ শেয়ার করুন</button>
       <button class="btn small ghost" id="admClose" type="button">বন্ধ করুন</button>
     </div>
     <h3 style="margin:16px 0 6px">📊 আয় ও ব্যবহারকারীর সারসংক্ষেপ</h3>
@@ -998,11 +1001,40 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </div>
 </div>
 
+<!-- SHARE APP MODAL -->
+<div class="modal" id="shareModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <h2>📤 অ্যাপ শেয়ার করুন</h2>
+    <p class="hint">বন্ধু বা পরিচিত দোকানদারকে পাঠান — লিংকে চাপ দিলেই অ্যাপ চলবে, আলাদা করে ডাউনলোড লাগবে না।</p>
+    <p id="shareMsgPreview" style="background:var(--goldbg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:.95rem;white-space:pre-line"></p>
+    <button class="btn gold" id="shareNativeBtn" type="button" style="width:100%;display:none">📤 শেয়ার করুন (ফোনের শেয়ার মেনু)</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <a class="btn ghost" id="shareWa" href="#" target="_blank" rel="noopener" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">🟢 WhatsApp</a>
+      <a class="btn ghost" id="shareFb" href="#" target="_blank" rel="noopener" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">🔵 Facebook</a>
+      <a class="btn ghost" id="shareMsgr" href="#" target="_blank" rel="noopener" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">💬 Messenger</a>
+      <a class="btn ghost" id="shareTg" href="#" target="_blank" rel="noopener" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">✈️ Telegram</a>
+    </div>
+    <button class="btn" id="shareCopyBtn" type="button" style="width:100%;margin-top:10px">🔗 লিংক কপি করুন</button>
+    <h3 style="margin:18px 0 6px">📷 QR কোড — দোকানের কাউন্টারের জন্য</h3>
+    <p class="hint">কাস্টমার ফোনের ক্যামেরা দিয়ে স্ক্যান করলেই অ্যাপ খুলবে। ছবিটা ডাউনলোড করে প্রিন্ট করে কাউন্টারে লাগিয়ে রাখতে পারেন।</p>
+    <div style="text-align:center">
+      <canvas id="shareQrCanvas" width="264" height="264" style="max-width:80vw;height:auto;background:#fff;border:1.5px solid var(--line);border-radius:12px"></canvas>
+      <p id="shareQrFallback" class="hint" style="display:none;margin:8px 0 0"></p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn gold" id="shareQrDl" type="button" style="flex:1 1 150px">⬇️ QR ছবি ডাউনলোড</button>
+      <button class="btn ghost" id="shareQrShare" type="button" style="flex:1 1 150px;display:none">📤 QR ছবি শেয়ার</button>
+    </div>
+    <button class="btn ghost" id="shareClose" type="button" style="width:100%;margin-top:12px">বন্ধ করুন</button>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="assets/qrcode.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -2378,6 +2410,80 @@ $('shareToday').addEventListener('click',function(){
 $('printReport').addEventListener('click',function(){
   document.body.classList.add('print-report');
   setTimeout(function(){window.print();setTimeout(function(){document.body.classList.remove('print-report');},600);},60);
+});
+
+/* ---------- APP SHARE (link is ALWAYS the hardcoded live site URL) ---------- */
+var APP_SHARE_URL='https://st-news-bd.github.io/black-ghost-hisab/';
+var APP_SHARE_MSG='📱 *Black Ghost Hisab* — দোকান আর বাসার হিসাবের ফ্রি অ্যাপ!\n💰 ক্যাশ খাতা, 📦 প্রোডাক্ট স্টক আর 🤝 বাকির হিসাব — সব এক অ্যাপে, হিসাব সব অটোমেটিক।\n🎁 নতুন অ্যাকাউন্টে ৭ দিনের ফ্রি ট্রায়াল!\nডাউনলোড লাগবে না — লিংকে চাপ দিলেই অ্যাপ চলবে 👇';
+var APP_SHARE_TEXT=APP_SHARE_MSG+'\n'+APP_SHARE_URL;
+function drawShareQr(canvas,px){
+  if(typeof qrcode==='undefined')return false;
+  try{
+    var qr=qrcode(0,'M');qr.addData(APP_SHARE_URL);qr.make();
+    var n=qr.getModuleCount(),quiet=4,total=n+quiet*2,cell=Math.max(2,Math.floor(px/total)),size=cell*total;
+    canvas.width=size;canvas.height=size;
+    var ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,size,size);ctx.fillStyle='#12291c';
+    for(var r=0;r<n;r++)for(var c=0;c<n;c++)if(qr.isDark(r,c))ctx.fillRect((c+quiet)*cell,(r+quiet)*cell,cell,cell);
+    return true;
+  }catch(e){return false;}
+}
+function shareQrCardCanvas(){
+  var qrC=document.createElement('canvas');if(!drawShareQr(qrC,880))return null;
+  var card=document.createElement('canvas');card.width=1000;card.height=1180;
+  var ctx=card.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,1000,1180);
+  ctx.drawImage(qrC,60,50);
+  ctx.textAlign='center';
+  ctx.fillStyle='#0f4d2e';ctx.font='800 64px sans-serif';ctx.fillText('Black Ghost Hisab',500,1015);
+  ctx.fillStyle='#444444';ctx.font='40px sans-serif';ctx.fillText('স্ক্যান করলেই অ্যাপ খুলবে — ডাউনলোড লাগবে না',500,1080);
+  ctx.font='34px sans-serif';ctx.fillText('st-news-bd.github.io/black-ghost-hisab',500,1135);
+  return card;
+}
+function openShareApp(){
+  $('shareMsgPreview').textContent=APP_SHARE_TEXT;
+  $('shareWa').href='https://wa.me/?text='+encodeURIComponent(APP_SHARE_TEXT);
+  $('shareFb').href='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(APP_SHARE_URL)+'&quote='+encodeURIComponent(APP_SHARE_MSG);
+  $('shareMsgr').href='fb-messenger://share?link='+encodeURIComponent(APP_SHARE_URL);
+  $('shareTg').href='https://t.me/share/url?url='+encodeURIComponent(APP_SHARE_URL)+'&text='+encodeURIComponent(APP_SHARE_MSG);
+  $('shareNativeBtn').style.display=navigator.share?'':'none';
+  var ok=drawShareQr($('shareQrCanvas'),264);
+  $('shareQrCanvas').style.display=ok?'':'none';
+  $('shareQrFallback').style.display=ok?'none':'';
+  if(!ok)$('shareQrFallback').textContent='QR তৈরি হয়নি — এই লিংকটা কপি করে দিন: '+APP_SHARE_URL;
+  $('shareQrShare').style.display=(navigator.share&&navigator.canShare)?'':'none';
+  $('shareModal').classList.add('open');
+}
+['shareAppBtn','shareAppBtn2','shareAppBtn3'].forEach(function(id){var b=$(id);if(b)b.addEventListener('click',openShareApp);});
+$('shareClose').addEventListener('click',function(){$('shareModal').classList.remove('open');});
+$('shareModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+$('shareNativeBtn').addEventListener('click',function(){
+  if(navigator.share)navigator.share({title:'Black Ghost Hisab',text:APP_SHARE_MSG,url:APP_SHARE_URL}).catch(function(){});
+});
+$('shareCopyBtn').addEventListener('click',function(){
+  function done(){toast('✅ লিংক কপি হয়েছে — যেখানে খুশি পেস্ট করে পাঠান');}
+  function fallbackCopy(){
+    var ta=document.createElement('textarea');ta.value=APP_SHARE_URL;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(e){toast('লিংক: '+APP_SHARE_URL);}
+    document.body.removeChild(ta);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(APP_SHARE_URL).then(done).catch(fallbackCopy);}
+  else fallbackCopy();
+});
+$('shareQrDl').addEventListener('click',function(){
+  var card=shareQrCardCanvas();if(!card){toast('⚠️ QR তৈরি হয়নি — ইন্টারনেটে একবার খুলে আবার চেষ্টা করুন');return;}
+  var a=document.createElement('a');a.download='black-ghost-hisab-qr.png';a.href=card.toDataURL('image/png');
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('⬇️ QR ছবি ডাউনলোড হচ্ছে — প্রিন্ট করে কাউন্টারে লাগান');
+});
+$('shareQrShare').addEventListener('click',function(){
+  var card=shareQrCardCanvas();if(!card){toast('⚠️ QR তৈরি হয়নি');return;}
+  if(card.toBlob){card.toBlob(function(blob){
+    if(!blob){toast('⚠️ QR ছবি তৈরি হয়নি');return;}
+    var file=new File([blob],'black-ghost-hisab-qr.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Black Ghost Hisab — QR'}).catch(function(){});}
+    else toast('এই ফোনে QR ছবি সরাসরি শেয়ার হয় না — ডাউনলোড করে পাঠান');
+  },'image/png');}
+  else toast('এই ফোনে QR ছবি শেয়ার হয় না — ডাউনলোড করে পাঠান');
 });
 
 /* ---------- DUES / BAKI ---------- */
