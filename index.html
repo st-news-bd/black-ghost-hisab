@@ -580,21 +580,24 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </div>
 </div>
 
-<!-- PAYWALL — shown ONLY after login, when the 7-day free trial has ended and
-     no paid plan is active. The plan list + payment form stay hidden until the
-     user taps the one "প্রিমিয়াম কিনুন" button. -->
+<!-- ACCESS GATE — shown ONLY after login, when the account has no active
+     access (no running trial, no paid plan, no free grant). Two choices:
+     start the 7-day free trial (OPT-IN — shown only if the trial was never
+     started on this account) or buy Premium. The plan list + payment form
+     stay hidden until the user taps the "প্রিমিয়াম কিনুন" button. -->
 <div id="paywall" style="display:none;position:fixed;inset:0;z-index:55;background:var(--bg);overflow-y:auto">
   <div style="max-width:640px;margin:0 auto;padding:26px 16px 60px">
     <div style="text-align:center;margin-bottom:14px">
       <div class="logo" style="margin:0 auto 10px">BG</div>
       <h2 style="margin:0 0 4px;font-size:1.35rem">Black Ghost Hisab</h2>
-      <p style="color:var(--muted);margin:0">আপনার ফ্রি ট্রায়াল শেষ হয়ে গেছে। আবার পুরো অ্যাপ ব্যবহার করতে একটা প্ল্যান কিনুন — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।</p>
+      <p id="pwHeadTxt" style="color:var(--muted);margin:0">আপনার ফ্রি ট্রায়াল শেষ হয়ে গেছে। আবার পুরো অ্যাপ ব্যবহার করতে একটা প্ল্যান কিনুন — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।</p>
     </div>
     <div style="max-width:340px;margin:0 auto 16px;text-align:center">
       <input type="password" id="pwAdminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
       <button class="btn small ghost" id="pwAdminBtn" type="button" style="margin-top:6px">🔐 Admin Panel</button>
     </div>
-    <button class="btn gold" id="pwBuyBtn" type="button" style="width:100%;font-size:1.12rem;min-height:3.3rem">💎 প্রিমিয়াম কিনুন</button>
+    <button class="btn" id="pwTrialBtn" type="button" style="width:100%;font-size:1.12rem;min-height:3.3rem;display:none">🎁 ৭ দিনের ফ্রি ট্রায়াল শুরু করুন</button>
+    <button class="btn gold" id="pwBuyBtn" type="button" style="width:100%;font-size:1.12rem;min-height:3.3rem;margin-top:8px">💎 প্রিমিয়াম কিনুন</button>
     <button class="btn ghost" id="pwCloseBtn" type="button" style="width:100%;margin-top:8px;display:none">← ফিরে যান (পরে কিনবো)</button>
     <div id="pwBuySection" style="display:none">
     <div class="panel">
@@ -649,7 +652,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div id="gateLogin" class="panel" style="display:none;margin-top:0">
       <h2>লগইন / অ্যাকাউন্ট খুলুন</h2>
-      <p class="hint">অ্যাপ ব্যবহার করতে অ্যাকাউন্ট লাগবে। নতুন অ্যাকাউন্টে প্রথম <b>৭ দিন সম্পূর্ণ ফ্রি ট্রায়াল</b> — কোনো পেমেন্ট লাগবে না।</p>
+      <p class="hint">অ্যাপ ব্যবহার করতে অ্যাকাউন্ট লাগবে। লগইনের পর চাইলে <b>৭ দিনের ফ্রি ট্রায়াল শুরু</b> করতে পারবেন — নিজে শুরু না করলে ট্রায়াল চালু হবে না, কোনো পেমেন্টও লাগবে না।</p>
       <p id="gateNote" style="display:none;margin:0 0 10px;font-weight:700;color:var(--out)"></p>
       <div class="seg" id="gAuthModeSeg" style="margin-bottom:12px">
         <button type="button" data-v="login" class="sel-gold">লগইন</button>
@@ -767,7 +770,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <button class="btn" id="authGo" type="button">লগইন করুন</button>
         <button class="btn ghost" id="authClose" type="button">বন্ধ করুন</button>
       </div>
-      <p class="hint" style="margin-top:10px">নতুন অ্যাকাউন্টে প্রথম ৭ দিন সম্পূর্ণ ফ্রি ট্রায়াল — তারপর প্ল্যান কিনলেই চলবে। একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে। লগইন/সাইন আপের সময় একবার ইন্টারনেট লাগে; হিসাবের সব কাজ অফলাইনেও চলে।</p>
+      <p class="hint" style="margin-top:10px">লগইনের পর চাইলে ৭ দিনের ফ্রি ট্রায়াল শুরু করা যাবে — নিজে শুরু না করলে ট্রায়াল চালু হবে না; ট্রায়াল শেষে প্ল্যান কিনলেই চলবে। একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে। লগইন/সাইন আপের সময় একবার ইন্টারনেট লাগে; হিসাবের সব কাজ অফলাইনেও চলে।</p>
     </div>
   </div>
 </div>
@@ -1019,7 +1022,6 @@ function onAuthChanged(u){
     loadLocal();loadSub();loadReqs();loadDevices();
     deviceBlocked=false;deviceConfirmed=false;gateNote='';
     mergeGuest(u.uid);
-    ensureTrial();
     renderAll();
     setSync('লগইন হয়েছে — সিঙ্ক হচ্ছে…');
     syncNow();
@@ -1083,7 +1085,6 @@ function syncNow(){
       var merged=mergeData(DB,cd);
       if(JSON.stringify(merged)!==JSON.stringify(DB)){DB=merged;persistLocal();renderAll();}
       adoptCloudPlan(cd);
-      ensureTrial();
     }else{
       processDevices({});
     }
@@ -1170,14 +1171,21 @@ function loadSub(){
 }
 function saveSubLocal(){try{localStorage.setItem(curKey+'_sub',JSON.stringify(SUB));}catch(e){}}
 function subPayload(){return{status:SUB.status,planName:SUB.planName,expiresAt:SUB.expiresAt,free:SUB.free,history:SUB.history,redeemed:SUB.redeemed,u:SUB.u,trialStart:SUB.trialStart};}
-/* ---------- 7-DAY FREE TRIAL ----------
-   trialStart is stamped at the account's FIRST login and stored in the
-   user's own hisabi_users doc (inside `sub`) as well as locally, so the
-   same account keeps the same trial start on every device / reinstall. */
+/* ---------- 7-DAY FREE TRIAL (OPT-IN — never automatic) ----------
+   The trial does NOT start at login. trialStart is stamped ONLY when the
+   user taps "🎁 ৭ দিনের ফ্রি ট্রায়াল শুরু করুন" on the gate screen, and is
+   stored in the user's own hisabi_users doc (inside `sub`) as well as
+   locally, so the same account keeps the same trial start on every device
+   / reinstall. It can be started only ONCE per account: once trialStart
+   exists (trial running, used up, or expired) the start button never
+   appears again. Accounts stamped by the old auto-start version keep
+   their existing trialStart untouched — their trial runs from that date. */
 var TRIAL_DAYS=7;
-function ensureTrial(){
+function startTrial(){
   if(!currentUser||isOwner())return;
-  if(!num(SUB.trialStart)){SUB.trialStart=Date.now();saveSubLocal();}
+  if(num(SUB.trialStart))return; /* already started once — never restamp */
+  SUB.trialStart=Date.now();SUB.u=Date.now();saveSubLocal();schedulePush();syncNow();renderAccess();
+  toast('🎁 ৭ দিনের ফ্রি ট্রায়াল শুরু হয়েছে — পুরো অ্যাপ খুলে গেছে!');
 }
 function trialActive(){return num(SUB.trialStart)>0&&Date.now()<num(SUB.trialStart)+TRIAL_DAYS*DAYMS;}
 function trialDaysLeft(){if(!num(SUB.trialStart))return 0;var ms=num(SUB.trialStart)+TRIAL_DAYS*DAYMS-Date.now();return ms>0?Math.ceil(ms/DAYMS):0;}
@@ -1196,9 +1204,10 @@ function adoptCloudPlan(cd){
     SUB={status:s.status||'none',planName:s.planName||'',expiresAt:num(s.expiresAt),free:!!s.free,history:Array.isArray(s.history)?s.history:[],redeemed:Array.isArray(s.redeemed)?s.redeemed:[],u:num(s.u),trialStart:num(s.trialStart)||num(SUB.trialStart)};
     saveSubLocal();
   }
-  /* Trial start: the EARLIEST value wins — the trial began at the account's
-     first ever login, so a second device adopts that same start, never a
-     fresh one. */
+  /* Trial start: the EARLIEST value wins — the trial began the moment the
+     user tapped "start trial", so a second device adopts that same start,
+     never a fresh one. A cloud doc with no trialStart never clears a local
+     one (the trial simply hasn't been started / hasn't synced yet). */
   if(cd.sub&&num(cd.sub.trialStart)&&(!num(SUB.trialStart)||num(cd.sub.trialStart)<num(SUB.trialStart))){
     SUB.trialStart=num(cd.sub.trialStart);saveSubLocal();
   }
@@ -1304,7 +1313,7 @@ function submitAuth(scope){
     }).then(function(){
       if(currentUser&&nm)currentUser.name=nm;
       done();closeAuth();syncNow();
-      toast('✅ অ্যাকাউন্ট তৈরি হয়েছে — ৭ দিনের ফ্রি ট্রায়াল শুরু হয়েছে!');
+      toast('✅ অ্যাকাউন্ট তৈরি হয়েছে — এবার চাইলে "৭ দিনের ফ্রি ট্রায়াল শুরু করুন" বোতামে চাপ দিয়ে ট্রায়াল শুরু করুন');
     }).catch(function(e){done();msg.textContent=authErr(e);});
   }
 }
@@ -1528,7 +1537,7 @@ function planStatusText(){
   if(trialActive())return '🎁 ফ্রি ট্রায়াল — আর '+fmt(trialDaysLeft())+' দিন বাকি';
   if(num(SUB.expiresAt))return '⛔ প্ল্যানের মেয়াদ শেষ ('+fmtDate(SUB.expiresAt)+')';
   if(num(SUB.trialStart))return '⛔ ফ্রি ট্রায়াল শেষ হয়ে গেছে';
-  return 'কোনো প্ল্যান চালু নেই';
+  return '🎁 ৭ দিনের ফ্রি ট্রায়াল এখনো শুরু হয়নি';
 }
 function renderAccess(){
   var pp=$('profilePlan');if(pp)pp.textContent=planStatusText();
@@ -1542,14 +1551,24 @@ function renderAccess(){
   var pn=$('payNumTxt');if(pn)pn.textContent=CFG.payNumber||'01568559982';
   renderGate();
   var pw=$('paywall');if(!pw)return;
-  /* The paywall exists ONLY for a logged-in user whose trial ended with no
-     active plan (or who opened it on purpose from Profile to buy early). */
+  /* The gate exists ONLY for a logged-in user with no active access (trial
+     never started, trial ended, or plan expired — or who opened it on
+     purpose from Profile to buy early). Owners never see it. */
   if(!currentUser||deviceBlocked){pw.style.display='none';return;}
   if(hasAccess()&&!pwVoluntary){pw.style.display='none';return;}
   pw.style.display='block';
+  /* Header + trial button depend on whether this account ever started its
+     trial: never started → offer the opt-in start button; started and
+     expired → only the premium path remains. */
+  var trialNeverStarted=!isOwner()&&!num(SUB.trialStart);
+  var ht=$('pwHeadTxt');
+  if(ht)ht.textContent=trialNeverStarted
+    ?'আপনি এখনো ফ্রি ট্রায়াল শুরু করেননি। নিচের বোতামে চাপ দিলেই ৭ দিনের ফ্রি ট্রায়াল শুরু হবে — নিজে শুরু না করলে ট্রায়াল চালু হবে না। অথবা চাইলে সরাসরি প্রিমিয়াম প্ল্যানও কিনতে পারেন।'
+    :'আপনার ফ্রি ট্রায়াল শেষ হয়ে গেছে। আবার পুরো অ্যাপ ব্যবহার করতে একটা প্ল্যান কিনুন — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।';
+  var tb=$('pwTrialBtn');if(tb)tb.style.display=(trialNeverStarted&&!pwBuyOpen)?'':'none';
   $('pwBuySection').style.display=pwBuyOpen?'':'none';
   $('pwBuyBtn').style.display=pwBuyOpen?'none':'';
-  $('pwCloseBtn').style.display=pwVoluntary?'':'none';
+  $('pwCloseBtn').style.display=pwBuyOpen?'':'none';
   $('pwPlans').innerHTML=PLANS.map(function(p){return '<div class="kv"><span>💎 <b>'+esc(p.name)+'</b></span><b>'+money(num(p.price))+'</b></div>';}).join('');
   var sel=$('buyPlan'),cur=sel.value;
   sel.innerHTML=PLANS.map(function(p,i){return '<option value="'+i+'">'+esc(p.name)+' — '+money(num(p.price))+'</option>';}).join('');
@@ -1590,6 +1609,7 @@ $('copyPayNum').addEventListener('click',function(){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(n).then(function(){toast('📋 নম্বর কপি হয়েছে: '+n);},function(){toast('নম্বর: '+n);});
   else toast('নম্বর: '+n);
 });
+$('pwTrialBtn').addEventListener('click',function(){startTrial();});
 $('pwBuyBtn').addEventListener('click',function(){pwBuyOpen=true;renderAccess();});
 $('pwCloseBtn').addEventListener('click',function(){pwVoluntary=false;pwBuyOpen=false;renderAccess();});
 $('pwSwitchBtn').addEventListener('click',function(){doLogout();});
