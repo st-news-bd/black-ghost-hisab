@@ -147,7 +147,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="syncpill">
       <span class="pill off" id="netPill"><span class="dot"></span><span id="netTxt">চেক হচ্ছে…</span></span>
-      <button class="pill" id="acctBtn" type="button" style="background:#ffffff;color:#0f4d2e;border-color:#ffffff">👤 <span id="acctBtnTxt">লগইন / সাইন আপ</span></button>
+      <button class="pill" id="acctBtn" type="button" style="background:#ffffff;color:#0f4d2e;border-color:#ffffff"><img id="acctAvatar" alt="" style="display:none;width:24px;height:24px;border-radius:50%;object-fit:cover" /><span id="acctIcon">👤</span> <span id="acctBtnTxt">লগইন / সাইন আপ</span></button>
       <button class="pill" id="installBtn" type="button" style="background:#ffcd5a;color:#0f4d2e;border-color:#ffcd5a">📲 ফোনে ইনস্টল করুন</button>
     </div>
   </div>
@@ -205,6 +205,22 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel">
       <h2>👤 প্রোফাইল</h2>
+      <div style="text-align:center;padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:6px">
+        <button id="pfPhotoBtn" type="button" aria-label="প্রোফাইল ছবি দিন বা বদলান" style="width:104px;height:104px;border-radius:50%;border:3px solid var(--gold);background:var(--goldbg);padding:0;overflow:hidden;display:inline-flex;align-items:center;justify-content:center">
+          <img id="pfPhotoImg" alt="প্রোফাইল ছবি" style="display:none;width:100%;height:100%;object-fit:cover" />
+          <span id="pfPhotoIcon" style="font-size:3rem;line-height:1">👤</span>
+        </button>
+        <div class="noprint" id="pfPhotoHint" style="margin-top:6px;font-weight:700;font-size:.92rem">📷 প্রোফাইল ছবি দিতে ছবিতে চাপ দিন</div>
+        <input type="file" id="pfPhoto" accept="image/*" style="display:none" />
+        <input type="file" id="pfPhotoCam" accept="image/*" capture="environment" style="display:none" />
+        <div id="pfPhotoPicker" class="noprint" style="display:none;margin-top:8px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+            <button class="btn small" id="pfPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
+            <button class="btn small ghost" id="pfPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
+            <button class="btn small danger" id="pfPhotoRm" type="button" style="display:none">ছবি সরান</button>
+          </div>
+        </div>
+      </div>
       <div class="kv"><span>নাম</span><b>The Black Ghost</b></div>
       <div class="kv"><span>অ্যাকাউন্ট</span><b id="profileAcct">লগইন করা নেই</b></div>
       <div class="kv"><span>আমার প্ল্যান</span><b id="profilePlan">—</b></div>
@@ -1163,7 +1179,7 @@ function $(id){return document.getElementById(id);}
 /* ---------- DATA (local first, per-account) ---------- */
 /* App name lives in ONE place: change APP_NAME here + <title> + manifest to rename. */
 var APP_NAME='Black Ghost Hisab';
-function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],purchases:[],olist:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,tombs:[],updatedAt:0,rev:0};}
+function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],purchases:[],olist:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,profilePhoto:'',profilePhotoU:0,tombs:[],updatedAt:0,rev:0};}
 /* ---------- SEPARATE BOOKS (আলাদা খাতা) ----------
    Every entry/product/party/etc. carries a `book` field = the id of the
    book it belongs to. Entries saved before books existed have NO book
@@ -1213,7 +1229,7 @@ function bookName(id){var b=findBook(id);return b?b.name:'প্রধান খ
    rev   = local revision counter, bumped on every save. */
 function normDB(d){
   if(!d||typeof d!=='object')return blankDB();
-  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],purchases:Array.isArray(d.purchases)?d.purchases:[],olist:Array.isArray(d.olist)?d.olist:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev)};
+  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],purchases:Array.isArray(d.purchases)?d.purchases:[],olist:Array.isArray(d.olist)?d.olist:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),profilePhoto:typeof d.profilePhoto==='string'?d.profilePhoto:'',profilePhotoU:num(d.profilePhotoU),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev)};
 }
 var DB=blankDB();
 var curKey=LS_KEY; /* guest (this-phone-only) key until login */
@@ -1249,7 +1265,7 @@ function mergeData(a,b){
   a.tombs.concat(b.tombs).forEach(function(t){if(t&&!tombSet[t]){tombSet[t]=1;tombs.push(t);}});
   var catSet={},catList=[];
   a.cats.concat(b.cats).forEach(function(c){if(c&&!catSet[c]){catSet[c]=1;catList.push(c);}});
-  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
+  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),profilePhoto:(b.profilePhotoU>a.profilePhotoU?b.profilePhoto:a.profilePhoto),profilePhotoU:Math.max(a.profilePhotoU,b.profilePhotoU),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
 }
 function addTomb(p,id){var t=p+id;if(DB.tombs.indexOf(t)<0)DB.tombs.push(t);}
 function persistLocal(){try{localStorage.setItem(curKey,JSON.stringify(DB));}catch(e){}}
@@ -1276,6 +1292,7 @@ function setSync(txt){
   var pa=$('profileAcct');if(pa)pa.textContent=currentUser?currentUser.label:'লগইন করা নেই';
   var lo=$('logoutBtn');if(lo)lo.style.display=currentUser?'':'none';
   var li=$('loginOpenBtn');if(li)li.style.display=currentUser?'none':'';
+  updateProfilePhotoUI();
   if(typeof renderAccess==='function')renderAccess();
 }
 
@@ -1390,7 +1407,7 @@ function syncNow(){
     }else{
       processDevices({});
     }
-    var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,purchases:DB.purchases,olist:DB.olist,books:DB.books,targetAmt:DB.targetAmt,targetU:DB.targetU,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
+    var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,purchases:DB.purchases,olist:DB.olist,books:DB.books,targetAmt:DB.targetAmt,targetU:DB.targetU,profilePhoto:DB.profilePhoto||'',profilePhotoU:DB.profilePhotoU||0,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
       sub:subPayload(),plans:PLANS,planCfgU:CFG.u||0,payNum:CFG.payNumber||'',planReqs:PLANREQS,planReqsU:PLANREQS_U,devices:DEVICES};
     userDoc().set(payload).then(function(){finish(true);},function(){finish(false);});
   }).catch(function(){finish(false);});
@@ -3697,6 +3714,45 @@ window.viewTxPhoto=function(id){
 };
 $('photoClose').addEventListener('click',function(){$('photoModal').classList.remove('open');});
 $('photoModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+/* ---------- PROFILE PICTURE (v9) ----------
+   Stored per account as DB.profilePhoto (a data URL) inside the SAME
+   hisabi_users doc as everything else: local-first via persistLocal,
+   pushed by syncNow's payload, and merged by profilePhotoU (the newest
+   set/remove wins, exactly like targetAmt/targetU) — so it survives
+   reload, shows offline once set, and follows the account to any phone.
+   Same two-option picker + on-phone compression (max 600px JPEG) as
+   product and receipt photos: camera input carries capture, the gallery
+   input does NOT, so choosing an existing photo always works. */
+function updateProfilePhotoUI(){
+  var has=!!(DB&&DB.profilePhoto);
+  var img=$('pfPhotoImg'),icn=$('pfPhotoIcon'),rm=$('pfPhotoRm'),hint=$('pfPhotoHint');
+  if(img){if(has){img.src=DB.profilePhoto;img.style.display='';}else{img.removeAttribute('src');img.style.display='none';}}
+  if(icn)icn.style.display=has?'none':'';
+  if(rm)rm.style.display=has?'':'none';
+  if(hint)hint.textContent=has?'📷 ছবি বদলাতে ছবিতে চাপ দিন':'📷 প্রোফাইল ছবি দিতে ছবিতে চাপ দিন';
+  var av=$('acctAvatar'),ai=$('acctIcon');
+  if(av){if(has){av.src=DB.profilePhoto;av.style.display='';}else{av.removeAttribute('src');av.style.display='none';}}
+  if(ai)ai.style.display=has?'none':'';
+}
+function loadProfilePhoto(f){
+  compressPhotoFile(f,function(d){
+    if(!d){toast('⚠️ ছবিটা পড়া যায়নি');return;}
+    DB.profilePhoto=d;DB.profilePhotoU=Date.now();saveLocal();
+    toast('✅ প্রোফাইল ছবি সেভ হয়েছে');
+  });
+}
+$('pfPhotoBtn').addEventListener('click',function(){
+  var p=$('pfPhotoPicker');if(p)p.style.display=(p.style.display==='none')?'':'none';
+});
+$('pfPhotoCamBtn').addEventListener('click',function(){$('pfPhotoCam').click();});
+$('pfPhotoGalBtn').addEventListener('click',function(){$('pfPhoto').click();});
+$('pfPhoto').addEventListener('change',function(){loadProfilePhoto(this.files&&this.files[0]);this.value='';});
+$('pfPhotoCam').addEventListener('change',function(){loadProfilePhoto(this.files&&this.files[0]);this.value='';});
+$('pfPhotoRm').addEventListener('click',function(){
+  DB.profilePhoto='';DB.profilePhotoU=Date.now();saveLocal();
+  toast('প্রোফাইল ছবি সরানো হয়েছে');
+});
 
 /* ---------- PURCHASES — কেনা মালের হিসাব (v8) ----------
    A purchase records supplier + product + qty + cost price + date. Saving
