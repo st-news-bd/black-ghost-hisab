@@ -242,6 +242,21 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <p class="hint" style="margin:6px 0 0">এই PIN শুধু এই ফোনে তোমার হিসাব লুকিয়ে রাখে — Admin PIN থেকে আলাদা। PIN ভুলে গেলে লগইনের পাসওয়ার্ড দিয়ে লক খোলা যাবে।</p>
       </div>
       <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">🔑 পাসওয়ার্ড বদলান</h3>
+        <p class="hint" style="margin:0 0 8px">লগইনের পাসওয়ার্ড বদলাতে বর্তমান পাসওয়ার্ডটা লাগবে। বদলানোর পর এই ফোনে লগইন থাকবেই — অন্য ডিভাইসে এরপর থেকে নতুন পাসওয়ার্ডে লগইন করতে হবে।</p>
+        <div class="grid2">
+          <div class="field" style="margin:0"><label for="pwCur">বর্তমান পাসওয়ার্ড</label><input type="password" id="pwCur" placeholder="বর্তমান পাসওয়ার্ড" autocomplete="current-password" /></div>
+          <div class="field" style="margin:0"><label for="pwNew">নতুন পাসওয়ার্ড</label><input type="password" id="pwNew" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="new-password" /></div>
+        </div>
+        <p id="pwChangeMsg" style="margin:8px 0 0;font-weight:700"></p>
+        <button class="btn small gold" id="pwChangeBtn" type="button" style="margin-top:8px">🔑 পাসওয়ার্ড বদলান</button>
+      </div>
+      <div class="noprint" id="profileDevicesWrap" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">📱 আমার লগইন করা ডিভাইস</h3>
+        <p class="hint" style="margin:0 0 8px">একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। অন্য ডিভাইস থেকে লগআউট করতে চাইলে পাশের বোতাম চাপুন — ওই ডিভাইসে অ্যাপ খুললেই লগআউট হয়ে যাবে।</p>
+        <div id="profileDevices"></div>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
         <label for="pfCode">🎟️ ভাউচার / রিডিম কোড</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <input type="text" id="pfCode" placeholder="কোড লিখুন" style="flex:1 1 160px;text-transform:uppercase" />
@@ -302,6 +317,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="txCat">খাত / ক্যাটাগরি</label>
           <input type="text" id="txCat" list="catList" value="পণ্য বিক্রি" placeholder="ক্যাটাগরি বাছুন বা নতুন লিখুন" />
           <datalist id="catList"></datalist>
+          <datalist id="custList"></datalist>
           <p class="hint" style="margin:4px 0 0">লিস্ট থেকে বাছুন, অথবা নিজের নতুন ক্যাটাগরি লিখলেই সেটা যোগ হয়ে যাবে।</p></div>
         <div class="field"><label for="txMethod">মাধ্যম</label>
           <select id="txMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
@@ -491,7 +507,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <h2>🧾 নতুন বিল বানান</h2>
       <p class="hint">আইটেম যোগ করলেই মোট অটোমেটিক হিসাব হবে। বিল সেভ করলে স্টক থেকে বিক্রি কেটে যাবে, জমা টাকা টাকার খাতায় আয় হিসেবে যাবে, আর বাকি থাকলে তা বাকি হিসাবে যোগ হবে — একই হিসাব দুবার হবে না।</p>
       <div class="grid2">
-        <div class="field"><label for="bCust">কাস্টমারের নাম</label><input type="text" id="bCust" placeholder="নাম লিখুন" /></div>
+        <div class="field"><label for="bCust">কাস্টমারের নাম</label><input type="text" id="bCust" list="custList" placeholder="নাম লিখুন" /></div>
         <div class="field"><label for="bPhone">মোবাইল (ঐচ্ছিক)</label><input type="tel" id="bPhone" placeholder="01XXXXXXXXX" /></div>
       </div>
       <div class="grid2">
@@ -518,6 +534,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel">
       <h2>সব বিল</h2>
+      <div class="searchrow noprint"><input type="search" id="billSearch" placeholder="🔍 কাস্টমারের নাম, মোবাইল বা তারিখ দিয়ে বিল খুঁজুন…" /></div>
       <div id="billList"></div>
     </div>
   </section>
@@ -535,7 +552,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <h2>🧾 বর্তমান বিল</h2>
       <div id="qsCart"></div>
       <div class="grid2" style="margin-top:10px">
-        <div class="field"><label for="qsCust">কাস্টমারের নাম (ঐচ্ছিক)</label><input type="text" id="qsCust" placeholder="নাম লিখুন" /></div>
+        <div class="field"><label for="qsCust">কাস্টমারের নাম (ঐচ্ছিক)</label><input type="text" id="qsCust" list="custList" placeholder="নাম লিখুন" /></div>
         <div class="field"><label for="qsMethod">পেমেন্ট মাধ্যম</label>
           <select id="qsMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
       </div>
@@ -816,6 +833,8 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="field"><label for="gAuthPass">পাসওয়ার্ড</label><input type="password" id="gAuthPass" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="current-password" /></div>
       <p id="gAuthMsg" style="margin:0 0 10px;font-weight:700;color:var(--out)"></p>
       <button class="btn" id="gAuthGo" type="button" style="width:100%">লগইন করুন</button>
+      <button class="btn ghost" id="gForgotBtn" type="button" style="width:100%;margin-top:8px">পাসওয়ার্ড ভুলে গেছি? (শুধু জিমেইল অ্যাকাউন্টে রিসেট লিংক যাবে)</button>
+      <p id="gForgotMsg" style="display:none;margin:8px 0 0;font-weight:700"></p>
       <p class="hint" style="margin-top:10px">একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে — বারবার লগইন করতে হবে না। লগইনের সময় একবার ইন্টারনেট লাগে; এরপর হিসাবের সব কাজ অফলাইনেও চলে। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে।</p>
     </div>
     <div id="gateDevices" class="panel" style="display:none;margin-top:0">
@@ -1126,6 +1145,10 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" id="bookSave" type="button">✅ সেভ করুন</button>
       <button class="btn ghost" id="bookClose" type="button">বন্ধ করুন</button>
+    </div>
+    <div id="bookDelWrap" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+      <button class="btn danger" id="bookDelBtn" type="button" style="width:100%">🗑️ এই খাতাটা মুছুন</button>
+      <p class="hint" style="margin:6px 0 0">খাতা মুছা যায় শুধু তখনই, যখন খাতাটা একদম খালি — ভেতরে কোনো এন্ট্রি থাকলে মুছা যাবে না, তাই কোনো হিসাব হারানোর সুযোগ নেই।</p>
     </div>
   </div>
 </div>
@@ -1647,9 +1670,29 @@ function setGAuthMode(m){
   $('gAuthGo').textContent=m==='signup'?'অ্যাকাউন্ট খুলুন':'লগইন করুন';
   $('gAuthPass').setAttribute('autocomplete',m==='signup'?'new-password':'current-password');
   $('gAuthMsg').textContent='';
+  $('gForgotBtn').style.display=m==='signup'?'none':'';
+  $('gForgotMsg').style.display='none';
 }
 $('gAuthModeSeg').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setGAuthMode(b.getAttribute('data-v'));});});
 $('gateSwitchBtn').addEventListener('click',function(){doLogout();});
+/* Forgot password (login gate): Firebase emails a reset link — email
+   accounts only. Phone accounts use a synthetic email inbox nobody can
+   open, so they get an honest support message instead of a dead link. */
+$('gForgotBtn').addEventListener('click',function(){
+  var m=$('gForgotMsg');m.style.display='';
+  function say(t,ok){m.textContent=t;m.style.color=ok?'var(--in)':'var(--out)';}
+  var idf=identToEmail($('gAuthId').value);
+  if(!idf){say('⚠️ আগে ওপরে আপনার জিমেইলটা লিখুন');return;}
+  if(idf.kind!=='email'){say('⚠️ ফোন নম্বরের অ্যাকাউন্টে রিসেট ইমেইল পাঠানো যায় না — পাসওয়ার্ড ভুলে গেলে সাপোর্টে যোগাযোগ করুন (Telegram @STVideoWorld1)');return;}
+  if(typeof firebase==='undefined'||!fbReady||!navigator.onLine){say('⚠️ ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
+  say('⏳ রিসেট লিংক পাঠানো হচ্ছে…',true);
+  firebase.auth().sendPasswordResetEmail(idf.email).then(function(){
+    say('✅ পাসওয়ার্ড রিসেটের লিংক আপনার জিমেইলে পাঠানো হয়েছে — মেইল খুলে লিংকে চাপ দিয়ে নতুন পাসওয়ার্ড দিন, তারপর এখানে নতুন পাসওয়ার্ডে লগইন করুন',true);
+  }).catch(function(e){
+    var c=(e&&e.code)||'';
+    say(c==='auth/user-not-found'?'⚠️ এই জিমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি — "নতুন অ্যাকাউন্ট (সাইন আপ)" দিয়ে অ্যাকাউন্ট খুলুন':'⚠️ পাঠানো যায়নি — আবার চেষ্টা করুন'+(c?' ('+c+')':''));
+  });
+});
 
 /* ---------- AUTO CALCULATIONS ---------- */
 function totals(list){var i=0,o=0,sv=0,us=0;list.forEach(function(t){if(t.type==='in')i+=num(t.amount);else if(t.type==='out')o+=num(t.amount);else if(t.type==='save')sv+=num(t.amount);else if(t.type==='unsave')us+=num(t.amount);});return{inn:i,out:o,save:sv,unsave:us,bal:i+us-o-sv};}
@@ -2236,6 +2279,52 @@ $('supSend').addEventListener('click',function(){
   });
 });
 
+/* ---------- CHANGE PASSWORD + MY DEVICES (Profile) ---------- */
+$('pwChangeBtn').addEventListener('click',function(){
+  var m=$('pwChangeMsg');
+  function say(t,ok){m.textContent=t;m.style.color=ok?'var(--in)':'var(--out)';}
+  if(!currentUser){say('⚠️ পাসওয়ার্ড বদলাতে আগে লগইন করুন');openAuth();return;}
+  var cur=$('pwCur').value||'',nw=$('pwNew').value||'';
+  if(!cur){say('⚠️ বর্তমান পাসওয়ার্ড লিখুন');return;}
+  if(nw.length<6){say('⚠️ নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে');return;}
+  if(typeof firebase==='undefined'||!fbReady||!navigator.onLine){say('⚠️ পাসওয়ার্ড বদলাতে ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
+  var u=firebase.auth().currentUser;
+  if(!u){say('⚠️ আবার লগইন করে চেষ্টা করুন');return;}
+  var btn=this;btn.disabled=true;say('⏳ যাচাই হচ্ছে…',true);
+  var cred=firebase.auth.EmailAuthProvider.credential(u.email,cur);
+  u.reauthenticateWithCredential(cred).then(function(){
+    return u.updatePassword(nw);
+  }).then(function(){
+    btn.disabled=false;$('pwCur').value='';$('pwNew').value='';
+    say('✅ পাসওয়ার্ড বদলে গেছে — এবার থেকে নতুন পাসওয়ার্ডে লগইন হবে',true);
+    toast('🔑 পাসওয়ার্ড বদলে গেছে');
+  }).catch(function(e){
+    btn.disabled=false;
+    var c=(e&&e.code)||'';
+    say((c==='auth/wrong-password'||c==='auth/invalid-credential')?'❌ বর্তমান পাসওয়ার্ড মিলছে না':(c==='auth/weak-password'?'⚠️ নতুন পাসওয়ার্ড আরো শক্ত দিন':'⚠️ হয়নি — আবার চেষ্টা করুন'+(c?' ('+c+')':'')));
+  });
+});
+function renderProfileDevices(){
+  var wrap=$('profileDevicesWrap'),box=$('profileDevices');if(!wrap||!box)return;
+  if(!currentUser||isOwner()||!DEVICES.length){wrap.style.display='none';return;}
+  wrap.style.display='';
+  var myId=deviceId();
+  box.innerHTML=DEVICES.map(function(d){
+    var mine=d&&d.id===myId;
+    return '<div class="kv"><span>📱 '+esc((d&&d.label)||'ডিভাইস')+'<br><span style="color:var(--muted);font-size:.85rem">শেষ লগইন: '+fmtDate(d&&d.lastSeen)+'</span></span><b>'+(mine?'<span class="badge in">এই ডিভাইস</span>':'<button class="btn small danger" type="button" onclick="profDevLogout(\''+esc(d.id)+'\')">লগআউট করুন</button>')+'</b></div>';
+  }).join('');
+}
+window.profDevLogout=function(id){
+  if(!currentUser||!fbReady||!fsDb){toast('⚠️ ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
+  askSure('এই ডিভাইস থেকে লগআউট করবেন? ওই ডিভাইসে অ্যাপ খুললেই লগআউট হয়ে যাবে।',function(){
+    var rest=DEVICES.filter(function(d){return d&&d.id!==id;});
+    userDoc().set({devices:rest},{merge:true}).then(function(){
+      DEVICES=rest;saveDevicesLocal();renderProfileDevices();
+      toast('✅ ওই ডিভাইস থেকে লগআউট করা হয়েছে');
+    }).catch(function(){toast('⚠️ হয়নি — ইন্টারনেট চেক করে আবার চেষ্টা করুন');});
+  });
+};
+
 /* ---------- ADMIN PANEL (PIN only) ---------- */
 $('adminWord').addEventListener('input',function(){if(this.value==='OPEN'){this.value='';tryOpenAdmin();}});
 $('pwAdminWord').addEventListener('input',function(){if(this.value==='OPEN'){this.value='';tryOpenAdmin();}});
@@ -2623,6 +2712,8 @@ function renderCats(){
   DEFAULT_CATS.concat(DB.cats).forEach(function(c){if(c&&!seen[c]){seen[c]=1;list.push(c);}});
   DB.txs.forEach(function(t){if(t.cat&&!seen[t.cat]){seen[t.cat]=1;list.push(t.cat);}});
   var dl=$('catList');if(dl)dl.innerHTML=list.map(function(c){return '<option value="'+esc(c)+'"></option>';}).join('');
+  var cl=$('custList');
+  if(cl){var seen2={},names=[];DB.parties.forEach(function(p){if(p.name&&!seen2[p.name]){seen2[p.name]=1;names.push(p.name);}});cl.innerHTML=names.map(function(n){return '<option value="'+esc(n)+'"></option>';}).join('');}
 }
 $('shareToday').addEventListener('click',function(){
   var t=todayStr(),tt=totals(bTxs().filter(function(x){return x.date===t;}));
@@ -2827,7 +2918,7 @@ function renderDues(){
 
 /* ---------- DAILY CASH RECONCILIATION ---------- */
 function dayTotals(dateStr){return totals(bTxs().filter(function(x){return x.date===dateStr;}));}
-function cdFind(dateStr){var list=bCashdays(),wb=writeBook(),i;for(i=0;i<list.length;i++)if(list[i].date===dateStr&&bookOf(list[i])===wb)return list[i];for(i=0;i<list.length;i++)if(list[i].date===dateStr)return list[i];return null;}
+function cdFind(dateStr){var list=bCashdays(),wb=writeBook(),i;for(i=0;i<list.length;i++)if(list[i].date===dateStr&&bookOf(list[i])===wb)return list[i];return null;}
 function cdCalc(){
   var d=$('cdDate').value||todayStr();
   var open=num($('cdOpen').value),counted=num($('cdCounted').value);
@@ -2939,7 +3030,7 @@ function billCalc(){
   var dt=$('bDiscType').value,dv=num($('bDiscVal').value),disc=0;
   if(dt==='pct')disc=sub*dv/100;else if(dt==='flat')disc=dv;
   if(disc>sub)disc=sub;if(disc<0)disc=0;
-  var total=sub-disc,paid=num($('bPaid').value),due=Math.max(0,total-paid);
+  var total=sub-disc,paid=Math.min(num($('bPaid').value),total),due=Math.max(0,total-paid);
   $('billDiscBox').textContent=money(disc);
   $('billTotalBox').textContent='মোট = '+money(total)+' • জমা = '+money(paid)+' • বাকি = '+money(due);
   return{items:items,subtotal:sub,discAmt:disc,total:total,paid:paid,due:due};
@@ -3014,9 +3105,14 @@ window.delBill=function(id){
     DB.bills=DB.bills.filter(function(x){return x.id!==id;});addTomb('b',id);saveLocal();toast('🗑️ বিল মোছা হয়েছে');
   });
 };
+$('billSearch').addEventListener('input',renderBills);
 function renderBills(){
-  var list=bBills().slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
-  if(!list.length){$('billList').innerHTML='<div class="empty">এখনো কোনো বিল নেই।</div>';return;}
+  var q=($('billSearch').value||'').trim().toLowerCase();
+  var list=bBills().filter(function(b){
+    if(!q)return true;
+    return (b.customer||'').toLowerCase().indexOf(q)>=0||(b.phone||'').indexOf(q)>=0||(b.date||'').indexOf(q)>=0;
+  }).slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
+  if(!list.length){$('billList').innerHTML='<div class="empty">'+(q?'“'+esc(q)+'” দিয়ে কোনো বিল পাওয়া যায়নি।':'এখনো কোনো বিল নেই।')+'</div>';return;}
   $('billList').innerHTML=list.map(function(b){
     return '<div class="rowitem"><div class="r1"><div><b>'+esc(b.customer)+'</b><div class="meta">'+esc(b.date)+' • '+fmt(b.items.length)+' আইটেম'+(num(b.discAmt)>0?' • ছাড় '+money(b.discAmt):'')+'</div></div><div class="amt">'+money(b.total)+'</div></div>'+
     '<div class="meta">জমা '+money(b.paid)+' • বাকি <b style="color:'+(b.due>0?'var(--out)':'var(--in)')+'">'+money(b.due)+'</b></div>'+
@@ -3548,6 +3644,7 @@ window.openBookModal=function(id){
   $('bookModalTitle').textContent=id?'✏️ খাতার নাম বদলান':'📚 নতুন খাতা বানান';
   $('bookName').value=id?bookName(id):'';
   $('bookMsg').textContent='';
+  $('bookDelWrap').style.display=(id&&id!==DEFAULT_BOOK)?'':'none';
   $('bookModal').classList.add('open');
   setTimeout(function(){$('bookName').focus();},80);
 };
@@ -3566,6 +3663,28 @@ $('bookSave').addEventListener('click',function(){
   }
   $('bookModal').classList.remove('open');
   saveLocal();
+});
+
+/* Delete a book ONLY when it is completely empty — every collection is
+   scanned for entries stamped with this book; if anything exists, the
+   delete is refused, so removing a book can never lose a single entry. */
+$('bookDelBtn').addEventListener('click',function(){
+  if(!bookEditId||bookEditId===DEFAULT_BOOK)return;
+  var id=bookEditId,count=0;
+  ['txs','products','logs','parties','dues','bills','staff','pays','cashdays','partners','orders','loans','insts','budgets','goals','rbills','rpays','atts','purchases','olist'].forEach(function(k){
+    (DB[k]||[]).forEach(function(x){if(bookOf(x)===id)count++;});
+  });
+  if(count>0){$('bookMsg').textContent='⚠️ এই খাতায় '+fmt(count)+'টি এন্ট্রি আছে — এন্ট্রি থাকা অবস্থায় খাতা মুছা যাবে না, যাতে কোনো হিসাব না হারায়।';return;}
+  var nm=bookName(id);
+  askSure('“'+nm+'” খাতাটা মুছে ফেলবেন? খাতাটা একদম খালি — কোনো হিসাব মুছবে না।',function(){
+    DB.books=DB.books.filter(function(b){return b.id!==id;});
+    addTomb('k2',id);
+    if(bookView===id){bookView=DEFAULT_BOOK;saveBookView();}
+    bookEditId=null;
+    $('bookModal').classList.remove('open');
+    saveLocal();
+    toast('🗑️ খাতা মোছা হয়েছে: '+nm);
+  });
 });
 
 /* ---------- BARCODE SCAN ----------
@@ -4087,8 +4206,11 @@ function renderDash(){
     '<div class="kv"><span>সব মিলিয়ে হাতে আছে</span><b>'+money(all.bal)+'</b></div>'+
     '<h3 style="margin:12px 0 2px;font-size:.98rem">আজকের পেমেন্ট মাধ্যম অনুযায়ী</h3>'+(methodRowsHtml(todayTx)||'<p class="hint" style="margin:0">আজ কোনো এন্ট্রি নেই</p>');
   var lows=bProducts().filter(function(p){return prodStats(p).remaining<=num(p.low);});
-  var lst=$('lowStockTitle');if(lst)lst.textContent=lows.length?'⚠️ স্টক কমে গেছে':'📦 স্টক অবস্থা';
-  $('lowStockBox').innerHTML=lows.length?lows.map(function(p){var s=prodStats(p);return '<div class="kv"><span>'+esc(p.name)+'</span><b><span class="badge warn">মাত্র '+fmt(s.remaining)+' '+esc(p.unit)+' আছে</span></b></div>';}).join(''):'<p class="hint" style="margin:0">সব প্রোডাক্টের স্টক ঠিক আছে ✅</p>';
+  var exps=bProducts().filter(function(p){var ei=expiryInfo(p);return ei&&(ei.expired||ei.soon);});
+  var lst=$('lowStockTitle');if(lst)lst.textContent=(lows.length||exps.length)?'⚠️ স্টকে নজর দিন':'📦 স্টক অবস্থা';
+  var lowHtml=lows.map(function(p){var s=prodStats(p);return '<div class="kv"><span>'+esc(p.name)+'</span><b><span class="badge warn">মাত্র '+fmt(s.remaining)+' '+esc(p.unit)+' আছে</span></b></div>';}).join('');
+  var expHtml=exps.map(function(p){var ei=expiryInfo(p);return '<div class="kv"><span>'+esc(p.name)+'</span><b>'+(ei.expired?'<span class="badge out">⛔ মেয়াদ শেষ!</span>':'<span class="badge warn">⏰ মেয়াদ '+esc(p.expiry)+' (আর '+fmt(ei.days)+' দিন)</span>')+'</b></div>';}).join('');
+  $('lowStockBox').innerHTML=(lowHtml+expHtml)||'<p class="hint" style="margin:0">সব প্রোডাক্টের স্টক ঠিক আছে ✅</p>';
   var recent=bTxs().slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);}).slice(0,5);
   $('recentBox').innerHTML=recent.length?recent.map(function(x){
     return '<div class="kv"><span>'+esc(x.date)+' • '+esc(x.note||x.cat)+'</span><b style="color:'+(x.type==='in'?'var(--in)':'var(--out)')+'">'+(x.type==='in'?'+':'−')+' '+money(x.amount)+'</b></div>';
@@ -4189,7 +4311,7 @@ function renderReport(){
   $('profitTable').innerHTML='<div style="overflow-x:auto"><table><tr><th>প্রোডাক্ট</th><th class="num">বিক্রি</th><th class="num">বিক্রির টাকা</th><th class="num">লাভ</th><th class="num">বাকি স্টক</th></tr>'+rows+'<tr><td><b>মোট</b></td><td></td><td class="num"><b>'+money(totS)+'</b></td><td class="num"><b>'+money(totP)+'</b></td><td></td></tr></table></div>';
   renderPartners();renderBudgets();renderGoals();renderRbills();renderCharts();
 }
-function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();}
+function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();renderProfileDevices();}
 
 /* ---------- BACKUP / CSV / PRINT ---------- */
 function download(name,content,type){
@@ -4261,8 +4383,21 @@ initFirebase();
 setInterval(function(){renderAccess();refreshPendingBadge();if(currentUser&&deviceConfirmed&&!deviceBlocked)syncNow();},60000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&currentUser)syncNow();});
 /* If Firebase never resolves (blocked CDN / very slow network), stop showing
-   the loading state and fall back to the login screen + its offline message. */
-setTimeout(function(){if(!authResolved){authResolved=true;renderAccess();}},9000);
+   the loading state and fall back to the login screen + its offline message.
+   EXCEPTION: if this phone still holds a saved Firebase login (the
+   persistent LOCAL session), the user IS logged in and the session is just
+   still restoring — keep the loading state instead of flashing the login
+   form at them; the session must never ask for the password again. */
+setTimeout(function(){
+  if(authResolved)return;
+  var hasPersisted=false;
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('firebase:authUser:')===0){hasPersisted=true;break;}}}catch(e){}
+  if(hasPersisted){
+    setTimeout(function(){if(!authResolved){authResolved=true;renderAccess();}},20000);
+    return;
+  }
+  authResolved=true;renderAccess();
+},9000);
 })();
 </script>
 </body>
