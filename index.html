@@ -30,6 +30,21 @@
     color-scheme:dark;
   }
 }
+/* Manual theme choice (🌙/☀️ button) wins over the system setting. */
+:root[data-theme="dark"]{
+  --bg:#101613; --card:#1a211c; --ink:#eef3ee; --muted:#a7b5ab; --line:#33413a;
+  --green:#1d7a4a; --green2:#24965c; --gold:#e0aa22; --goldbg:#3a2f10;
+  --in:#4cc38a; --inbg:#143527; --out:#ff8a7a; --outbg:#3d1d18;
+  --btn:#1d7a4a; --input:#141a16; --shadow:0 2px 10px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f4f1e8; --card:#ffffff; --ink:#1c2420; --muted:#5c6a62; --line:#ddd6c4;
+  --green:#0f4d2e; --green2:#14663d; --gold:#c9920e; --goldbg:#fdf3d7;
+  --in:#157347; --inbg:#e3f4ea; --out:#b02a20; --outbg:#fbe7e4;
+  --btn:#0f4d2e; --btnink:#ffffff; --input:#ffffff; --shadow:0 2px 10px rgba(20,40,28,.10);
+  color-scheme:light;
+}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hind Siliguri","Noto Sans Bengali",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
@@ -132,6 +147,12 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   body.print-bill .modal{display:none!important}
   body.print-bill #billModal{display:block!important;position:static;background:#fff;padding:0}
   body.print-bill #billModal .box{max-height:none;overflow:visible;max-width:100%;border-radius:0;box-shadow:none}
+  body.print-stmt .wrap,body.print-stmt header.top,body.print-stmt #gate,body.print-stmt #paywall,body.print-stmt #lockScreen{display:none!important}
+  body.print-stmt .modal{display:none!important}
+  body.print-stmt #stmtModal{display:block!important;position:static;background:#fff;padding:0}
+  body.print-stmt #stmtModal .box{max-height:none;overflow:visible;max-width:100%;border-radius:0;box-shadow:none}
+  body.print-one section.page{display:none!important}
+  body.print-one section.page.active{display:block!important}
   .card,.panel,.rowitem{box-shadow:none;border-color:#bbb}
   .printonly{display:block}
 }
@@ -149,6 +170,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <span class="pill off" id="netPill"><span class="dot"></span><span id="netTxt">চেক হচ্ছে…</span></span>
       <button class="pill" id="acctBtn" type="button" style="background:#ffffff;color:#0f4d2e;border-color:#ffffff"><img id="acctAvatar" alt="" style="display:none;width:24px;height:24px;border-radius:50%;object-fit:cover" /><span id="acctIcon">👤</span> <span id="acctBtnTxt">লগইন / সাইন আপ</span></button>
       <button class="pill" id="installBtn" type="button" style="background:#ffcd5a;color:#0f4d2e;border-color:#ffcd5a">📲 ফোনে ইনস্টল করুন</button>
+      <button class="pill" id="themeBtn" type="button" title="ডার্ক / লাইট মোড">🌙</button>
     </div>
   </div>
 </header>
@@ -175,7 +197,25 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <p class="hint" id="bookHint" style="margin:8px 0 0"></p>
     </div>
     <button class="btn gold noprint" id="shareAppBtn" type="button" style="width:100%;margin:0 0 14px;font-size:1.05rem;min-height:3rem">📤 অ্যাপ শেয়ার করুন</button>
+    <div id="dashWarn"></div>
+    <div class="panel" id="upcomingPanel" style="display:none">
+      <h2>⏰ আসন্ন কিস্তি ও ডেলিভারি</h2>
+      <div id="upcomingBox"></div>
+    </div>
     <div class="cards" id="dashCards"></div>
+    <div class="panel noprint">
+      <h2>🔁 খাতার মধ্যে টাকা স্থানান্তর</h2>
+      <p class="hint">এক খাতা থেকে আরেক খাতায় টাকা সরান — দুই খাতাতেই এন্ট্রি হবে (যে খাতা থেকে গেল সেখানে খরচ, যেখানে এলো সেখানে আয়), মোট ব্যালেন্স একই থাকবে।</p>
+      <div class="grid2">
+        <div class="field"><label for="tfFrom">কোন খাতা থেকে</label><select id="tfFrom"></select></div>
+        <div class="field"><label for="tfTo">কোন খাতায়</label><select id="tfTo"></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="tfAmt">টাকার পরিমাণ (৳)</label><input type="number" id="tfAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="tfDate">তারিখ</label><input type="date" id="tfDate" /></div>
+      </div>
+      <button class="btn" id="tfGo" type="button">🔁 স্থানান্তর করুন</button>
+    </div>
     <div class="panel">
       <h2>আজকের হিসাব — <span id="todayLabel"></span></h2>
       <p class="hint">আজকের সব এন্ট্রি থেকে অটোমেটিক হিসাব করা। তোমাকে কিছু যোগ-বিয়োগ করতে হবে না।</p>
@@ -221,7 +261,12 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
           </div>
         </div>
       </div>
-      <div class="kv"><span>নাম</span><b>The Black Ghost</b></div>
+      <div class="kv"><span>নাম</span><b id="profileName">The Black Ghost</b></div>
+      <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <input type="text" id="pfNameInput" placeholder="তোমার নাম লিখুন" style="flex:1 1 180px" />
+        <button class="btn small gold" id="pfNameSave" type="button">নাম সেভ করুন</button>
+      </div>
+      <p class="hint" style="margin:4px 0 0">সাইন আপের সময় দেওয়া নামটাই এখানে দেখায় — চাইলে বদলে সেভ করুন।</p>
       <div class="kv"><span>অ্যাকাউন্ট</span><b id="profileAcct">লগইন করা নেই</b></div>
       <div class="kv"><span>আমার প্ল্যান</span><b id="profilePlan">—</b></div>
       <div class="kv" id="profileTrial" style="display:none"><span>🎁 ফ্রি ট্রায়াল</span><b id="profileTrialTxt"></b></div>
@@ -244,12 +289,32 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
         <h3 style="margin:0 0 4px">🔑 পাসওয়ার্ড বদলান</h3>
         <p class="hint" style="margin:0 0 8px">লগইনের পাসওয়ার্ড বদলাতে বর্তমান পাসওয়ার্ডটা লাগবে। বদলানোর পর এই ফোনে লগইন থাকবেই — অন্য ডিভাইসে এরপর থেকে নতুন পাসওয়ার্ডে লগইন করতে হবে।</p>
-        <div class="grid2">
+        <div class="grid3">
           <div class="field" style="margin:0"><label for="pwCur">বর্তমান পাসওয়ার্ড</label><input type="password" id="pwCur" placeholder="বর্তমান পাসওয়ার্ড" autocomplete="current-password" /></div>
           <div class="field" style="margin:0"><label for="pwNew">নতুন পাসওয়ার্ড</label><input type="password" id="pwNew" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="new-password" /></div>
+          <div class="field" style="margin:0"><label for="pwNew2">নতুন পাসওয়ার্ড আবার লিখুন</label><input type="password" id="pwNew2" placeholder="আবার একই পাসওয়ার্ড" autocomplete="new-password" /></div>
         </div>
         <p id="pwChangeMsg" style="margin:8px 0 0;font-weight:700"></p>
         <button class="btn small gold" id="pwChangeBtn" type="button" style="margin-top:8px">🔑 পাসওয়ার্ড বদলান</button>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">📧 লগইন আইডি বদলান (জিমেইল / ফোন নম্বর)</h3>
+        <p class="hint" style="margin:0 0 8px">নতুন জিমেইল বা ফোন নম্বর দিলে এরপর থেকে সেটা দিয়েই লগইন হবে — আপনার সব হিসাব আগের মতোই থাকবে, কিছুই বদলাবে না। যাচাইয়ের জন্য বর্তমান পাসওয়ার্ড লাগবে, আর ইন্টারনেট লাগবে।</p>
+        <div class="grid2">
+          <div class="field" style="margin:0"><label for="chIdNew">নতুন জিমেইল অথবা ফোন নম্বর</label><input type="text" id="chIdNew" placeholder="example@gmail.com অথবা 01XXXXXXXXX" autocomplete="username" /></div>
+          <div class="field" style="margin:0"><label for="chIdPass">বর্তমান পাসওয়ার্ড</label><input type="password" id="chIdPass" placeholder="বর্তমান পাসওয়ার্ড" autocomplete="current-password" /></div>
+        </div>
+        <p id="chIdMsg" style="margin:8px 0 0;font-weight:700"></p>
+        <button class="btn small gold" id="chIdBtn" type="button" style="margin-top:8px">📧 লগইন আইডি বদলান</button>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px;color:var(--out)">🗑️ অ্যাকাউন্ট মুছে ফেলুন</h3>
+        <p class="hint" style="margin:0 0 8px">সাবধান: অ্যাকাউন্ট মুছলে সার্ভারে থাকা আপনার সব হিসাব চিরতরে মুছে যাবে — ফেরত আনা যাবে না। এই ফোনে থাকা কপিটাও লগআউট হয়ে যাবে। যাচাইয়ের জন্য পাসওয়ার্ড লাগবে।</p>
+        <div class="grid2">
+          <div class="field" style="margin:0"><label for="delAcctPass">পাসওয়ার্ড (নিশ্চিত করতে)</label><input type="password" id="delAcctPass" placeholder="আপনার পাসওয়ার্ড" autocomplete="current-password" /></div>
+          <div class="field" style="margin:0"><label>&nbsp;</label><button class="btn small danger" id="delAcctBtn" type="button" style="width:100%">🗑️ অ্যাকাউন্ট মুছুন</button></div>
+        </div>
+        <p id="delAcctMsg" style="margin:8px 0 0;font-weight:700"></p>
       </div>
       <div class="noprint" id="profileDevicesWrap" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
         <h3 style="margin:0 0 4px">📱 আমার লগইন করা ডিভাইস</h3>
@@ -323,6 +388,10 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
           <select id="txMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
       </div>
       <div class="field"><label for="txNote">বিবরণ (কার কাছে / কী জন্য)</label><input type="text" id="txNote" placeholder="যেমন: রহিমের কাছে চাল বিক্রি" /></div>
+      <div class="field"><label for="txBook">কোন খাতায় যাবে</label><select id="txBook"></select>
+        <p class="hint" style="margin:4px 0 0">নতুন এন্ট্রি সাধারণত চলতি খাতাতেই যায়। পুরনো এন্ট্রি ঠিক করার সময় এখান থেকে অন্য খাতায় সরানোও যায়।</p></div>
+      <div style="margin-bottom:10px"><button class="btn small gold" id="obBtn" type="button">💰 শুরুর ক্যাশ / ওপেনিং ব্যালেন্স যোগ করুন</button>
+      <span class="hint" style="margin-left:6px">অ্যাপে প্রথমবার হিসাব শুরু করার সময় হাতে যা ক্যাশ ছিল — একবারই লাগে।</span></div>
       <div class="field"><label>রসিদ / বিলের ছবি (ঐচ্ছিক)</label>
         <input type="file" id="txPhoto" accept="image/*" style="display:none" />
         <input type="file" id="txPhotoCam" accept="image/*" capture="environment" style="display:none" />
@@ -351,6 +420,14 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="searchrow noprint">
         <input type="search" id="txSearch" placeholder="🔍 খুঁজুন — নাম, খাত, বিবরণ…" />
         <select id="txFilter"><option value="all">সব এন্ট্রি</option><option value="in">শুধু আয়</option><option value="out">শুধু খরচ</option><option value="today">আজকের</option><option value="month">এই মাসের</option></select>
+        <select id="txMethodF"><option value="">সব মাধ্যম</option><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select>
+        <select id="txCatF"><option value="">সব ক্যাটাগরি</option></select>
+      </div>
+      <div class="searchrow noprint">
+        <input type="date" id="txFrom" aria-label="এই তারিখ থেকে" />
+        <input type="date" id="txTo" aria-label="এই তারিখ পর্যন্ত" />
+        <button class="btn small ghost" id="txRangeClear" type="button">তারিখের ফিল্টার সরান</button>
+        <button class="btn small ghost" id="txPrint" type="button">🖨️ তালিকা প্রিন্ট</button>
       </div>
       <div id="txList"></div>
     </div>
@@ -400,6 +477,8 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         </div>
         <p class="hint" style="margin:4px 0 0">ছবি ফোনেই ছোট করে (সর্বোচ্চ ৬০০px) সেভ হয় — স্টক লিস্টে আর বিলে দেখা যাবে।</p>
       </div>
+      <div class="field"><label for="pBook">কোন খাতায় থাকবে</label><select id="pBook"></select>
+        <p class="hint" style="margin:4px 0 0">প্রোডাক্ট ঠিক করার সময় এখান থেকে অন্য খাতায় সরানো যায় — স্টক ইতিহাসও সাথে যাবে।</p></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
         <button class="btn" id="pSave" type="button">✅ প্রোডাক্ট সেভ করুন</button>
         <button class="btn ghost" id="pCancel" type="button" style="display:none">বাতিল</button>
@@ -407,12 +486,13 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel">
       <h2>সব প্রোডাক্ট ও স্টক</h2>
+      <div style="margin-bottom:8px" class="noprint"><button class="btn small ghost" id="stockPrint" type="button">🖨️ স্টক তালিকা প্রিন্ট</button></div>
       <div id="stockSummary"></div>
       <div class="searchrow noprint"><input type="search" id="pSearch" placeholder="🔍 প্রোডাক্ট খুঁজুন…" /><select id="pStockFilter"><option value="all">সব প্রোডাক্ট</option><option value="low">⚠️ শুধু কম স্টক</option><option value="expiry">⏰ মেয়াদ শেষ হতে চলেছে</option></select></div>
       <div id="prodList"></div>
     </div>
     <div class="panel">
-      <h2>🛒 কেনা মালের হিসাব</h2>
+      <h2 id="puFormTitle">🛒 কেনা মালের হিসাব</h2>
       <p class="hint">কোন সাপ্লায়ারের কাছ থেকে, কত দামে মাল কিনলেন — এখানে লিখলেই স্টকে যোগ হবে, কেনার ইতিহাস থেকে যাবে, আর লাভের হিসাব এই কেনা দাম দিয়েই হবে।</p>
       <div class="grid2">
         <div class="field"><label for="puProd">প্রোডাক্ট</label><select id="puProd"></select></div>
@@ -431,8 +511,26 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="field">
         <label style="display:flex;gap:8px;align-items:center;min-height:2.25rem"><input type="checkbox" id="puCash" checked style="width:22px;height:22px;flex:0 0 auto" /> টাকার খাতায় খরচ হিসেবে যোগ করুন</label>
       </div>
-      <button class="btn" id="puSave" type="button">✅ কেনা সেভ করুন (স্টকে যোগ হবে)</button>
+      <div class="field"><label>কেনার রসিদের ছবি (ঐচ্ছিক)</label>
+        <input type="file" id="puPhoto" accept="image/*" style="display:none" />
+        <input type="file" id="puPhotoCam" accept="image/*" capture="environment" style="display:none" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small" id="puPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
+          <button class="btn small ghost" id="puPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
+          <button class="btn small gold" id="puVoiceBtn" type="button">🎤 ভয়েসে বলুন</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <img id="puPhotoPrev" alt="কেনার রসিদের ছবি" style="display:none;width:74px;height:74px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line)" />
+          <button class="btn small danger" id="puPhotoRm" type="button" style="display:none">ছবি সরান</button>
+        </div>
+        <p class="hint" style="margin:4px 0 0">ভয়েসে বললে ফর্মে বসে যাবে — সেভ করার আগে যাচাই করুন, অটোমেটিক সেভ হয় না। ভয়েস চিনতে ইন্টারনেট লাগে।</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="puSave" type="button">✅ কেনা সেভ করুন (স্টকে যোগ হবে)</button>
+        <button class="btn ghost" id="puCancel" type="button" style="display:none">বাতিল</button>
+      </div>
       <h3 style="margin:16px 0 6px">কেনার ইতিহাস</h3>
+      <div class="searchrow noprint"><input type="search" id="puSearch" placeholder="🔍 প্রোডাক্ট, সাপ্লায়ার বা তারিখ দিয়ে খুঁজুন…" /></div>
       <div id="puList"></div>
       <h3 style="margin:16px 0 6px">সাপ্লায়ার অনুযায়ী মোট কেনা</h3>
       <div id="puSuppliers"></div>
@@ -473,8 +571,12 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <button class="btn ghost" id="ptCancel" type="button" style="display:none">বাতিল</button>
       </div>
     </div>
+    <div class="panel" id="overduePanel" style="display:none">
+      <h2>⛔ মেয়াদ পার বকেয়া</h2>
+      <div id="overdueBox"></div>
+    </div>
     <div class="panel">
-      <h2>নতুন বাকি এন্ট্রি</h2>
+      <h2 id="duFormTitle">নতুন বাকি এন্ট্রি</h2>
       <p class="hint">বাকি দিলে / নিলে বা টাকা শোধ হলে এখানে লিখুন — কার কাছে কত পাবেন, কাকে কত দিতে হবে, সব অটোমেটিক হিসাব হবে।</p>
       <div class="field"><label for="duParty">কার নামে</label><select id="duParty"></select></div>
       <div class="field"><label>ধরন</label>
@@ -489,14 +591,20 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="duDate">তারিখ</label><input type="date" id="duDate" /></div>
         <div class="field"><label for="duAmount">টাকার পরিমাণ (৳)</label><input type="number" id="duAmount" inputmode="decimal" min="0" step="any" placeholder="যেমন: 2000" /></div>
       </div>
+      <div class="grid2">
+        <div class="field"><label for="duDueDate">শোধের তারিখ (ঐচ্ছিক — বাকি দিলে)</label><input type="date" id="duDueDate" /></div>
+        <div class="field"><label>ভয়েসে হিসাব</label><button class="btn gold" id="duVoiceBtn" type="button" style="width:100%">🎤 ভয়েসে বলুন</button></div>
+      </div>
+      <p class="hint" id="duVoiceMsg" style="margin:0 0 8px">শোধের তারিখ দিলে মেয়াদ পার হলেই ওপরে “মেয়াদ পার বকেয়া” তালিকায় লাল হয়ে দেখাবে। ভয়েসে বললে ফর্মে বসে যাবে — সেভ করার আগে যাচাই করুন।</p>
       <div class="field"><label for="duNote">বিবরণ (ঐচ্ছিক)</label><input type="text" id="duNote" placeholder="যেমন: ১০ বস্তা চাল বাকিতে" /></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="duSave" type="button">✅ সেভ করুন</button>
+        <button class="btn ghost" id="duCancel" type="button" style="display:none">বাতিল</button>
       </div>
     </div>
     <div class="panel">
       <h2>কার কাছে কত বাকি</h2>
-      <div class="searchrow noprint"><input type="search" id="duSearch" placeholder="🔍 নাম খুঁজুন…" /></div>
+      <div class="searchrow noprint"><input type="search" id="duSearch" placeholder="🔍 নাম খুঁজুন…" /><button class="btn small ghost" id="duPrint" type="button">🖨️ তালিকা প্রিন্ট</button></div>
       <div id="partyList"></div>
     </div>
   </section>
@@ -534,7 +642,8 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel">
       <h2>সব বিল</h2>
-      <div class="searchrow noprint"><input type="search" id="billSearch" placeholder="🔍 কাস্টমারের নাম, মোবাইল বা তারিখ দিয়ে বিল খুঁজুন…" /></div>
+      <div class="searchrow noprint"><input type="search" id="billSearch" placeholder="🔍 কাস্টমারের নাম, মোবাইল বা তারিখ দিয়ে বিল খুঁজুন…" /><button class="btn small ghost" id="billPrintList" type="button">🖨️ তালিকা প্রিন্ট</button></div>
+      <p class="hint" style="margin:0 0 8px">বিল “✏️ ঠিক” করলে তার স্টক, টাকার খাতা আর বাকির এন্ট্রিও অটোমেটিক ঠিক হয়ে যাবে; বিল মুছলেও সেগুলো একসাথে মুছে যাবে — কোনো হিসাব ঝুলে থাকবে না। নতুন বিল বানানোর ফর্মটা লিখে রেখে গেলে পেজ রিলোড হলেও খসড়াটা থেকে যাবে।</p>
       <div id="billList"></div>
     </div>
   </section>
@@ -553,8 +662,21 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div id="qsCart"></div>
       <div class="grid2" style="margin-top:10px">
         <div class="field"><label for="qsCust">কাস্টমারের নাম (ঐচ্ছিক)</label><input type="text" id="qsCust" list="custList" placeholder="নাম লিখুন" /></div>
+        <div class="field"><label for="qsPhone">কাস্টমারের মোবাইল (ঐচ্ছিক)</label><input type="tel" id="qsPhone" placeholder="01XXXXXXXXX" /></div>
+      </div>
+      <div class="grid2">
         <div class="field"><label for="qsMethod">পেমেন্ট মাধ্যম</label>
           <select id="qsMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+        <div class="field"><label>দামের ধরন</label>
+          <div class="seg" id="qsPriceSeg">
+            <button type="button" data-v="retail" class="sel-gold">খুচরা দাম</button>
+            <button type="button" data-v="wholesale">পাইকারি দাম</button>
+          </div></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="qsDiscType">ছাড়ের ধরন</label><select id="qsDiscType"><option value="none">ছাড় নেই</option><option value="pct">শতকরা (%)</option><option value="flat">টাকা (৳)</option></select></div>
+        <div class="field"><label for="qsDiscVal">ছাড়ের পরিমাণ</label><input type="number" id="qsDiscVal" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label>ছাড়ের টাকা (অটোমেটিক)</label><div class="live-total" id="qsDiscBox" style="margin:0">৳ 0</div></div>
       </div>
       <div class="grid2">
         <div class="field"><label for="qsPaid">জমা / পরিশোধ (৳) — খালি রাখলে পুরো টাকা</label><input type="number" id="qsPaid" inputmode="decimal" min="0" step="any" placeholder="পুরো টাকা" /></div>
@@ -583,7 +705,8 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel">
       <h2>কর্মচারী ও বেতনের হিসাব</h2>
-      <p class="hint">বেতন দিলে সেটা অটোমেটিক টাকার খাতায় “বেতন / মজুরি” খরচ হিসেবে চলে যাবে — আলাদা করে আর লিখতে হবে না, দুবার হিসাব হবে না। প্রতিটি কর্মচারীর কার্ডেই হাজিরা দেওয়া যায়: তারিখ বেছে ✅ উপস্থিত / ❌ অনুপস্থিত / 🏖️ ছুটি চাপুন — এই মাসে কতদিন উপস্থিত, অনুপস্থিত ও ছুটি, কার্ডেই সারসংক্ষেপ দেখা যাবে।</p>
+      <p class="hint">বেতন দিলে সেটা অটোমেটিক টাকার খাতায় “বেতন / মজুরি” খরচ হিসেবে চলে যাবে — আলাদা করে আর লিখতে হবে না, দুবার হিসাব হবে না। অগ্রিম, বোনাস আর ওভারটাইমও একইভাবে দেওয়া যায় (বেতনের বোতামে গিয়ে ধরন বাছুন)। প্রতিটি কর্মচারীর কার্ডেই হাজিরা দেওয়া যায়: তারিখ বেছে ✅ উপস্থিত / ❌ অনুপস্থিত / 🏖️ ছুটি চাপুন — এই মাসে কতদিন উপস্থিত, অনুপস্থিত ও ছুটি, কার্ডেই সারসংক্ষেপ দেখা যাবে।</p>
+      <div class="searchrow noprint"><input type="search" id="stSearch" placeholder="🔍 কর্মচারীর নাম বা মোবাইল খুঁজুন…" /></div>
       <div id="staffList"></div>
     </div>
   </section>
@@ -610,11 +733,21 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="oDate">অর্ডারের তারিখ</label><input type="date" id="oDate" /></div>
         <div class="field"><label for="oDdate">ডেলিভারির তারিখ</label><input type="date" id="oDdate" /></div>
       </div>
+      <div class="grid2">
+        <div class="field"><label for="oMethod">অগ্রিমের পেমেন্ট মাধ্যম</label>
+          <select id="oMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+        <div class="field"><label for="oPayMethod">ডেলিভারি / ফেরতের পেমেন্ট মাধ্যম</label>
+          <select id="oPayMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+      </div>
       <div class="live-total" id="oTotalBox">মোট = ৳ 0 • ডেলিভারিতে বাকি পাবো = ৳ 0</div>
-      <button class="btn" id="oSave" type="button">✅ অর্ডার সেভ করুন</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="oSave" type="button">✅ অর্ডার সেভ করুন</button>
+        <button class="btn ghost" id="oCancel" type="button" style="display:none">বাতিল</button>
+      </div>
     </div>
     <div class="panel">
       <h2>অপেক্ষমাণ অর্ডার</h2>
+      <div class="searchrow noprint"><input type="search" id="oSearch" placeholder="🔍 কাস্টমার, প্রোডাক্ট বা মোবাইল দিয়ে খুঁজুন…" /></div>
       <div id="orderPending"></div>
       <h3 style="margin:16px 0 6px">আগের অর্ডার (ডেলিভারি / বাতিল)</h3>
       <div id="orderDone"></div>
@@ -625,7 +758,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   <section class="page" id="page-loan">
     <div class="cards" id="loanCards"></div>
     <div class="panel">
-      <h2>🏦 নতুন লোন / ধার যোগ করুন</h2>
+      <h2 id="lnFormTitle">🏦 নতুন লোন / ধার যোগ করুন</h2>
       <p class="hint">লোন নিলে টাকা অটোমেটিক টাকার খাতায় আয়, লোন দিলে খরচ হিসেবে যাবে। কিস্তি দিলে/পেলে সেটাও অটোমেটিক খাতায় যাবে — একই টাকা দুবার হবে না।</p>
       <div class="field"><label>ধরন</label>
         <div class="seg" id="lnDirSeg">
@@ -642,10 +775,20 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="lnCount">মোট কিস্তি সংখ্যা</label><input type="number" id="lnCount" inputmode="numeric" min="0" step="1" placeholder="যেমন: 12" /></div>
         <div class="field"><label for="lnStart">শুরুর তারিখ</label><input type="date" id="lnStart" /></div>
       </div>
-      <button class="btn" id="lnSave" type="button">✅ লোন সেভ করুন</button>
+      <div class="grid3">
+        <div class="field"><label for="lnInterest">সুদ (%) — ঐচ্ছিক, মোট টাকার ওপর</label><input type="number" id="lnInterest" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="lnDueDay">প্রতি মাসে কিস্তির তারিখ (১–৩১)</label><input type="number" id="lnDueDay" inputmode="numeric" min="1" max="31" step="1" placeholder="যেমন: 10" /></div>
+        <div class="field"><label for="lnMethod">পেমেন্ট মাধ্যম</label>
+          <select id="lnMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="lnSave" type="button">✅ লোন সেভ করুন</button>
+        <button class="btn ghost" id="lnCancel" type="button" style="display:none">বাতিল</button>
+      </div>
     </div>
     <div class="panel">
       <h2>সব লোন ও কিস্তির হিসাব</h2>
+      <div class="searchrow noprint"><input type="search" id="lnSearch" placeholder="🔍 নাম দিয়ে লোন খুঁজুন…" /></div>
       <div id="loanList"></div>
     </div>
   </section>
@@ -660,6 +803,31 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <button class="btn gold noprint" id="printReport" type="button" style="margin-top:12px">🖨️ মাসের রিপোর্ট প্রিন্ট / PDF</button>
     </div>
     <div class="panel">
+      <h2>🗓️ বছরের রিপোর্ট ও তারিখ বাছাই</h2>
+      <p class="hint">বছর বাছাই করলে ১২ মাসের আয়-খরচ-লাভের তালিকা আসবে। অথবা যেকোনো দুই তারিখের মধ্যের হিসাবও আলাদা করে দেখা যাবে।</p>
+      <div class="grid2">
+        <div class="field"><label for="repYear">বছর</label><input type="number" id="repYear" inputmode="numeric" min="2000" max="2100" step="1" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn" id="repYearBtn" type="button" style="width:100%">বছরের রিপোর্ট দেখুন</button></div>
+      </div>
+      <div id="yearReport"></div>
+      <div class="grid3" style="margin-top:12px">
+        <div class="field"><label for="repFrom">এই তারিখ থেকে</label><input type="date" id="repFrom" /></div>
+        <div class="field"><label for="repTo">এই তারিখ পর্যন্ত</label><input type="date" id="repTo" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn gold" id="repRangeBtn" type="button" style="width:100%">এই সময়ের হিসাব দেখুন</button></div>
+      </div>
+      <div id="rangeReport"></div>
+    </div>
+    <div class="panel">
+      <h2>📊 আয়-খরচের চার্ট (শেষ ৬ মাস)</h2>
+      <p class="hint">সবুজ = আয়, লাল = খরচ — মাস অনুযায়ী পাশাপাশি।</p>
+      <canvas id="ieChart" style="width:100%;display:block"></canvas>
+    </div>
+    <div class="panel">
+      <h2>🏷️ ক্যাটাগরি ম্যানেজার</h2>
+      <p class="hint">ক্যাটাগরির নাম বদলালে পুরনো সব এন্ট্রিতেও নতুন নাম বসে যাবে। নিজের বানানো ক্যাটাগরি মুছলে এন্ট্রিগুলোর নাম থেকে যাবে — শুধু লিস্ট থেকে সরে যাবে।</p>
+      <div id="catMgr"></div>
+    </div>
+    <div class="panel">
       <h2>🤝 পার্টনারের হিসাব</h2>
       <p class="hint">পার্টনারের বিনিয়োগ আর লাভের ভাগ (%) লিখুন — রিপোর্টের মাসের মোট লাভ থেকে প্রত্যেকের ভাগ অটোমেটিক হিসাব হবে।</p>
       <div class="grid3">
@@ -671,6 +839,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="pnDate">বিনিয়োগের তারিখ</label><input type="date" id="pnDate" /></div>
         <div class="field"><label>&nbsp;</label><button class="btn" id="pnSave" type="button" style="width:100%">✅ পার্টনার সেভ করুন</button></div>
       </div>
+      <button class="btn ghost" id="pnCancel" type="button" style="display:none">বাতিল</button>
       <div id="partnerList"></div>
     </div>
     <div class="panel">
@@ -707,7 +876,10 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="glTarget">লক্ষ্য টাকা (৳)</label><input type="number" id="glTarget" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
         <div class="field"><label for="glDate">লক্ষ্যের তারিখ (ঐচ্ছিক)</label><input type="date" id="glDate" /></div>
       </div>
-      <button class="btn" id="glSave" type="button">✅ লক্ষ্য বানান</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="glSave" type="button">✅ লক্ষ্য বানান</button>
+        <button class="btn ghost" id="glCancel" type="button" style="display:none">বাতিল</button>
+      </div>
       <div id="goalList" style="margin-top:12px"></div>
     </div>
     <div class="panel">
@@ -718,10 +890,13 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="rbAmt">টাকা (৳)</label><input type="number" id="rbAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
         <div class="field"><label for="rbDay">মাসের কত তারিখে দিতে হয়</label><input type="number" id="rbDay" inputmode="numeric" min="1" max="31" step="1" placeholder="যেমন: 10" /></div>
       </div>
-      <div class="grid2">
+      <div class="grid3">
         <div class="field"><label for="rbCat">খরচের ক্যাটাগরি</label><input type="text" id="rbCat" list="catList" placeholder="যেমন: দোকান ভাড়া" /></div>
+        <div class="field"><label for="rbMethod">পরিশোধের মাধ্যম (“পরিশোধ হয়েছে” চাপলে)</label>
+          <select id="rbMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
         <div class="field"><label>&nbsp;</label><button class="btn" id="rbSave" type="button" style="width:100%">✅ বিল যোগ করুন</button></div>
       </div>
+      <button class="btn ghost" id="rbCancel" type="button" style="display:none">বাতিল</button>
       <div id="rbillList"></div>
     </div>
     <div class="panel noprint">
@@ -733,6 +908,9 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <input type="file" id="upBackup" accept=".json,application/json" style="display:none" />
         <button class="btn ghost" id="dlCsvTx" type="button">টাকার হিসাব CSV</button>
         <button class="btn ghost" id="dlCsvStock" type="button">স্টক হিসাব CSV</button>
+        <button class="btn ghost" id="dlCsvBills" type="button">বিল CSV</button>
+        <button class="btn ghost" id="dlCsvDues" type="button">বাকি হিসাব CSV</button>
+        <button class="btn ghost" id="dlCsvPurchases" type="button">কেনার হিসাব CSV</button>
       </div>
       <h3>হিসাব কোথায় থাকে</h3>
       <div id="syncBox"></div>
@@ -743,7 +921,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 11 (v11)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -833,8 +1011,10 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="field"><label for="gAuthPass">পাসওয়ার্ড</label><input type="password" id="gAuthPass" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="current-password" /></div>
       <p id="gAuthMsg" style="margin:0 0 10px;font-weight:700;color:var(--out)"></p>
       <button class="btn" id="gAuthGo" type="button" style="width:100%">লগইন করুন</button>
-      <button class="btn ghost" id="gForgotBtn" type="button" style="width:100%;margin-top:8px">পাসওয়ার্ড ভুলে গেছি? (শুধু জিমেইল অ্যাকাউন্টে রিসেট লিংক যাবে)</button>
+      <button class="btn ghost" id="gForgotBtn" type="button" style="width:100%;margin-top:8px">পাসওয়ার্ড ভুলে গেছি?</button>
       <p id="gForgotMsg" style="display:none;margin:8px 0 0;font-weight:700"></p>
+      <button class="btn gold" id="gForgotReqBtn" type="button" style="width:100%;margin-top:8px;display:none">📩 Admin-কে পাসওয়ার্ড রিসেটের অনুরোধ পাঠান</button>
+      <p id="gForgotReqMsg" style="display:none;margin:8px 0 0;font-weight:700"></p>
       <p class="hint" style="margin-top:10px">একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে — বারবার লগইন করতে হবে না। লগইনের সময় একবার ইন্টারনেট লাগে; এরপর হিসাবের সব কাজ অফলাইনেও চলে। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে।</p>
     </div>
     <div id="gateDevices" class="panel" style="display:none;margin-top:0">
@@ -875,6 +1055,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <h3 style="margin:16px 0 6px">📩 প্ল্যান রিকোয়েস্ট <span id="admReqCount"></span></h3>
     <div id="admReqBox"><p class="hint">লোড হচ্ছে…</p></div>
     <h3 style="margin:18px 0 6px">👥 সব ব্যবহারকারী</h3>
+    <div class="searchrow"><input type="search" id="admUserSearch" placeholder="🔍 নাম, জিমেইল বা ফোন নম্বর দিয়ে ইউজার খুঁজুন…" /></div>
     <div id="admUsersBox"><p class="hint">লোড হচ্ছে…</p></div>
     <h3 style="margin:18px 0 6px">✉️ মেসেজ (সাপোর্ট ইনবক্স)</h3>
     <div id="admMsgBox"><p class="hint">লোড হচ্ছে…</p></div>
@@ -986,6 +1167,8 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="field"><label for="mvMethod">পেমেন্ট মাধ্যম (টাকার খাতার এন্ট্রির জন্য)</label>
       <select id="mvMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
+    <div style="margin-bottom:10px"><button class="btn gold" id="mvVoiceBtn" type="button">🎤 ভয়েসে পরিমাণ বলুন</button>
+    <span class="hint" style="margin-left:6px">বললেই পরিমাণ বসে যাবে — সেভ করার আগে যাচাই করুন।</span></div>
     <div class="live-total" id="mvTotal">মোট = ৳ 0</div>
     <div class="live-total" id="mvAfter" style="background:var(--inbg);border-color:var(--in)">এই এন্ট্রির পর স্টক থাকবে: 0</div>
     <div class="field" id="mvCashWrap">
@@ -1037,11 +1220,17 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   <div class="box">
     <h2 id="salTitle">বেতন দিন</h2>
     <div class="grid2">
-      <div class="field"><label for="salMonth">কোন মাসের বেতন</label><input type="month" id="salMonth" /></div>
+      <div class="field"><label for="salKind">কীসের টাকা</label>
+        <select id="salKind"><option value="salary">💵 মাসিক বেতন</option><option value="advance">⏩ অগ্রিম বেতন</option><option value="bonus">🎁 বোনাস</option><option value="overtime">🕐 ওভারটাইম</option></select></div>
+      <div class="field"><label for="salMethod">পেমেন্ট মাধ্যম</label>
+        <select id="salMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label for="salMonth">কোন মাসের</label><input type="month" id="salMonth" /></div>
       <div class="field"><label for="salDate">তারিখ</label><input type="date" id="salDate" /></div>
     </div>
     <div class="field"><label for="salAmount">টাকার পরিমাণ (৳)</label><input type="number" id="salAmount" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-    <p class="hint">সেভ করলেই এই টাকা টাকার খাতায় “বেতন / মজুরি” খরচ হিসেবে চলে যাবে। একই মাসের বেতন দুবার দেওয়া যাবে না।</p>
+    <p class="hint">সেভ করলেই এই টাকা টাকার খাতায় “বেতন / মজুরি” খরচ হিসেবে চলে যাবে। মাসিক বেতন একই মাসে দুবার দেওয়া যাবে না — অগ্রিম / বোনাস / ওভারটাইম যতবার দরকার দেওয়া যাবে।</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" id="salSave" type="button">✅ বেতন দেওয়া হয়েছে</button>
       <button class="btn ghost" id="salClose" type="button">বন্ধ করুন</button>
@@ -1053,9 +1242,11 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
 <div class="modal" id="goalModal" role="dialog" aria-modal="true">
   <div class="box">
     <h2 id="gmTitle">সঞ্চয়ে টাকা</h2>
-    <div class="grid2">
+    <div class="grid3">
       <div class="field"><label for="gmDate">তারিখ</label><input type="date" id="gmDate" /></div>
       <div class="field"><label for="gmAmt">টাকা (৳)</label><input type="number" id="gmAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+      <div class="field"><label for="gmMethod">মাধ্যম</label>
+        <select id="gmMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" id="gmSave" type="button">✅ সেভ করুন</button>
@@ -1068,9 +1259,11 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
 <div class="modal" id="instModal" role="dialog" aria-modal="true">
   <div class="box">
     <h2 id="imTitle">কিস্তি</h2>
-    <div class="grid2">
+    <div class="grid3">
       <div class="field"><label for="imDate">তারিখ</label><input type="date" id="imDate" /></div>
       <div class="field"><label for="imAmt">টাকা (৳)</label><input type="number" id="imAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+      <div class="field"><label for="imMethod">পেমেন্ট মাধ্যম</label>
+        <select id="imMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
     </div>
     <p class="hint">সেভ করলেই টাকাটা টাকার খাতায় অটোমেটিক চলে যাবে।</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1178,6 +1371,36 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <button class="btn ghost" id="shareQrShare" type="button" style="flex:1 1 150px;display:none">📤 QR ছবি শেয়ার</button>
     </div>
     <button class="btn ghost" id="shareClose" type="button" style="width:100%;margin-top:12px">বন্ধ করুন</button>
+  </div>
+</div>
+
+<!-- PARTNER PROFIT PAY MODAL -->
+<div class="modal" id="pnPayModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <h2 id="pnPayTitle">পার্টনারকে লাভের টাকা দিন</h2>
+    <div class="grid3">
+      <div class="field"><label for="pnPayDate">তারিখ</label><input type="date" id="pnPayDate" /></div>
+      <div class="field"><label for="pnPayAmt">টাকা (৳)</label><input type="number" id="pnPayAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+      <div class="field"><label for="pnPayMethod">পেমেন্ট মাধ্যম</label>
+        <select id="pnPayMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+    </div>
+    <p class="hint">সেভ করলেই টাকাটা টাকার খাতায় খরচ হিসেবে যাবে আর পার্টনারের “লাভ দেওয়া হয়েছে” হিসেবে থেকে যাবে।</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="pnPaySave" type="button">✅ সেভ করুন</button>
+      <button class="btn ghost" id="pnPayClose" type="button">বন্ধ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- DUE STATEMENT MODAL -->
+<div class="modal" id="stmtModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <div id="stmtView"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px" class="noprint">
+      <button class="btn gold" id="stmtWa" type="button">📲 WhatsApp-এ পাঠান</button>
+      <button class="btn ghost" id="stmtPrint" type="button">🖨️ প্রিন্ট</button>
+      <button class="btn ghost" id="stmtClose" type="button">বন্ধ করুন</button>
+    </div>
   </div>
 </div>
 
@@ -1316,6 +1539,7 @@ function setSync(txt){
   var lo=$('logoutBtn');if(lo)lo.style.display=currentUser?'':'none';
   var li=$('loginOpenBtn');if(li)li.style.display=currentUser?'none':'';
   updateProfilePhotoUI();
+  if(typeof updateProfileNameUI==='function')updateProfileNameUI();
   if(typeof renderAccess==='function')renderAccess();
 }
 
@@ -1361,6 +1585,7 @@ function onAuthChanged(u){
     currentUser={uid:u.uid,label:identLabel(u),name:u.displayName||'',email:u.email||''};
     curKey=LS_KEY+'_'+u.uid; /* this account's own on-device cache — never shared */
     loadLocal();loadSub();loadReqs();loadDevices();loadBookView();loadLock();lockUnlocked=false;lockEntry='';
+    loadDrafts();
     deviceBlocked=false;deviceConfirmed=false;gateNote='';
     mergeGuest(u.uid);
     renderAll();
@@ -1370,7 +1595,7 @@ function onAuthChanged(u){
     flushOutbox();
     refreshPendingBadge();
   }else{
-    currentUser=null;curKey=LS_KEY;loadLocal();loadSub();loadReqs();loadBookView();LOCK={on:false,hash:''};lockUnlocked=false;lockEntry='';admPendingCount=0;renderAdmBadges();
+    currentUser=null;curKey=LS_KEY;loadLocal();loadSub();loadReqs();loadBookView();loadDrafts();LOCK={on:false,hash:''};lockUnlocked=false;lockEntry='';admPendingCount=0;renderAdmBadges();
     DEVICES=[];deviceBlocked=false;deviceConfirmed=false;pwVoluntary=false;pwBuyOpen=false;
     renderAll();
     setSync('লগইন করা নেই');
@@ -1672,18 +1897,32 @@ function setGAuthMode(m){
   $('gAuthMsg').textContent='';
   $('gForgotBtn').style.display=m==='signup'?'none':'';
   $('gForgotMsg').style.display='none';
+  $('gForgotReqBtn').style.display='none';
+  $('gForgotReqMsg').style.display='none';
 }
 $('gAuthModeSeg').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setGAuthMode(b.getAttribute('data-v'));});});
 $('gateSwitchBtn').addEventListener('click',function(){doLogout();});
 /* Forgot password (login gate): Firebase emails a reset link — email
    accounts only. Phone accounts use a synthetic email inbox nobody can
    open, so they get an honest support message instead of a dead link. */
+var forgotPhoneIdent='';
 $('gForgotBtn').addEventListener('click',function(){
   var m=$('gForgotMsg');m.style.display='';
+  $('gForgotReqBtn').style.display='none';$('gForgotReqMsg').style.display='none';
   function say(t,ok){m.textContent=t;m.style.color=ok?'var(--in)':'var(--out)';}
   var idf=identToEmail($('gAuthId').value);
-  if(!idf){say('⚠️ আগে ওপরে আপনার জিমেইলটা লিখুন');return;}
-  if(idf.kind!=='email'){say('⚠️ ফোন নম্বরের অ্যাকাউন্টে রিসেট ইমেইল পাঠানো যায় না — পাসওয়ার্ড ভুলে গেলে সাপোর্টে যোগাযোগ করুন (Telegram @STVideoWorld1)');return;}
+  if(!idf){say('⚠️ আগে ওপরে আপনার জিমেইল অথবা ফোন নম্বরটা লিখুন');return;}
+  if(idf.kind!=='email'){
+    /* Phone accounts sign in with a synthetic email nobody can open, so a
+       reset LINK can never reach them. The working path is Admin-based:
+       one tap sends a reset request into the Admin's support inbox; the
+       admin resets the password in the Firebase console and tells the
+       user the new one. The button appears right here — no dead end. */
+    forgotPhoneIdent=$('gAuthId').value.trim();
+    say('ফোন নম্বরের অ্যাকাউন্টে রিসেট লিংক পাঠানো যায় না — তবে নিচের বোতামে চাপ দিলেই Admin-এর কাছে রিসেটের অনুরোধ চলে যাবে। Admin পাসওয়ার্ড রিসেট করে নতুন পাসওয়ার্ড জানিয়ে দেবেন।',true);
+    $('gForgotReqBtn').style.display='';
+    return;
+  }
   if(typeof firebase==='undefined'||!fbReady||!navigator.onLine){say('⚠️ ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
   say('⏳ রিসেট লিংক পাঠানো হচ্ছে…',true);
   firebase.auth().sendPasswordResetEmail(idf.email).then(function(){
@@ -1691,6 +1930,26 @@ $('gForgotBtn').addEventListener('click',function(){
   }).catch(function(e){
     var c=(e&&e.code)||'';
     say(c==='auth/user-not-found'?'⚠️ এই জিমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি — "নতুন অ্যাকাউন্ট (সাইন আপ)" দিয়ে অ্যাকাউন্ট খুলুন':'⚠️ পাঠানো যায়নি — আবার চেষ্টা করুন'+(c?' ('+c+')':''));
+  });
+});
+$('gForgotReqBtn').addEventListener('click',function(){
+  var m=$('gForgotReqMsg');m.style.display='';
+  function say(t,ok){m.textContent=t;m.style.color=ok?'var(--in)':'var(--out)';}
+  if(!forgotPhoneIdent){say('⚠️ আগে ওপরে ফোন নম্বরটা লিখুন');return;}
+  var obj={name:'🔑 পাসওয়ার্ড রিসেট অনুরোধ',message:'ফোন অ্যাকাউন্টের পাসওয়ার্ড ভুলে গেছি — নম্বর: '+forgotPhoneIdent+'। Admin যেন Firebase Console (Authentication → Users) থেকে এই নম্বরের অ্যাকাউন্টের পাসওয়ার্ড রিসেট করে নতুন পাসওয়ার্ডটা জানিয়ে দেন।',account:'📱 '+forgotPhoneIdent.replace(/[^0-9]/g,''),type:'pwreset',date:todayStr(),ts:Date.now()};
+  var btn=this;btn.disabled=true;
+  function sent(){
+    btn.disabled=false;
+    say('✅ অনুরোধ পাঠানো হয়েছে — Admin পাসওয়ার্ড রিসেট করে নতুন পাসওয়ার্ড জানিয়ে দিলেই সেটা দিয়ে লগইন করতে পারবেন। তাড়া থাকলে Telegram-এও জানান: @STVideoWorld1',true);
+    $('gForgotReqBtn').style.display='none';
+  }
+  if(typeof firebase==='undefined'||!fbReady||!fsDb||!navigator.onLine){
+    var b=msgOutbox();b.push(obj);msgOutboxSave(b);sent();
+    m.textContent='📥 ইন্টারনেট নেই — অনুরোধটা এই ফোনে সেভ থাকলো, নেট এলেই Admin-এর কাছে চলে যাবে। তাড়া থাকলে Telegram-এ জানান: @STVideoWorld1';
+    return;
+  }
+  fsDb.collection('hisabi_messages').add(obj).then(sent).catch(function(){
+    var bx=msgOutbox();bx.push(obj);msgOutboxSave(bx);sent();
   });
 });
 
@@ -1827,7 +2086,16 @@ $('txTypeSeg').querySelectorAll('button').forEach(function(b){
     b.className=txType==='in'?'sel-in':'sel-out';
   });
 });
-function resetTxForm(){editTxId=null;$('txAmount').value='';$('txNote').value='';$('txDate').value=todayStr();pendingTxPhoto=null;$('txPhoto').value='';if($('txPhotoCam'))$('txPhotoCam').value='';$('txPhotoPrev').style.display='none';$('txPhotoRm').style.display='none';$('txFormTitle').textContent='নতুন টাকার এন্ট্রি';$('txSave').textContent='✅ সেভ করুন';$('txCancel').style.display='none';formToHome('txFormTitle');}
+function resetTxForm(){editTxId=null;$('txAmount').value='';$('txNote').value='';$('txDate').value=todayStr();if($('txBook'))$('txBook').value=writeBook();pendingTxPhoto=null;$('txPhoto').value='';if($('txPhotoCam'))$('txPhotoCam').value='';$('txPhotoPrev').style.display='none';$('txPhotoRm').style.display='none';$('txFormTitle').textContent='নতুন টাকার এন্ট্রি';$('txSave').textContent='✅ সেভ করুন';$('txCancel').style.display='none';formToHome('txFormTitle');}
+$('obBtn').addEventListener('click',function(){
+  setTxTypeUI('in');
+  $('txCat').value='শুরুর ব্যালেন্স';
+  if(DB.cats.indexOf('শুরুর ব্যালেন্স')<0)DB.cats.push('শুরুর ব্যালেন্স');
+  $('txNote').value='শুরুর ক্যাশ (ওপেনিং ব্যালেন্স)';
+  showPageNoScroll('ledger');formToHome('txFormTitle');
+  $('txAmount').focus();
+  toast('💰 হাতে শুরুর ক্যাশ কত ছিল লিখে “সেভ করুন” চাপুন');
+});
 $('txSave').addEventListener('click',function(){
   var wasEditTx=editTxId, txPos=wasEditTx?rowPosBefore('txList',wasEditTx):null;
   var amt=num($('txAmount').value);
@@ -1836,10 +2104,10 @@ $('txSave').addEventListener('click',function(){
   var catVal=$('txCat').value.trim()||'অন্যান্য';
   if(DB.cats.indexOf(catVal)<0)DB.cats.push(catVal);
   if(editTxId){
-    for(var i=0;i<DB.txs.length;i++)if(DB.txs[i].id===editTxId){var nt={id:editTxId,date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:bookOf(DB.txs[i]),u:Date.now()};if(pendingTxPhoto!==null){if(pendingTxPhoto)nt.photo=pendingTxPhoto;}else if(DB.txs[i].photo)nt.photo=DB.txs[i].photo;DB.txs[i]=nt;}
+    for(var i=0;i<DB.txs.length;i++)if(DB.txs[i].id===editTxId){var nt={id:editTxId,date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:($('txBook')&&findBook($('txBook').value))?$('txBook').value:bookOf(DB.txs[i]),u:Date.now()};if(pendingTxPhoto!==null){if(pendingTxPhoto)nt.photo=pendingTxPhoto;}else if(DB.txs[i].photo)nt.photo=DB.txs[i].photo;DB.txs[i]=nt;}
     toast('✅ এন্ট্রি ঠিক করা হয়েছে — হিসাব অটোমেটিক আপডেট হয়েছে');
   }else{
-    var ntx={id:uid(),date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:writeBook(),u:Date.now()};
+    var ntx={id:uid(),date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:($('txBook')&&findBook($('txBook').value))?$('txBook').value:writeBook(),u:Date.now()};
     if(pendingTxPhoto)ntx.photo=pendingTxPhoto;
     DB.txs.push(ntx);
     toast(txType==='in'?'✅ আয় যোগ হয়েছে — ব্যালেন্স অটোমেটিক বেড়েছে':'✅ খরচ যোগ হয়েছে — ব্যালেন্স অটোমেটিক কমেছে');
@@ -1856,7 +2124,7 @@ window.editTx=function(id){
   var t=null;DB.txs.forEach(function(x){if(x.id===id)t=x;});if(!t)return;
   editTxId=id;txType=t.type;
   $('txTypeSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===t.type?(t.type==='in'?'sel-in':'sel-out'):'';});
-  $('txDate').value=t.date;$('txAmount').value=t.amount;$('txCat').value=t.cat;$('txMethod').value=t.method;$('txNote').value=t.note||'';
+  $('txDate').value=t.date;$('txAmount').value=t.amount;$('txCat').value=t.cat;$('txMethod').value=t.method;$('txNote').value=t.note||'';if($('txBook'))$('txBook').value=bookOf(t);
   pendingTxPhoto=null;$('txPhoto').value='';if($('txPhotoCam'))$('txPhotoCam').value='';
   if(t.photo){$('txPhotoPrev').src=t.photo;$('txPhotoPrev').style.display='';$('txPhotoRm').style.display='';}else{$('txPhotoPrev').style.display='none';$('txPhotoRm').style.display='none';}
   $('txFormTitle').textContent='এন্ট্রি ঠিক করুন';$('txSave').textContent='✅ আপডেট করুন';$('txCancel').style.display='';
@@ -1870,17 +2138,31 @@ window.delTx=function(id){
 };
 $('txSearch').addEventListener('input',renderLedger);
 $('txFilter').addEventListener('change',renderLedger);
+['txMethodF','txCatF','txFrom','txTo'].forEach(function(id){$(id).addEventListener('change',renderLedger);$(id).addEventListener('input',renderLedger);});
+$('txRangeClear').addEventListener('click',function(){$('txFrom').value='';$('txTo').value='';renderLedger();});
+$('txPrint').addEventListener('click',function(){printActivePage();});
 
 /* ---------- PRODUCT FORM ---------- */
 var editProdId=null;
 function updOpenTotal(){$('pOpenTotal').textContent=money(num($('pOpen').value)*num($('pBuy').value));var b=$('pProfitBox');if(b)b.textContent='খুচরা লাভ '+money(num($('pSell').value)-num($('pBuy').value))+' • পাইকারি লাভ '+money(num($('pWsell').value)-num($('pBuy').value));}
 ['pOpen','pBuy','pSell','pWsell'].forEach(function(id){$(id).addEventListener('input',updOpenTotal);});
-function resetProdForm(){editProdId=null;$('pName').value='';$('pBarcode').value='';$('pBuy').value='';$('pSell').value='';$('pWsell').value='';$('pOpen').value='';$('pLow').value='5';$('pExpiry').value='';pendingPhoto=null;$('pPhoto').value='';if($('pPhotoCam'))$('pPhotoCam').value='';$('pPhotoPrev').style.display='none';$('pPhotoRm').style.display='none';updOpenTotal();$('prodFormTitle').textContent='নতুন প্রোডাক্ট যোগ করুন';$('pSave').textContent='✅ প্রোডাক্ট সেভ করুন';$('pCancel').style.display='none';formToHome('prodFormTitle');}
+function resetProdForm(){editProdId=null;$('pName').value='';$('pBarcode').value='';$('pBuy').value='';$('pSell').value='';$('pWsell').value='';$('pOpen').value='';$('pLow').value='5';$('pExpiry').value='';if($('pBook'))$('pBook').value=writeBook();pendingPhoto=null;$('pPhoto').value='';if($('pPhotoCam'))$('pPhotoCam').value='';$('pPhotoPrev').style.display='none';$('pPhotoRm').style.display='none';updOpenTotal();$('prodFormTitle').textContent='নতুন প্রোডাক্ট যোগ করুন';$('pSave').textContent='✅ প্রোডাক্ট সেভ করুন';$('pCancel').style.display='none';formToHome('prodFormTitle');}
 $('pSave').addEventListener('click',function(){
   var wasEditProd=editProdId, prodPos=wasEditProd?rowPosBefore('prodList',wasEditProd):null;
   var name=$('pName').value.trim();
   if(!name){toast('⚠️ প্রোডাক্টের নাম লিখুন');$('pName').focus();return;}
-  var data={name:name,unit:$('pUnit').value,buy:num($('pBuy').value),sell:num($('pSell').value),wsell:num($('pWsell').value),opening:num($('pOpen').value),low:num($('pLow').value),expiry:$('pExpiry').value||'',barcode:$('pBarcode').value.trim(),book:editProdId?(findProd(editProdId)?bookOf(findProd(editProdId)):writeBook()):writeBook(),u:Date.now()};
+  var chosenBook=($('pBook')&&findBook($('pBook').value))?$('pBook').value:null;
+  var data={name:name,unit:$('pUnit').value,buy:num($('pBuy').value),sell:num($('pSell').value),wsell:num($('pWsell').value),opening:num($('pOpen').value),low:num($('pLow').value),expiry:$('pExpiry').value||'',barcode:$('pBarcode').value.trim(),book:chosenBook||(editProdId?(findProd(editProdId)?bookOf(findProd(editProdId)):writeBook()):writeBook()),u:Date.now()};
+  if(editProdId&&chosenBook){
+    var oldP=findProd(editProdId);
+    if(oldP&&bookOf(oldP)!==chosenBook){
+      /* Moving a product to another book: its stock history moves with it,
+         so the destination book sees the full stock picture. */
+      DB.logs.forEach(function(l){if(l.pid===editProdId){l.book=chosenBook;l.u=Date.now();}});
+      (DB.purchases||[]).forEach(function(pu){if(pu.pid===editProdId){pu.book=chosenBook;pu.u=Date.now();}});
+      toast('📚 প্রোডাক্ট “'+bookName(chosenBook)+'” খাতায় সরানো হয়েছে');
+    }
+  }
   if(pendingPhoto!==null)data.photo=pendingPhoto;else if(!editProdId)data.photo='';
   if(editProdId){
     for(var i=0;i<DB.products.length;i++)if(DB.products[i].id===editProdId){for(var k in data)DB.products[i][k]=data[k];}
@@ -1899,7 +2181,7 @@ $('pCancel').addEventListener('click',function(){
 });
 window.editProd=function(id){
   var p=findProd(id);if(!p)return;editProdId=id;
-  $('pName').value=p.name;$('pBarcode').value=p.barcode||'';$('pUnit').value=p.unit;$('pBuy').value=p.buy;$('pSell').value=p.sell;$('pWsell').value=num(p.wsell)||'';$('pOpen').value=p.opening;$('pLow').value=p.low;$('pExpiry').value=p.expiry||'';
+  $('pName').value=p.name;$('pBarcode').value=p.barcode||'';$('pUnit').value=p.unit;$('pBuy').value=p.buy;$('pSell').value=p.sell;$('pWsell').value=num(p.wsell)||'';$('pOpen').value=p.opening;$('pLow').value=p.low;$('pExpiry').value=p.expiry||'';if($('pBook'))$('pBook').value=bookOf(p);
   pendingPhoto=null;$('pPhoto').value='';if($('pPhotoCam'))$('pPhotoCam').value='';
   if(p.photo){$('pPhotoPrev').src=p.photo;$('pPhotoPrev').style.display='';$('pPhotoRm').style.display='';}else{$('pPhotoPrev').style.display='none';$('pPhotoRm').style.display='none';}
   updOpenTotal();$('prodFormTitle').textContent='প্রোডাক্ট ঠিক করুন';$('pSave').textContent='✅ আপডেট করুন';$('pCancel').style.display='';
@@ -1918,9 +2200,10 @@ window.delProd=function(id){
 };
 $('pSearch').addEventListener('input',renderProducts);
 $('pStockFilter').addEventListener('change',renderProducts);
+$('stockPrint').addEventListener('click',function(){printActivePage();});
 
 /* ---------- STOCK MOVE MODAL ---------- */
-var mvPid=null, mvType='sale';
+var mvPid=null, mvType='sale', mvEditLogId=null;
 function mvSetType(t){
   mvType=t;
   $('mvTypeSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===t?'sel-gold':'';});
@@ -1941,7 +2224,7 @@ function mvUpdate(){
 }
 ['mvQty','mvPrice'].forEach(function(id){$(id).addEventListener('input',mvUpdate);});
 window.openMove=function(id,type){
-  var p=findProd(id);if(!p)return;mvPid=id;
+  var p=findProd(id);if(!p)return;mvPid=id;mvEditLogId=null;$('mvSave').textContent='✅ সেভ করুন';
   $('mvTitle').textContent=p.name+' — স্টক এন্ট্রি';
   $('mvSub').textContent='কেনা দাম '+money(p.buy)+' • বিক্রি দাম '+money(p.sell)+' • একক: '+p.unit;
   $('mvDate').value=todayStr();$('mvQty').value='';$('mvParty').value='';$('mvCash').checked=true;
@@ -1952,12 +2235,40 @@ window.openMove=function(id,type){
 };
 $('mvClose').addEventListener('click',function(){$('moveModal').classList.remove('open');});
 $('moveModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+/* Edit an existing stock entry in place: the log's qty/price/date/type are
+   updated and stock + profit recalculate automatically (they are derived
+   from the logs). A money-ledger entry created alongside the original is
+   NOT auto-adjusted — the toast says so, so nothing silently mismatches. */
+window.editLog=function(logId){
+  var l=null;DB.logs.forEach(function(x){if(x.id===logId)l=x;});if(!l)return;
+  var p=findProd(l.pid);if(!p)return;
+  mvPid=l.pid;mvEditLogId=logId;
+  $('mvTitle').textContent=p.name+' — স্টক এন্ট্রি ঠিক করুন';
+  $('mvSub').textContent='কেনা দাম '+money(p.buy)+' • বিক্রি দাম '+money(p.sell)+' • একক: '+p.unit;
+  $('mvDate').value=l.date;$('mvQty').value=l.qty;$('mvPrice').value=l.price;$('mvParty').value=l.party||'';$('mvCash').checked=false;
+  mvPriceType='retail';
+  $('mvSave').textContent='✅ আপডেট করুন';
+  $('moveModal').classList.add('open');
+  mvSetType(l.type||'sale');
+  $('mvPrice').value=l.price;mvUpdate();
+};
 $('mvSave').addEventListener('click',function(){
   var p=findProd(mvPid);if(!p)return;
   var q=num($('mvQty').value);
   if(!(q>0)){toast('⚠️ পরিমাণ লিখুন');$('mvQty').focus();return;}
   var pr=num($('mvPrice').value), date=$('mvDate').value||todayStr(), party=$('mvParty').value.trim();
   var total=q*pr;
+  if(mvEditLogId){
+    for(var ei=0;ei<DB.logs.length;ei++)if(DB.logs[ei].id===mvEditLogId){
+      DB.logs[ei].date=date;DB.logs[ei].type=mvType;DB.logs[ei].qty=q;DB.logs[ei].price=pr;DB.logs[ei].party=party;DB.logs[ei].u=Date.now();
+      if(mvType==='sale'&&DB.logs[ei].cost==null)DB.logs[ei].cost=num(p.buy);
+    }
+    mvEditLogId=null;$('mvSave').textContent='✅ সেভ করুন';
+    $('moveModal').classList.remove('open');
+    saveLocal();
+    toast('✅ স্টক এন্ট্রি ঠিক হয়েছে — স্টক ও লাভ আপডেট হয়েছে (আলাদা টাকার এন্ট্রি থাকলে সেটা টাকার খাতা থেকে ঠিক করুন)');
+    return;
+  }
   DB.logs.push({id:uid(),pid:p.id,date:date,type:mvType,qty:q,price:pr,party:party,book:bookOf(p),u:Date.now(),cost:(mvType==='sale'?num(p.buy):pr)});
   if($('mvCash').checked&&total>0){
     if(mvType==='sale')DB.txs.push({id:uid(),date:date,type:'in',amount:total,cat:'পণ্য বিক্রি',method:$('mvMethod').value,note:p.name+' বিক্রি '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()});
@@ -2284,9 +2595,10 @@ $('pwChangeBtn').addEventListener('click',function(){
   var m=$('pwChangeMsg');
   function say(t,ok){m.textContent=t;m.style.color=ok?'var(--in)':'var(--out)';}
   if(!currentUser){say('⚠️ পাসওয়ার্ড বদলাতে আগে লগইন করুন');openAuth();return;}
-  var cur=$('pwCur').value||'',nw=$('pwNew').value||'';
+  var cur=$('pwCur').value||'',nw=$('pwNew').value||'',nw2=$('pwNew2').value||'';
   if(!cur){say('⚠️ বর্তমান পাসওয়ার্ড লিখুন');return;}
   if(nw.length<6){say('⚠️ নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে');return;}
+  if(nw!==nw2){say('⚠️ দুইবার দেওয়া নতুন পাসওয়ার্ড মিলছে না — আবার লিখুন');return;}
   if(typeof firebase==='undefined'||!fbReady||!navigator.onLine){say('⚠️ পাসওয়ার্ড বদলাতে ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
   var u=firebase.auth().currentUser;
   if(!u){say('⚠️ আবার লগইন করে চেষ্টা করুন');return;}
@@ -2295,7 +2607,7 @@ $('pwChangeBtn').addEventListener('click',function(){
   u.reauthenticateWithCredential(cred).then(function(){
     return u.updatePassword(nw);
   }).then(function(){
-    btn.disabled=false;$('pwCur').value='';$('pwNew').value='';
+    btn.disabled=false;$('pwCur').value='';$('pwNew').value='';$('pwNew2').value='';
     say('✅ পাসওয়ার্ড বদলে গেছে — এবার থেকে নতুন পাসওয়ার্ডে লগইন হবে',true);
     toast('🔑 পাসওয়ার্ড বদলে গেছে');
   }).catch(function(e){
@@ -2324,6 +2636,109 @@ window.profDevLogout=function(id){
     }).catch(function(){toast('⚠️ হয়নি — ইন্টারনেট চেক করে আবার চেষ্টা করুন');});
   });
 };
+
+/* ---------- THEME (dark / light toggle) ----------
+   The choice is this phone's display preference only — saved in
+   localStorage, applied as data-theme on <html>; the CSS variables for
+   [data-theme] win over the system media query. No choice = follow the
+   phone's own light/dark setting, exactly as before. */
+function applyTheme(t){
+  if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);
+  else document.documentElement.removeAttribute('data-theme');
+  var b=$('themeBtn');if(b)b.textContent=(t==='dark')?'☀️':'🌙';
+}
+function themeInit(){
+  var t='';try{t=localStorage.getItem('bgh_theme')||'';}catch(e){}
+  applyTheme(t);
+  $('themeBtn').addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme')||'';
+    var next=cur==='dark'?'light':(cur==='light'?'dark':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'light':'dark'));
+    try{localStorage.setItem('bgh_theme',next);}catch(e){}
+    applyTheme(next);
+    toast(next==='dark'?'🌙 ডার্ক মোড চালু হয়েছে':'☀️ লাইট মোড চালু হয়েছে');
+  });
+}
+
+/* ---------- PROFILE NAME (signup name, editable) ---------- */
+function profileDisplayName(){return (currentUser&&currentUser.name)?currentUser.name:'The Black Ghost';}
+function updateProfileNameUI(){
+  var el=$('profileName');if(el)el.textContent=profileDisplayName();
+  var inp=$('pfNameInput');
+  if(inp&&document.activeElement!==inp)inp.value=(currentUser&&currentUser.name)?currentUser.name:'';
+}
+$('pfNameSave').addEventListener('click',function(){
+  var nm=$('pfNameInput').value.trim();
+  if(!nm){toast('⚠️ নাম লিখুন');return;}
+  if(!currentUser){toast('⚠️ নাম সেভ করতে আগে লগইন করুন');openAuth();return;}
+  currentUser.name=nm;updateProfileNameUI();
+  if(typeof firebase!=='undefined'&&fbReady&&firebase.auth().currentUser){
+    firebase.auth().currentUser.updateProfile({displayName:nm}).catch(function(){});
+  }
+  schedulePush();syncNow();
+  toast('✅ নাম সেভ হয়েছে: '+nm);
+});
+
+/* ---------- CHANGE LOGIN ID (Gmail / phone) ----------
+   Re-authenticates with the current password, then Firebase updateEmail
+   moves the account to the new identifier (a phone number becomes its
+   synthetic email, same as signup). All hisab stays untouched — only the
+   sign-in identifier changes. Needs internet, like any account change. */
+$('chIdBtn').addEventListener('click',function(){
+  var m=$('chIdMsg');
+  function say(t,ok){m.textContent=t;m.style.color=ok?'var(--in)':'var(--out)';}
+  if(!currentUser){say('⚠️ আগে লগইন করুন');openAuth();return;}
+  var idf=identToEmail($('chIdNew').value);
+  if(!idf){say('⚠️ সঠিক নতুন জিমেইল অথবা ফোন নম্বর লিখুন');return;}
+  var pw=$('chIdPass').value||'';
+  if(!pw){say('⚠️ যাচাইয়ের জন্য বর্তমান পাসওয়ার্ড লিখুন');return;}
+  if(typeof firebase==='undefined'||!fbReady||!navigator.onLine){say('⚠️ ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
+  var u=firebase.auth().currentUser;if(!u){say('⚠️ আবার লগইন করে চেষ্টা করুন');return;}
+  if(idf.email===u.email){say('⚠️ এটাই আপনার বর্তমান লগইন আইডি — নতুনটা লিখুন');return;}
+  var btn=this;btn.disabled=true;say('⏳ যাচাই হচ্ছে…',true);
+  var cred=firebase.auth.EmailAuthProvider.credential(u.email,pw);
+  u.reauthenticateWithCredential(cred).then(function(){
+    return u.updateEmail(idf.email);
+  }).then(function(){
+    btn.disabled=false;$('chIdNew').value='';$('chIdPass').value='';
+    say('✅ লগইন আইডি বদলে গেছে — এবার থেকে নতুন '+(idf.kind==='phone'?'নম্বর':'জিমেইল')+' দিয়ে লগইন হবে',true);
+    toast('✅ লগইন আইডি বদলে গেছে');
+  }).catch(function(e){
+    btn.disabled=false;
+    var c=(e&&e.code)||'';
+    say(c==='auth/email-already-in-use'?'⚠️ এই জিমেইল/নম্বর দিয়ে আগেই আরেকটা অ্যাকাউন্ট আছে':((c==='auth/wrong-password'||c==='auth/invalid-credential')?'❌ পাসওয়ার্ড মিলছে না':'⚠️ হয়নি — আবার চেষ্টা করুন'+(c?' ('+c+')':'')));
+  });
+});
+
+/* ---------- DELETE ACCOUNT ----------
+   Password re-auth → delete the user's cloud document → delete the
+   Firebase account itself. The on-device cache key is per-UID, so after
+   deletion the login gate simply returns; nothing of this account is
+   kept server-side. */
+$('delAcctBtn').addEventListener('click',function(){
+  var m=$('delAcctMsg');
+  function say(t,ok){m.textContent=t;m.style.color=ok?'var(--in)':'var(--out)';}
+  if(!currentUser){say('⚠️ আগে লগইন করুন');openAuth();return;}
+  var pw=$('delAcctPass').value||'';
+  if(!pw){say('⚠️ নিশ্চিত করতে পাসওয়ার্ড লিখুন');return;}
+  if(typeof firebase==='undefined'||!fbReady||!navigator.onLine){say('⚠️ ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন');return;}
+  askSure('সত্যিই অ্যাকাউন্ট মুছে ফেলবেন? সার্ভারের সব হিসাব চিরতরে মুছে যাবে — এটা ফেরত আনা যাবে না।',function(){
+    var u=firebase.auth().currentUser;if(!u){say('⚠️ আবার লগইন করে চেষ্টা করুন');return;}
+    var btn=$('delAcctBtn');btn.disabled=true;say('⏳ যাচাই হচ্ছে…',true);
+    var cred=firebase.auth.EmailAuthProvider.credential(u.email,pw);
+    u.reauthenticateWithCredential(cred).then(function(){
+      return userDoc().delete().catch(function(){});
+    }).then(function(){
+      return u.delete();
+    }).then(function(){
+      btn.disabled=false;$('delAcctPass').value='';
+      toast('অ্যাকাউন্ট মুছে ফেলা হয়েছে');
+    }).catch(function(e){
+      btn.disabled=false;
+      var c=(e&&e.code)||'';
+      say((c==='auth/wrong-password'||c==='auth/invalid-credential')?'❌ পাসওয়ার্ড মিলছে না':'⚠️ হয়নি — আবার চেষ্টা করুন'+(c?' ('+c+')':''));
+    });
+  });
+});
 
 /* ---------- ADMIN PANEL (PIN only) ---------- */
 $('adminWord').addEventListener('input',function(){if(this.value==='OPEN'){this.value='';tryOpenAdmin();}});
@@ -2532,15 +2947,56 @@ function renderAdminReqs(){
   }).join('');
 }
 function renderAdminUsers(){
-  if(!admUsers.length){$('admUsersBox').innerHTML='<p class="hint" style="margin:0">এখনো কোনো ব্যবহারকারী নেই।</p>';return;}
-  $('admUsersBox').innerHTML=admUsers.map(function(rec){
+  var q=(($('admUserSearch')||{}).value||'').toLowerCase();
+  var list=admUsers.filter(function(rec){
+    if(!q)return true;
+    var d=rec.data||{};
+    return String(d.displayName||'').toLowerCase().indexOf(q)>=0||String(d.account||'').toLowerCase().indexOf(q)>=0||rec.uid.toLowerCase().indexOf(q)>=0;
+  });
+  if(!list.length){$('admUsersBox').innerHTML='<p class="hint" style="margin:0">'+(q?'“'+esc(q)+'” দিয়ে কোনো ইউজার পাওয়া যায়নি।':'এখনো কোনো ব্যবহারকারী নেই।')+'</p>';return;}
+  $('admUsersBox').innerHTML=list.map(function(rec){
     var d=rec.data,sub=d.sub||{},now=Date.now();
     var status=sub.free?'<span class="badge in">🎁 ফ্রি অ্যাক্সেস</span>':(num(sub.expiresAt)>now?'<span class="badge in">✅ চালু — '+esc(fmtDate(sub.expiresAt))+' পর্যন্ত</span>':(num(sub.expiresAt)?'<span class="badge out">মেয়াদ শেষ</span>':'<span class="badge warn">প্ল্যান নেই</span>'));
     var pend=(d.planReqs||[]).length?' <span class="badge warn">📩 '+fmt((d.planReqs||[]).length)+' রিকোয়েস্ট</span>':'';
     return '<div class="rowitem"><div class="r1"><div><b>'+esc(d.displayName||d.account||rec.uid)+'</b><div class="meta">'+esc(d.account||'')+' • এন্ট্রি: '+fmt((d.txs||[]).length+(d.logs||[]).length+(d.dues||[]).length)+' টি</div></div><div>'+status+pend+'</div></div>'+
-    '<div class="iconbtns">'+(sub.free?'<button class="btn small danger" type="button" onclick="admSetFree(\''+rec.uid+'\',false)">ফ্রি বন্ধ করুন</button>':'<button class="btn small gold" type="button" onclick="admSetFree(\''+rec.uid+'\',true)">🎁 ফ্রি দিন</button>')+'</div></div>';
+    '<div class="iconbtns">'+(sub.free?'<button class="btn small danger" type="button" onclick="admSetFree(\''+rec.uid+'\',false)">ফ্রি বন্ধ করুন</button>':'<button class="btn small gold" type="button" onclick="admSetFree(\''+rec.uid+'\',true)">🎁 ফ্রি দিন</button>')+
+    '<button class="btn small danger" type="button" onclick="admDelUser(\''+rec.uid+'\')">🗑️ ইউজার মুছুন</button></div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:8px"><div class="field" style="margin:0;flex:0 1 130px"><label>সরাসরি প্ল্যান (দিন)</label><input type="number" id="grantDays_'+rec.uid+'" value="30" min="1" step="1" /></div>'+
+    '<button class="btn small" type="button" onclick="admGrantDays(\''+rec.uid+'\')">💎 প্ল্যান দিন</button></div></div>';
   }).join('');
 }
+$('admUserSearch').addEventListener('input',renderAdminUsers);
+/* Direct plan grant: adds N days on top of the user's current expiry
+   (or from today), recorded in their history like an approval. */
+window.admGrantDays=function(uid){
+  var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(!rec)return;
+  var inp=document.getElementById('grantDays_'+uid),days=num(inp&&inp.value);
+  if(!(days>0)){toast('⚠️ কত দিনের প্ল্যান দেবেন লিখুন');return;}
+  var sub=rec.data.sub?JSON.parse(JSON.stringify(rec.data.sub)):blankSub();
+  sub.expiresAt=Math.max(Date.now(),num(sub.expiresAt))+days*DAYMS;
+  sub.status='active';sub.planName='Admin সরাসরি দিয়েছেন ('+fmt(days)+' দিন)';sub.u=Date.now();
+  if(!Array.isArray(sub.history))sub.history=[];
+  sub.history.push({date:todayStr(),what:'Admin সরাসরি প্ল্যান দিয়েছেন',days:days,amount:0,planName:sub.planName});
+  fsDb.collection(HISABI_COLLECTION).doc(uid).update({sub:sub}).then(function(){
+    rec.data.sub=sub;
+    if(currentUser&&currentUser.uid===uid){SUB=sub;saveSubLocal();schedulePush();}
+    renderAdminAll();renderAccess();toast('💎 '+fmt(days)+' দিনের প্ল্যান দেওয়া হয়েছে');
+  }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
+};
+/* Delete a user: removes their cloud document (their hisab + plan state).
+   Their phone keeps its local copy until they log in again — the toast
+   says so plainly. The Firebase login itself can only be removed from
+   the Firebase console. */
+window.admDelUser=function(uid){
+  var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(!rec)return;
+  if(currentUser&&currentUser.uid===uid){toast('⚠️ নিজের অ্যাকাউন্ট এখান থেকে মোছা যাবে না');return;}
+  askSure('“'+(rec.data.displayName||rec.data.account||uid)+'”-এর সব ডাটা সার্ভার থেকে মুছে ফেলবেন? এটা ফেরত আনা যাবে না। (তার ফোনে থাকা লোকাল কপি থেকে যাবে — সে আবার লগইন করলে সেটা ফিরে আসতে পারে; পুরোপুরি বন্ধ করতে Firebase console থেকে লগইনটাও মুছুন।)',function(){
+    fsDb.collection(HISABI_COLLECTION).doc(uid).delete().then(function(){
+      admUsers=admUsers.filter(function(x){return x.uid!==uid;});
+      renderAdminAll();toast('🗑️ ইউজারের সার্ভার ডাটা মোছা হয়েছে');
+    }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
+  });
+};
 function renderAdminFree(){
   var box=$('admFreeBox');
   if(!admIndex.freeList||!admIndex.freeList.length){box.innerHTML='<p class="hint" style="margin:0">ফ্রি তালিকায় কেউ নেই (ওপরে ব্যবহারকারী তালিকা থেকেও ফ্রি দেওয়া যায়)।</p>';return;}
@@ -2649,7 +3105,8 @@ function renderAdminMsgs(){
   var box=$('admMsgBox');if(!box)return;
   if(!admMsgs.length){box.innerHTML='<p class="hint" style="margin:0">কোনো মেসেজ নেই।</p>';return;}
   box.innerHTML=admMsgs.map(function(m){
-    return '<div class="rowitem"><div class="r1"><div><b>'+esc(m.name||'')+'</b><div class="meta">'+esc(m.date||'')+(m.account?' • '+esc(m.account):'')+'</div><div style="margin-top:4px">'+esc(m.message||'')+'</div></div></div>'+
+    var reset=m.type==='pwreset';
+    return '<div class="rowitem"><div class="r1"><div><b>'+esc(m.name||'')+'</b>'+(reset?' <span class="badge warn">🔑 পাসওয়ার্ড রিসেট</span>':'')+'<div class="meta">'+esc(m.date||'')+(m.account?' • '+esc(m.account):'')+'</div><div style="margin-top:4px">'+esc(m.message||'')+'</div>'+(reset?'<div class="meta" style="margin-top:4px">করণীয়: Firebase Console → Authentication → Users → এই নম্বরের অ্যাকাউন্ট → পাসওয়ার্ড রিসেট করে নতুন পাসওয়ার্ডটা ব্যবহারকারীকে জানিয়ে দিন, তারপর এই মেসেজটা মুছে দিন।</div>':'')+'</div></div>'+
     '<div class="iconbtns"><button class="btn small danger" type="button" onclick="admMsgDel(\''+m._id+'\')">🗑️ মুছুন</button></div></div>';
   }).join('');
 }
@@ -2712,6 +3169,8 @@ function renderCats(){
   DEFAULT_CATS.concat(DB.cats).forEach(function(c){if(c&&!seen[c]){seen[c]=1;list.push(c);}});
   DB.txs.forEach(function(t){if(t.cat&&!seen[t.cat]){seen[t.cat]=1;list.push(t.cat);}});
   var dl=$('catList');if(dl)dl.innerHTML=list.map(function(c){return '<option value="'+esc(c)+'"></option>';}).join('');
+  var cf=$('txCatF');
+  if(cf){var cur=cf.value;cf.innerHTML='<option value="">সব ক্যাটাগরি</option>'+list.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');if(cur)cf.value=cur;}
   var cl=$('custList');
   if(cl){var seen2={},names=[];DB.parties.forEach(function(p){if(p.name&&!seen2[p.name]){seen2[p.name]=1;names.push(p.name);}});cl.innerHTML=names.map(function(n){return '<option value="'+esc(n)+'"></option>';}).join('');}
 }
@@ -2725,6 +3184,12 @@ $('printReport').addEventListener('click',function(){
   document.body.classList.add('print-report');
   setTimeout(function(){window.print();setTimeout(function(){document.body.classList.remove('print-report');},600);},60);
 });
+/* Print just the currently open tab (list printing for ledger / dues /
+   stock / bills): the print CSS hides every section except .active. */
+function printActivePage(){
+  document.body.classList.add('print-one');
+  setTimeout(function(){window.print();setTimeout(function(){document.body.classList.remove('print-one');},600);},60);
+}
 
 /* ---------- APP SHARE (link is ALWAYS the hardcoded live site URL) ---------- */
 var APP_SHARE_URL='https://st-news-bd.github.io/black-ghost-hisab/';
@@ -2853,17 +3318,104 @@ function duSetType(t){
   $('duTypeHint').textContent=t==='give'?'মানে: এই মানুষটা আপনার কাছে টাকা পাওনা থাকবে — “মোট পাবো” বাড়বে।':(t==='take'?'মানে: আপনি এই মানুষটার কাছে পাওনা থাকবেন — “মোট দিতে হবে” বাড়বে।':'মানে: বাকির টাকা শোধ হলো — যেদিকে বাকি আছে সেদিক থেকে কমে যাবে।');
 }
 $('duTypeSeg').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){duSetType(b.getAttribute('data-v'));});});
+var editDueId=null;
+function resetDueForm(){
+  editDueId=null;$('duAmount').value='';$('duNote').value='';$('duDueDate').value='';$('duDate').value=todayStr();
+  $('duFormTitle').textContent='নতুন বাকি এন্ট্রি';$('duSave').textContent='✅ সেভ করুন';$('duCancel').style.display='none';
+}
+$('duCancel').addEventListener('click',resetDueForm);
+window.editDue=function(id){
+  var d=null;DB.dues.forEach(function(x){if(x.id===id)d=x;});if(!d)return;
+  editDueId=id;
+  if(findParty(d.pid))$('duParty').value=d.pid;
+  duSetType(d.type==='give'?'give':(d.type==='take'?'take':'pay'));
+  $('duDate').value=d.date;$('duAmount').value=d.amount;$('duNote').value=d.note||'';$('duDueDate').value=d.dueDate||'';
+  $('duFormTitle').textContent='বাকি এন্ট্রি ঠিক করুন';$('duSave').textContent='✅ আপডেট করুন';$('duCancel').style.display='';
+  showPageNoScroll('dues');window.scrollTo({top:0,behavior:'smooth'});
+};
 $('duSave').addEventListener('click',function(){
   var pid=$('duParty').value;
   if(!pid){toast('⚠️ আগে একজন মানুষ যোগ করুন');return;}
   var amt=num($('duAmount').value);
   if(!(amt>0)){toast('⚠️ টাকার পরিমাণ লিখুন');$('duAmount').focus();return;}
+  if(editDueId){
+    for(var i=0;i<DB.dues.length;i++)if(DB.dues[i].id===editDueId){
+      var od=DB.dues[i];
+      var nt=duType;
+      if(nt==='pay')nt=(od.type==='recv'||od.type==='sent')?od.type:(partyBalance(pid)>=0?'recv':'sent');
+      else nt=duType;
+      od.pid=pid;od.type=nt;od.date=$('duDate').value||todayStr();od.amount=amt;od.note=$('duNote').value.trim();od.dueDate=$('duDueDate').value||'';od.u=Date.now();
+      var ep=findParty(pid);if(ep)od.book=bookOf(ep);
+    }
+    resetDueForm();saveLocal();toast('✅ বাকি এন্ট্রি ঠিক হয়েছে — ব্যালেন্স অটোমেটিক আপডেট হয়েছে');
+    return;
+  }
   var type=duType;
   if(type==='pay')type=partyBalance(pid)>=0?'recv':'sent';
   var dparty=findParty(pid);
-  DB.dues.push({id:uid(),pid:pid,date:$('duDate').value||todayStr(),type:type,amount:amt,note:$('duNote').value.trim(),book:dparty?bookOf(dparty):writeBook(),u:Date.now()});
-  $('duAmount').value='';$('duNote').value='';
+  DB.dues.push({id:uid(),pid:pid,date:$('duDate').value||todayStr(),type:type,amount:amt,note:$('duNote').value.trim(),dueDate:$('duDueDate').value||'',book:dparty?bookOf(dparty):writeBook(),u:Date.now()});
+  $('duAmount').value='';$('duNote').value='';$('duDueDate').value='';
   saveLocal();toast('✅ বাকি হিসাব সেভ হয়েছে — ব্যালেন্স অটোমেটিক আপডেট হয়েছে');
+});
+$('duVoiceBtn').addEventListener('click',function(){
+  startVoice(function(txt){
+    var r=parseVoiceText(txt,[]);
+    if(r.amount>0)$('duAmount').value=r.amount;
+    var t=bnToEnDigits(txt);
+    if(/শোধ|পেলাম|দিলো|পরিশোধ/.test(t))duSetType('pay');
+    else if(/নিলাম|নিয়েছি|ধার নিলাম/.test(t))duSetType('take');
+    else if(/দিলাম|বাকি/.test(t))duSetType('give');
+    $('duNote').value=txt;
+    $('duVoiceMsg').textContent='🎤 শুনেছি: “'+txt+'” — ফর্মে বসিয়ে দিয়েছি। মানুষ আর ধরন যাচাই করে “সেভ করুন” চাপুন — অটোমেটিক কিছুই সেভ হয়নি।';
+    toast('🎤 ফর্মে বসে গেছে — যাচাই করে সেভ করুন');
+  });
+});
+$('duPrint').addEventListener('click',function(){printActivePage();});
+/* A party is overdue when they still owe money and at least one 'give'
+   entry's promised pay-by date has passed. */
+function partyOverdue(p){
+  if(!(partyBalance(p.id)>0))return false;
+  var t=todayStr();
+  return bDues().some(function(d){return d.pid===p.id&&(d.type==='give')&&d.dueDate&&d.dueDate<t;});
+}
+/* ---------- PER-PERSON DUE STATEMENT ---------- */
+var curStmtParty=null;
+function stmtText(p){
+  var typeLbl={give:'🤝 বাকি দিলাম',take:'📥 বাকি নিলাম',recv:'💵 টাকা পেলাম (শোধ)',sent:'💸 টাকা শোধ দিলাম'};
+  var lines=['📄 *বাকির হিসাব — '+p.name+'*','Black Ghost Hisab • '+todayStr(),'——————————'];
+  var entries=bDues().filter(function(d){return d.pid===p.id;}).slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.id.localeCompare(b.id);});
+  var run=0;
+  entries.forEach(function(d){var a=num(d.amount);run+=(d.type==='give'||d.type==='sent')?a:-a;lines.push(d.date+' • '+typeLbl[d.type]+' — '+money(a)+(d.note?' ('+d.note+')':'')+' → ব্যালেন্স: '+(run>=0?'পাবো ':'দিতে হবে ')+money(Math.abs(run)));});
+  var bal=partyBalance(p.id);
+  lines.push('——————————',bal>0?('মোট পাবো: '+money(bal)):((bal<0)?('মোট দিতে হবে: '+money(-bal)):'হিসাব পুরো শোধ ✅'));
+  return lines.join('\n');
+}
+window.openStmt=function(pid){
+  var p=findParty(pid);if(!p)return;curStmtParty=pid;
+  var typeLbl={give:'🤝 বাকি দিলাম',take:'📥 বাকি নিলাম',recv:'💵 টাকা পেলাম (শোধ)',sent:'💸 টাকা শোধ দিলাম'};
+  var entries=bDues().filter(function(d){return d.pid===p.id;}).slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.id.localeCompare(b.id);});
+  var run=0;
+  var rows=entries.map(function(d){var a=num(d.amount);run+=(d.type==='give'||d.type==='sent')?a:-a;return '<tr><td>'+esc(d.date)+'</td><td>'+typeLbl[d.type]+(d.note?'<br><span style="color:var(--muted);font-size:.85rem">'+esc(d.note)+'</span>':'')+'</td><td class="num">'+((d.type==='give'||d.type==='sent')?'+':'−')+' '+money(a)+'</td><td class="num">'+(run>=0?'পাবো ':'দিতে হবে ')+money(Math.abs(run))+'</td></tr>';}).join('');
+  var bal=partyBalance(p.id);
+  $('stmtView').innerHTML='<div style="text-align:center;border-bottom:2px dashed var(--line);padding-bottom:10px;margin-bottom:10px"><div style="font-size:1.25rem;font-weight:800">Black Ghost Hisab</div><div style="color:var(--muted)">বাকির হিসাব বিবরণী (স্টেটমেন্ট)</div></div>'+
+  '<div class="kv"><span>নাম</span><b>'+esc(p.name)+(p.phone?' • '+esc(p.phone):'')+'</b></div>'+
+  (entries.length?'<div style="overflow-x:auto"><table><tr><th>তারিখ</th><th>বিবরণ</th><th class="num">টাকা</th><th class="num">ব্যালেন্স</th></tr>'+rows+'</table></div>':'<p class="hint">এখনো কোনো বাকি এন্ট্রি নেই।</p>')+
+  '<div class="kv"><span><b>বর্তমান অবস্থা</b></span><b>'+(bal>0?('পাবো '+money(bal)):((bal<0)?('দিতে হবে '+money(-bal)):'✅ হিসাব শোধ'))+'</b></div>';
+  $('stmtModal').classList.add('open');
+};
+$('stmtClose').addEventListener('click',function(){$('stmtModal').classList.remove('open');});
+$('stmtModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+$('stmtWa').addEventListener('click',function(){
+  var p=findParty(curStmtParty);if(!p)return;
+  var ph=(p.phone||'').replace(/[^0-9]/g,'');
+  if(ph.length>=10){
+    if(ph.indexOf('880')!==0)ph=(ph.charAt(0)==='0')?('880'+ph.slice(1)):('880'+ph);
+    window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(stmtText(p)),'_blank');
+  }else shareText(stmtText(p));
+});
+$('stmtPrint').addEventListener('click',function(){
+  document.body.classList.add('print-stmt');
+  setTimeout(function(){window.print();setTimeout(function(){document.body.classList.remove('print-stmt');},600);},60);
 });
 window.delDue=function(id){
   askSure('এই বাকি এন্ট্রিটা মুছবেন? ব্যালেন্স অটোমেটিক ঠিক হয়ে যাবে।',function(){
@@ -2888,6 +3440,16 @@ function renderDues(){
     '<div class="card"><div class="k">💰 মোট পাবো (সবাই মিলে)</div><div class="v pos">'+money(tt.pabo)+'</div></div>'+
     '<div class="card"><div class="k">💸 মোট দিতে হবে</div><div class="v neg">'+money(tt.debo)+'</div></div>'+
     '<div class="card"><div class="k">👥 মোট মানুষ</div><div class="v">'+fmt(bParties().length)+' জন</div></div>';
+  var overs=bParties().filter(partyOverdue);
+  var op=$('overduePanel');
+  if(op){
+    if(overs.length){
+      op.style.display='';
+      $('overdueBox').innerHTML=overs.map(function(p){
+        return '<div class="kv"><span>⛔ <b>'+esc(p.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">শোধের তারিখ পার হয়ে গেছে</span></span><b style="color:var(--out)">পাবো '+money(partyBalance(p.id))+' '+(partyBalance(p.id)>0?'<button class="btn small noprint" type="button" onclick="remindDue(\''+p.id+'\')" style="background:#1faa55">📲 রিমাইন্ডার</button>':'')+'</b></div>';
+      }).join('');
+    }else op.style.display='none';
+  }
   var sel=$('duParty'),cur=sel.value;
   sel.innerHTML=bParties().length?bParties().map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join(''):'<option value="">আগে মানুষ যোগ করুন</option>';
   if(cur&&findParty(cur)&&inBook(findParty(cur)))sel.value=cur;
@@ -2903,13 +3465,16 @@ function renderDues(){
     var run=0,runMap={};
     bDues().filter(function(d){return d.pid===p.id;}).slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.id.localeCompare(b.id);}).forEach(function(d){var a=num(d.amount);run+=(d.type==='give'||d.type==='sent')?a:-a;runMap[d.id]=run;});
     var hist=entries.length?entries.map(function(d){
-      return '<div class="kv"><span>'+esc(d.date)+' • '+typeLbl[d.type]+(d.note?' • '+esc(d.note):'')+'<br><span style="color:var(--muted);font-size:.85rem">এরপর ব্যালেন্স: '+(runMap[d.id]>=0?'পাবো ':'দিতে হবে ')+money(Math.abs(runMap[d.id]))+'</span></span><b>'+((d.type==='give'||d.type==='sent')?'+':'−')+' '+money(d.amount)+' <button class="btn small danger noprint" type="button" onclick="delDue(\''+d.id+'\')">মুছুন</button></b></div>';
+      return '<div class="kv"><span>'+esc(d.date)+' • '+typeLbl[d.type]+(d.note?' • '+esc(d.note):'')+(d.dueDate?' • শোধের তারিখ: '+esc(d.dueDate):'')+'<br><span style="color:var(--muted);font-size:.85rem">এরপর ব্যালেন্স: '+(runMap[d.id]>=0?'পাবো ':'দিতে হবে ')+money(Math.abs(runMap[d.id]))+'</span></span><b>'+((d.type==='give'||d.type==='sent')?'+':'−')+' '+money(d.amount)+' <button class="btn small ghost noprint" type="button" onclick="editDue(\''+d.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDue(\''+d.id+'\')">মুছুন</button></b></div>';
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো বাকি এন্ট্রি নেই।</p>';
-    return '<div class="rowitem" data-rowid="'+p.id+'"><div class="r1"><div><b style="font-size:1.08rem">'+esc(p.name)+'</b> '+(over?'<span class="badge out">⚠️ সীমা পার</span>':'')+
-    '<div class="meta">'+(kindLbl[p.kind]||'অন্যান্য')+(p.phone?' • '+esc(p.phone):'')+(lim>0?' • বাকির সীমা: '+money(lim):'')+'</div>'+
+    var od=partyOverdue(p);
+    var bought=0;bBills().forEach(function(b){if((b.customer||'').toLowerCase()===p.name.toLowerCase())bought+=num(b.total);});
+    return '<div class="rowitem" data-rowid="'+p.id+'"><div class="r1"><div><b style="font-size:1.08rem">'+esc(p.name)+'</b> '+(over?'<span class="badge out">⚠️ সীমা পার</span>':'')+(od?' <span class="badge out">⛔ মেয়াদ পার বকেয়া</span>':'')+
+    '<div class="meta">'+(kindLbl[p.kind]||'অন্যান্য')+(p.phone?' • '+esc(p.phone):'')+(lim>0?' • বাকির সীমা: '+money(lim):'')+(bought>0?' • মোট কেনাকাটা (বিল): '+money(bought):'')+'</div>'+
     (over?'<div style="color:var(--out);font-weight:700;font-size:.9rem;margin-top:2px">⚠️ সতর্ক: এই মানুষটার বাকি সীমা ('+money(lim)+') পার হয়ে গেছে!</div>':'')+
     '</div><div>'+balHtml+'</div></div>'+
     '<div class="iconbtns noprint">'+(bal>0?'<button class="btn small" type="button" onclick="remindDue(\''+p.id+'\')" style="background:#1faa55">📲 WhatsApp রিমাইন্ডার</button>':'')+
+    '<button class="btn small gold" type="button" onclick="openStmt(\''+p.id+'\')">📄 স্টেটমেন্ট</button>'+
     '<button class="btn small ghost" type="button" onclick="editParty(\''+p.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delParty(\''+p.id+'\')">🗑️</button></div>'+
     '<details class="logbox"><summary>📜 পুরো ইতিহাস ('+entries.length+' টি)</summary>'+hist+'</details></div>';
   }).join('');
@@ -2953,17 +3518,22 @@ $('cdSave').addEventListener('click',function(){
   saveLocal();
   toast(Math.abs(r.diff)<0.01?'✅ ক্যাশ মিলেছে! সেভ হয়েছে':('সেভ হয়েছে — পার্থক্য: '+money(r.diff)));
 });
+window.delCashday=function(id){
+  askSure('এই দিনের ক্যাশ মেলানোর রেকর্ড মুছবেন? (টাকার এন্ট্রিগুলো থেকে যাবে)',function(){
+    DB.cashdays=DB.cashdays.filter(function(x){return x.id!==id;});addTomb('k',id);saveLocal();toast('🗑️ ক্যাশ রেকর্ড মোছা হয়েছে');
+  });
+};
 function renderCash(){
   var rec=cdFind(todayStr());
   if(rec&&document.activeElement!==$('cdOpen')&&document.activeElement!==$('cdCounted')){
     if($('cdDate').value===todayStr()){$('cdOpen').value=num(rec.opening)||'';$('cdCounted').value=num(rec.counted)||'';}
   }
   cdUpdate();
-  var list=bCashdays().slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,10);
-  $('cdHistory').innerHTML=list.length?('<h3 style="margin:6px 0 4px">আগের দিনের ক্যাশ হিসাব</h3>'+list.map(function(c){
+  var list=bCashdays().slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  $('cdHistory').innerHTML=list.length?('<h3 style="margin:6px 0 4px">আগের দিনের ক্যাশ হিসাব (সব)</h3>'+list.map(function(c){
     var exp=num(c.opening)+dayTotals(c.date).bal,diff=num(c.counted)-exp;
     var badge=Math.abs(diff)<0.01?'<span class="badge in">✅ মিলেছে</span>':(diff<0?'<span class="badge out">কম '+money(-diff)+'</span>':'<span class="badge warn">বেশি '+money(diff)+'</span>');
-    return '<div class="kv"><span>'+esc(c.date)+' • সকালে '+money(c.opening)+' → থাকার কথা '+money(exp)+' • গুনে '+money(c.counted)+'</span><b>'+badge+'</b></div>';
+    return '<div class="kv"><span>'+esc(c.date)+' • সকালে '+money(c.opening)+' → থাকার কথা '+money(exp)+' • গুনে '+money(c.counted)+'</span><b>'+badge+' <button class="btn small danger noprint" type="button" onclick="delCashday(\''+c.id+'\')">মুছুন</button></b></div>';
   }).join('')):'';
 }
 
@@ -2985,7 +3555,74 @@ function renderTarget(){
 }
 
 /* ---------- BILLS / INVOICE ---------- */
-var curBillId=null;
+var curBillId=null, editBillId=null;
+/* Sequential bill number per book: one more than the highest number used
+   in that book so far (POS bills share the same sequence). */
+function nextBillNo(bk){
+  var mx=0;
+  DB.bills.forEach(function(b){if(bookOf(b)===bk&&num(b.no)>mx)mx=num(b.no);});
+  return mx+1;
+}
+/* Items whose quantity exceeds the stock on hand — used to warn (never
+   silently block) before a bill / POS sale / order delivery is saved. */
+function stockOverItems(items){
+  var over=[];
+  (items||[]).forEach(function(it){
+    if(!it.pid)return;
+    var p=findProd(it.pid);if(!p)return;
+    var s=prodStats(p);
+    if(num(it.qty)>s.remaining)over.push(p.name+' (আছে '+fmt(s.remaining)+' '+p.unit+', লাগবে '+fmt(num(it.qty))+')');
+  });
+  return over;
+}
+/* The stock / money / due entries a bill created. New bills store the ids
+   (logIds / txId / dueId); older bills are matched by exactly what the old
+   save wrote (same date, product, qty, price and customer for logs; the
+   'বিল — নাম' / 'দ্রুত বিক্রি — নাম' money note; the বাকি note + amount). */
+function billLinks(b){
+  if(b.logIds||b.txId||b.dueId)return{logs:b.logIds||[],tx:b.txId||'',due:b.dueId||''};
+  var logs=[],used={};
+  (b.items||[]).forEach(function(it){
+    if(!it.pid)return;
+    for(var i=0;i<DB.logs.length;i++){
+      var l=DB.logs[i];
+      if(used[l.id])continue;
+      if(l.pid===it.pid&&l.type==='sale'&&l.date===b.date&&num(l.qty)===num(it.qty)&&num(l.price)===num(it.price)&&(l.party||'')===(b.customer||'')){logs.push(l.id);used[l.id]=1;break;}
+    }
+  });
+  var tx='';
+  if(num(b.paid)>0)for(var j=0;j<DB.txs.length;j++){var t=DB.txs[j];if(t.type==='in'&&t.date===b.date&&num(t.amount)===num(b.paid)&&(t.note==='বিল — '+b.customer||t.note==='দ্রুত বিক্রি — '+b.customer)){tx=t.id;break;}}
+  var due='';
+  if(num(b.due)>0){
+    var party=null;bParties().forEach(function(p){if(p.name.toLowerCase()===(b.customer||'').toLowerCase())party=p;});
+    DB.dues.forEach(function(d){if(due)return;if(d.date===b.date&&num(d.amount)===num(b.due)&&d.type==='give'&&(d.note==='বিলের বাকি'||d.note==='দ্রুত বিক্রির বাকি')&&(!party||d.pid===party.id))due=d.id;});
+  }
+  return{logs:logs,tx:tx,due:due};
+}
+function removeBillLinks(b){
+  var L=billLinks(b);
+  L.logs.forEach(function(id){addTomb('l',id);});
+  DB.logs=DB.logs.filter(function(l){return L.logs.indexOf(l.id)<0;});
+  if(L.tx){addTomb('t',L.tx);DB.txs=DB.txs.filter(function(t){return t.id!==L.tx;});}
+  if(L.due){addTomb('d',L.due);DB.dues=DB.dues.filter(function(d){return d.id!==L.due;});}
+  return L;
+}
+/* Create the stock/money/due entries for a bill's figures and stamp the
+   link ids back onto the bill. Shared by new bills and bill edits. */
+function applyBillEntries(bill,c){
+  var logIds=[];
+  c.items.forEach(function(it){if(it.pid){var ip=findProd(it.pid);var lg={id:uid(),pid:it.pid,date:bill.date,type:'sale',qty:it.qty,price:it.price,party:bill.customer,book:ip?bookOf(ip):bookOf(bill),u:Date.now(),cost:ip?num(ip.buy):0};DB.logs.push(lg);logIds.push(lg.id);}});
+  bill.logIds=logIds;
+  bill.txId='';bill.dueId='';
+  if(c.paid>0){var tx={id:uid(),date:bill.date,type:'in',amount:c.paid,cat:'পণ্য বিক্রি',method:bill.method,note:'বিল — '+bill.customer,book:bookOf(bill),u:Date.now()};DB.txs.push(tx);bill.txId=tx.id;}
+  if(c.due>0){
+    var party=null;
+    bParties().forEach(function(p){if(p.name.toLowerCase()===bill.customer.toLowerCase())party=p;});
+    if(!party){party={id:uid(),name:bill.customer,phone:bill.phone,kind:'customer',limit:0,book:bookOf(bill),u:Date.now()};DB.parties.push(party);}
+    var du={id:uid(),pid:party.id,date:bill.date,type:'give',amount:c.due,note:'বিলের বাকি',book:bookOf(party),u:Date.now()};
+    DB.dues.push(du);bill.dueId=du.id;
+  }
+}
 function billRowHtml(){
   var opts='<option value="">— প্রোডাক্ট বাছুন —</option>'+bProducts().map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join('');
   return '<div class="billrow" style="border:1.5px solid var(--line);border-radius:12px;padding:10px;margin-bottom:9px">'+
@@ -3035,29 +3672,69 @@ function billCalc(){
   $('billTotalBox').textContent='মোট = '+money(total)+' • জমা = '+money(paid)+' • বাকি = '+money(due);
   return{items:items,subtotal:sub,discAmt:disc,total:total,paid:paid,due:due};
 }
+function resetBillForm(){
+  editBillId=null;
+  $('bCust').value='';$('bPhone').value='';$('bPaid').value='';$('bNote').value='';$('bDiscVal').value='';$('bDiscType').value='none';$('bDate').value=todayStr();
+  $('billItems').innerHTML='';addBillRow();billCalc();
+  $('billSave').textContent='✅ বিল সেভ করুন';
+  clearBillDraft();
+}
+window.editBill=function(id){
+  var b=findBill(id);if(!b)return;
+  editBillId=id;
+  $('bCust').value=b.customer;$('bPhone').value=b.phone||'';$('bDate').value=b.date;$('bPaid').value=num(b.paid)||'';$('bNote').value=b.note||'';
+  $('bDiscType').value=b.discType||'none';$('bDiscVal').value=num(b.discVal)||'';if(b.method)$('bMethod').value=b.method;
+  $('billItems').innerHTML='';
+  (b.items||[]).forEach(function(it){
+    addBillRow();
+    var rows=document.querySelectorAll('#billItems .billrow'),row=rows[rows.length-1];
+    if(it.pid)row.querySelector('.b-pid').value=it.pid;
+    if(!it.pid)row.querySelector('.b-name').value=it.name||'';
+    row.querySelector('.b-qty').value=it.qty;row.querySelector('.b-price').value=it.price;
+  });
+  if(!(b.items||[]).length)addBillRow();
+  billCalc();
+  $('billSave').textContent='✅ বিল আপডেট করুন';
+  showPageNoScroll('bill');window.scrollTo({top:0,behavior:'smooth'});
+  toast('✏️ বিলটা ফর্মে এসেছে — বদলে “বিল আপডেট করুন” চাপুন');
+};
 $('billSave').addEventListener('click',function(){
   var cust=$('bCust').value.trim();
   if(!cust){toast('⚠️ কাস্টমারের নাম লিখুন');$('bCust').focus();return;}
   var c=billCalc();
   if(!c.items.length){toast('⚠️ অন্তত একটা আইটেম (নাম + পরিমাণ) যোগ করুন');return;}
-  var date=$('bDate').value||todayStr();
-  var bill={id:uid(),date:date,customer:cust,phone:$('bPhone').value.trim(),items:c.items,subtotal:c.subtotal,discType:$('bDiscType').value,discVal:num($('bDiscVal').value),discAmt:c.discAmt,total:c.total,paid:c.paid,due:c.due,note:$('bNote').value.trim(),method:$('bMethod').value,book:writeBook(),u:Date.now()};
-  c.items.forEach(function(it){if(it.pid){var ip=findProd(it.pid);DB.logs.push({id:uid(),pid:it.pid,date:date,type:'sale',qty:it.qty,price:it.price,party:cust,book:ip?bookOf(ip):writeBook(),u:Date.now(),cost:ip?num(ip.buy):0});}});
-  if(c.paid>0)DB.txs.push({id:uid(),date:date,type:'in',amount:c.paid,cat:'পণ্য বিক্রি',method:$('bMethod').value,note:'বিল — '+cust,book:writeBook(),u:Date.now()});
-  if(c.due>0){
-    var party=null;
-    bParties().forEach(function(p){if(p.name.toLowerCase()===cust.toLowerCase())party=p;});
-    if(!party){party={id:uid(),name:cust,phone:bill.phone,kind:'customer',limit:0,book:writeBook(),u:Date.now()};DB.parties.push(party);}
-    DB.dues.push({id:uid(),pid:party.id,date:date,type:'give',amount:c.due,note:'বিলের বাকি',book:bookOf(party),u:Date.now()});
-  }
-  DB.bills.push(bill);
-  $('bCust').value='';$('bPhone').value='';$('bPaid').value='';$('bNote').value='';$('bDiscVal').value='';$('bDiscType').value='none';$('billItems').innerHTML='';addBillRow();billCalc();
-  saveLocal();toast('✅ বিল সেভ হয়েছে — স্টক, টাকা ও বাকি হিসাব আপডেট হয়েছে');
-  openBill(bill.id);
+  var doSave=function(){
+    var date=$('bDate').value||todayStr();
+    if(editBillId){
+      var old=findBill(editBillId);if(!old){resetBillForm();return;}
+      /* Reverse exactly what the old bill created, then re-apply the new
+         figures — stock, money and dues all end up matching the edit. */
+      removeBillLinks(old);
+      old.date=date;old.customer=cust;old.phone=$('bPhone').value.trim();old.items=c.items;old.subtotal=c.subtotal;
+      old.discType=$('bDiscType').value;old.discVal=num($('bDiscVal').value);old.discAmt=c.discAmt;old.total=c.total;
+      old.paid=c.paid;old.due=c.due;old.note=$('bNote').value.trim();old.method=$('bMethod').value;old.u=Date.now();
+      applyBillEntries(old,c);
+      var doneId=old.id;
+      resetBillForm();saveLocal();
+      toast('✅ বিল ঠিক হয়েছে — স্টক, টাকা ও বাকি হিসাবও অটোমেটিক ঠিক হয়ে গেছে');
+      openBill(doneId);
+      return;
+    }
+    var bill={id:uid(),no:nextBillNo(writeBook()),date:date,customer:cust,phone:$('bPhone').value.trim(),items:c.items,subtotal:c.subtotal,discType:$('bDiscType').value,discVal:num($('bDiscVal').value),discAmt:c.discAmt,total:c.total,paid:c.paid,due:c.due,note:$('bNote').value.trim(),method:$('bMethod').value,book:writeBook(),u:Date.now()};
+    applyBillEntries(bill,c);
+    DB.bills.push(bill);
+    resetBillForm();
+    saveLocal();toast('✅ বিল সেভ হয়েছে — স্টক, টাকা ও বাকি হিসাব আপডেট হয়েছে');
+    openBill(bill.id);
+  };
+  var over=stockOverItems(c.items);
+  if(over.length){
+    askSure('⚠️ স্টকে কম আছে: '+over.join('; ')+'। তবু বিল সেভ করবেন? (স্টক মাইনাস হয়ে যাবে)',doSave);
+  }else doSave();
 });
 function findBill(id){for(var i=0;i<DB.bills.length;i++)if(DB.bills[i].id===id)return DB.bills[i];return null;}
 function billText(b){
-  var lines=['🧾 *Black Ghost Hisab — বিল / রসিদ*','📅 তারিখ: '+b.date,'👤 কাস্টমার: '+b.customer+(b.phone?' ('+b.phone+')':''),'——————————'];
+  var lines=['🧾 *Black Ghost Hisab — বিল / রসিদ*',(b.no?'🔢 বিল নং: '+fmt(num(b.no)):''),'📅 তারিখ: '+b.date,'👤 কাস্টমার: '+b.customer+(b.phone?' ('+b.phone+')':''),'——————————'].filter(function(x){return x!=='';});
   b.items.forEach(function(it){lines.push('• '+it.name+' — '+fmt(it.qty)+' × '+money(it.price)+' = '+money(it.qty*it.price));});
   lines.push('——————————');
   if(num(b.discAmt)>0)lines.push('মোট: '+money(b.subtotal),'ছাড়: − '+money(b.discAmt));
@@ -3073,7 +3750,7 @@ window.openBill=function(id){
     var img=(p&&p.photo)?'<img src="'+p.photo+'" alt="" style="width:38px;height:38px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:6px" />':'';
     return '<tr><td>'+img+esc(it.name)+'</td><td class="num">'+fmt(it.qty)+'</td><td class="num">'+money(it.price)+'</td><td class="num">'+money(it.qty*it.price)+'</td></tr>';
   }).join('');
-  $('billView').innerHTML='<div style="text-align:center;border-bottom:2px dashed var(--line);padding-bottom:10px;margin-bottom:10px"><div style="font-size:1.3rem;font-weight:800">Black Ghost Hisab</div><div style="color:var(--muted)">বিক্রির বিল / রসিদ</div><div style="color:var(--muted);font-size:.9rem">তারিখ: '+esc(b.date)+'</div></div>'+
+  $('billView').innerHTML='<div style="text-align:center;border-bottom:2px dashed var(--line);padding-bottom:10px;margin-bottom:10px"><div style="font-size:1.3rem;font-weight:800">Black Ghost Hisab</div><div style="color:var(--muted)">বিক্রির বিল / রসিদ</div><div style="color:var(--muted);font-size:.9rem">তারিখ: '+esc(b.date)+(b.no?' • বিল নং: '+fmt(num(b.no)):'')+'</div></div>'+
   '<div class="kv"><span>কাস্টমার</span><b>'+esc(b.customer)+(b.phone?' • '+esc(b.phone):'')+'</b></div>'+
   '<div style="overflow-x:auto"><table><tr><th>আইটেম</th><th class="num">পরিমাণ</th><th class="num">দাম</th><th class="num">মোট</th></tr>'+rows+'</table></div>'+
   (num(b.discAmt)>0?'<div class="kv"><span>মোট</span><b>'+money(b.subtotal)+'</b></div><div class="kv"><span>ছাড়</span><b style="color:var(--in)">− '+money(b.discAmt)+'</b></div>':'')+
@@ -3087,7 +3764,16 @@ window.openBill=function(id){
 };
 $('billClose').addEventListener('click',function(){$('billModal').classList.remove('open');});
 $('billModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-$('billShare').addEventListener('click',function(){var b=findBill(curBillId);if(b)shareText(billText(b));});
+$('billShare').addEventListener('click',function(){
+  var b=findBill(curBillId);if(!b)return;
+  /* Send straight to the CUSTOMER's own WhatsApp number when the bill has
+     one; otherwise fall back to the generic share sheet. */
+  var ph=(b.phone||'').replace(/[^0-9]/g,'');
+  if(ph.length>=10){
+    if(ph.indexOf('880')!==0)ph=(ph.charAt(0)==='0')?('880'+ph.slice(1)):('880'+ph);
+    window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(billText(b)),'_blank');
+  }else shareText(billText(b));
+});
 $('billDownload').addEventListener('click',function(){
   var b=findBill(curBillId);if(!b)return;
   var html='<!doctype html><html lang="bn"><head><meta charset="utf-8"><title>Bill '+esc(b.date)+'</title><style>body{font-family:sans-serif;max-width:520px;margin:20px auto;padding:0 16px}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ccc;padding:6px;text-align:left}.num{text-align:right}h1{text-align:center;font-size:20px;margin:4px 0}.c{text-align:center;color:#555}</style></head><body><h1>Black Ghost Hisab</h1><p class="c">বিক্রির বিল / রসিদ • তারিখ: '+esc(b.date)+'</p><p>কাস্টমার: <b>'+esc(b.customer)+'</b>'+(b.phone?' • '+esc(b.phone):'')+'</p><table><tr><th>আইটেম</th><th class="num">পরিমাণ</th><th class="num">দাম</th><th class="num">মোট</th></tr>'+
@@ -3101,8 +3787,12 @@ $('billPrint').addEventListener('click',function(){
   setTimeout(function(){window.print();setTimeout(function(){document.body.classList.remove('print-bill');},600);},60);
 });
 window.delBill=function(id){
-  askSure('এই বিলটা মুছবেন? (বিল থেকে তৈরি স্টক/টাকার এন্ট্রি থেকে যাবে — দরকার হলে সেগুলো আলাদাভাবে মুছুন)',function(){
-    DB.bills=DB.bills.filter(function(x){return x.id!==id;});addTomb('b',id);saveLocal();toast('🗑️ বিল মোছা হয়েছে');
+  var b=findBill(id);
+  askSure('এই বিলটা মুছবেন? বিল থেকে তৈরি স্টক বিক্রি, টাকার খাতার জমা আর বাকির এন্ট্রিও একসাথে মুছে যাবে — কোনো হিসাব ঝুলে থাকবে না।',function(){
+    if(b)removeBillLinks(b);
+    DB.bills=DB.bills.filter(function(x){return x.id!==id;});addTomb('b',id);
+    if(editBillId===id)resetBillForm();
+    saveLocal();toast('🗑️ বিল ও তার সব এন্ট্রি মোছা হয়েছে');
   });
 };
 $('billSearch').addEventListener('input',renderBills);
@@ -3114,10 +3804,51 @@ function renderBills(){
   }).slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
   if(!list.length){$('billList').innerHTML='<div class="empty">'+(q?'“'+esc(q)+'” দিয়ে কোনো বিল পাওয়া যায়নি।':'এখনো কোনো বিল নেই।')+'</div>';return;}
   $('billList').innerHTML=list.map(function(b){
-    return '<div class="rowitem"><div class="r1"><div><b>'+esc(b.customer)+'</b><div class="meta">'+esc(b.date)+' • '+fmt(b.items.length)+' আইটেম'+(num(b.discAmt)>0?' • ছাড় '+money(b.discAmt):'')+'</div></div><div class="amt">'+money(b.total)+'</div></div>'+
+    return '<div class="rowitem"><div class="r1"><div><b>'+esc(b.customer)+'</b><div class="meta">'+(b.no?'বিল নং '+fmt(num(b.no))+' • ':'')+esc(b.date)+' • '+fmt(b.items.length)+' আইটেম'+(num(b.discAmt)>0?' • ছাড় '+money(b.discAmt):'')+'</div></div><div class="amt">'+money(b.total)+'</div></div>'+
     '<div class="meta">জমা '+money(b.paid)+' • বাকি <b style="color:'+(b.due>0?'var(--out)':'var(--in)')+'">'+money(b.due)+'</b></div>'+
-    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openBill(\''+b.id+'\')">👁️ দেখুন / পাঠান</button><button class="btn small danger" type="button" onclick="delBill(\''+b.id+'\')">🗑️</button></div></div>';
+    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openBill(\''+b.id+'\')">👁️ দেখুন / পাঠান</button><button class="btn small ghost" type="button" onclick="editBill(\''+b.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delBill(\''+b.id+'\')">🗑️</button></div></div>';
   }).join('');
+}
+$('billPrintList').addEventListener('click',function(){printActivePage();});
+/* ---------- BILL FORM DRAFT (survives reload) ----------
+   The half-written bill form is kept in this phone's storage per account;
+   leaving or reloading never loses it. Saving the bill clears the draft. */
+function saveBillDraft(){
+  if(editBillId)return;
+  try{
+    var rows=[];
+    document.querySelectorAll('#billItems .billrow').forEach(function(row){
+      rows.push({pid:row.querySelector('.b-pid').value,name:row.querySelector('.b-name').value,qty:row.querySelector('.b-qty').value,price:row.querySelector('.b-price').value});
+    });
+    var d={cust:$('bCust').value,phone:$('bPhone').value,date:$('bDate').value,paid:$('bPaid').value,method:$('bMethod').value,discType:$('bDiscType').value,discVal:$('bDiscVal').value,note:$('bNote').value,rows:rows};
+    localStorage.setItem(curKey+'_billdraft',JSON.stringify(d));
+  }catch(e){}
+}
+function clearBillDraft(){try{localStorage.removeItem(curKey+'_billdraft');}catch(e){}}
+function restoreBillDraft(){
+  var d=null;
+  try{var raw=localStorage.getItem(curKey+'_billdraft');if(raw)d=JSON.parse(raw);}catch(e){}
+  if(!d||editBillId)return;
+  if(d.cust)$('bCust').value=d.cust;
+  if(d.phone)$('bPhone').value=d.phone;
+  if(d.date)$('bDate').value=d.date;
+  if(d.paid)$('bPaid').value=d.paid;
+  if(d.method)$('bMethod').value=d.method;
+  if(d.discType)$('bDiscType').value=d.discType;
+  if(d.discVal)$('bDiscVal').value=d.discVal;
+  if(d.note)$('bNote').value=d.note;
+  if(Array.isArray(d.rows)&&d.rows.length){
+    $('billItems').innerHTML='';
+    d.rows.forEach(function(r){
+      addBillRow();
+      var rows=document.querySelectorAll('#billItems .billrow'),row=rows[rows.length-1];
+      if(r.pid)row.querySelector('.b-pid').value=r.pid;
+      row.querySelector('.b-name').value=r.name||'';
+      row.querySelector('.b-qty').value=r.qty||'';
+      row.querySelector('.b-price').value=r.price||'';
+    });
+    billCalc();
+  }
 }
 
 /* ---------- STAFF / SALARY / ATTENDANCE ---------- */
@@ -3159,10 +3890,12 @@ window.delStaff=function(id){
   });
 };
 var salSid=null;
-window.paySalary=function(sid){
+var SAL_KINDS={salary:'মাসিক বেতন',advance:'অগ্রিম বেতন',bonus:'বোনাস',overtime:'ওভারটাইম'};
+window.paySalary=function(sid,kind){
   var s=findStaff(sid);if(!s)return;salSid=sid;
-  $('salTitle').textContent=s.name+' — বেতন দিন';
-  $('salMonth').value=todayStr().slice(0,7);$('salDate').value=todayStr();$('salAmount').value=num(s.salary)||'';
+  $('salTitle').textContent=s.name+' — টাকা দিন';
+  $('salKind').value=kind||'salary';
+  $('salMonth').value=todayStr().slice(0,7);$('salDate').value=todayStr();$('salAmount').value=(kind&&kind!=='salary')?'':(num(s.salary)||'');
   $('salModal').classList.add('open');
 };
 $('salClose').addEventListener('click',function(){$('salModal').classList.remove('open');});
@@ -3170,15 +3903,19 @@ $('salModal').addEventListener('click',function(e){if(e.target===this)this.class
 $('salSave').addEventListener('click',function(){
   var s=findStaff(salSid);if(!s)return;
   var month=$('salMonth').value||todayStr().slice(0,7),amt=num($('salAmount').value),date=$('salDate').value||todayStr();
+  var kind=$('salKind').value||'salary';
   if(!(amt>0)){toast('⚠️ টাকার পরিমাণ লিখুন');return;}
-  var dup=DB.pays.some(function(py){return py.sid===salSid&&py.month===month;});
-  if(dup){toast('⚠️ এই মাসের বেতন আগেই দেওয়া হয়েছে — দুবার হবে না');return;}
-  var tx={id:uid(),date:date,type:'out',amount:amt,cat:'বেতন / মজুরি',method:'নগদ',note:s.name+'-এর বেতন ('+month+')',book:bookOf(s),u:Date.now()};
+  if(kind==='salary'){
+    var dup=DB.pays.some(function(py){return py.sid===salSid&&py.month===month&&(!py.kind||py.kind==='salary');});
+    if(dup){toast('⚠️ এই মাসের বেতন আগেই দেওয়া হয়েছে — দুবার হবে না');return;}
+  }
+  var tx={id:uid(),date:date,type:'out',amount:amt,cat:'বেতন / মজুরি',method:$('salMethod').value,note:s.name+'-এর '+SAL_KINDS[kind]+' ('+month+')',book:bookOf(s),u:Date.now()};
   DB.txs.push(tx);
-  DB.pays.push({id:uid(),sid:salSid,month:month,amount:amt,date:date,txId:tx.id,book:bookOf(s),u:Date.now()});
+  DB.pays.push({id:uid(),sid:salSid,month:month,amount:amt,date:date,kind:kind,txId:tx.id,book:bookOf(s),u:Date.now()});
   $('salModal').classList.remove('open');
-  saveLocal();toast('✅ বেতন দেওয়া হয়েছে — টাকার খাতায় খরচ যোগ হয়েছে');
+  saveLocal();toast('✅ '+SAL_KINDS[kind]+' দেওয়া হয়েছে — টাকার খাতায় খরচ যোগ হয়েছে');
 });
+$('stSearch').addEventListener('input',renderStaff);
 window.delPay=function(id){
   askSure('এই বেতনের এন্ট্রি মুছবেন? টাকার খাতার খরচটাও মুছে যাবে।',function(){
     var py=null;DB.pays.forEach(function(x){if(x.id===id)py=x;});
@@ -3199,18 +3936,20 @@ window.attSet=function(sid,status){
 function renderStaff(){
   detachFormFromList('staffList','staffFormTitle');
   var ym=todayStr().slice(0,7);
-  if(!bStaff().length){$('staffList').innerHTML='<div class="empty">কোনো কর্মচারী নেই — ওপরে যোগ করুন।</div>';placeFormAfterRender('staffFormTitle','staffList',editStaffId);return;}
+  var sq=($('stSearch').value||'').toLowerCase();
+  var staffList=bStaff().filter(function(s){return !sq||(s.name||'').toLowerCase().indexOf(sq)>=0||(s.phone||'').indexOf(sq)>=0;});
+  if(!staffList.length){$('staffList').innerHTML='<div class="empty">'+(sq?'“'+esc(sq)+'” দিয়ে কোনো কর্মচারী পাওয়া যায়নি।':'কোনো কর্মচারী নেই — ওপরে যোগ করুন।')+'</div>';placeFormAfterRender('staffFormTitle','staffList',editStaffId);return;}
   var attLbl={present:'✅ উপস্থিত',absent:'❌ অনুপস্থিত',leave:'🏖️ ছুটি'};
-  $('staffList').innerHTML=bStaff().map(function(s){
-    var paid=DB.pays.filter(function(py){return py.sid===s.id&&py.month===ym;});
+  $('staffList').innerHTML=staffList.map(function(s){
+    var paid=DB.pays.filter(function(py){return py.sid===s.id&&py.month===ym&&(!py.kind||py.kind==='salary');});
     var hist=DB.pays.filter(function(py){return py.sid===s.id;}).slice().sort(function(a,b){return b.month.localeCompare(a.month);});
     var atts=DB.atts.filter(function(a){return a.sid===s.id&&a.date.slice(0,7)===ym;});
     var cnt={present:0,absent:0,leave:0};atts.forEach(function(a){if(cnt[a.status]!==undefined)cnt[a.status]++;});
     var todayAtt=DB.atts.filter(function(a){return a.sid===s.id&&a.date===todayStr();})[0];
-    var histHtml=hist.length?hist.map(function(py){return '<div class="kv"><span>'+esc(py.month)+' • '+esc(py.date)+'</span><b>'+money(py.amount)+' <button class="btn small danger noprint" type="button" onclick="delPay(\''+py.id+'\')">মুছুন</button></b></div>';}).join(''):'<p class="hint" style="margin:0">এখনো কোনো বেতন দেওয়া হয়নি।</p>';
+    var histHtml=hist.length?hist.map(function(py){return '<div class="kv"><span>'+esc(py.month)+' • '+esc(SAL_KINDS[py.kind||'salary'])+' • '+esc(py.date)+'</span><b>'+money(py.amount)+' <button class="btn small danger noprint" type="button" onclick="delPay(\''+py.id+'\')">মুছুন</button></b></div>';}).join(''):'<p class="hint" style="margin:0">এখনো কোনো বেতন দেওয়া হয়নি।</p>';
     return '<div class="rowitem" data-rowid="'+s.id+'"><div class="r1"><div><b style="font-size:1.08rem">'+esc(s.name)+'</b><div class="meta">মাসিক বেতন '+money(s.salary)+(s.phone?' • '+esc(s.phone):'')+'</div></div>'+
     '<div>'+(paid.length?'<span class="badge in">✅ এই মাসের বেতন দেওয়া</span>':'<span class="badge warn">এই মাসের বেতন বাকি</span>')+'</div></div>'+
-    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="paySalary(\''+s.id+'\')">💵 বেতন দিন</button><button class="btn small ghost" type="button" onclick="editStaff(\''+s.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delStaff(\''+s.id+'\')">🗑️</button></div>'+
+    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="paySalary(\''+s.id+'\')">💵 বেতন দিন</button><button class="btn small gold" type="button" onclick="paySalary(\''+s.id+'\',\'advance\')">⏩ অগ্রিম / বোনাস</button><button class="btn small ghost" type="button" onclick="editStaff(\''+s.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delStaff(\''+s.id+'\')">🗑️</button></div>'+
     '<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px"><b>🗓️ হাজিরা</b> <span class="meta">এই মাসে: ✅ '+fmt(cnt.present)+' দিন • ❌ '+fmt(cnt.absent)+' দিন • 🏖️ '+fmt(cnt.leave)+' দিন'+(todayAtt?' • আজ: '+attLbl[todayAtt.status]:'')+'</span>'+
     '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px" class="noprint"><input type="date" id="attDate_'+s.id+'" value="'+todayStr()+'" style="flex:0 1 160px;width:auto" />'+
     '<button class="btn small" type="button" onclick="attSet(\''+s.id+'\',\'present\')">✅ উপস্থিত</button><button class="btn small danger" type="button" onclick="attSet(\''+s.id+'\',\'absent\')">❌ অনুপস্থিত</button><button class="btn small gold" type="button" onclick="attSet(\''+s.id+'\',\'leave\')">🏖️ ছুটি</button></div></div>'+
@@ -3220,16 +3959,69 @@ function renderStaff(){
 }
 
 /* ---------- PARTNERS ---------- */
+var editPartnerId=null;
+function resetPartnerForm(){
+  editPartnerId=null;$('pnName').value='';$('pnInvest').value='';$('pnShare').value='';$('pnDate').value=todayStr();
+  $('pnSave').textContent='✅ পার্টনার সেভ করুন';$('pnCancel').style.display='none';
+}
+$('pnCancel').addEventListener('click',resetPartnerForm);
+window.editPartner=function(id){
+  var pn=null;DB.partners.forEach(function(x){if(x.id===id)pn=x;});if(!pn)return;
+  editPartnerId=id;
+  $('pnName').value=pn.name;$('pnInvest').value=num(pn.invest)||'';$('pnShare').value=num(pn.share)||'';$('pnDate').value=pn.date||todayStr();
+  $('pnSave').textContent='✅ আপডেট করুন';$('pnCancel').style.display='';
+  showPageNoScroll('report');window.scrollTo({top:0,behavior:'smooth'});
+};
 $('pnSave').addEventListener('click',function(){
   var name=$('pnName').value.trim();
   if(!name){toast('⚠️ পার্টনারের নাম লিখুন');$('pnName').focus();return;}
-  DB.partners.push({id:uid(),name:name,invest:num($('pnInvest').value),share:num($('pnShare').value),date:$('pnDate').value||todayStr(),book:writeBook(),u:Date.now()});
-  $('pnName').value='';$('pnInvest').value='';$('pnShare').value='';
+  if(editPartnerId){
+    for(var i=0;i<DB.partners.length;i++)if(DB.partners[i].id===editPartnerId){DB.partners[i].name=name;DB.partners[i].invest=num($('pnInvest').value);DB.partners[i].share=num($('pnShare').value);DB.partners[i].date=$('pnDate').value||todayStr();DB.partners[i].u=Date.now();}
+    resetPartnerForm();saveLocal();toast('✅ পার্টনার ঠিক হয়েছে');
+    return;
+  }
+  DB.partners.push({id:uid(),name:name,invest:num($('pnInvest').value),share:num($('pnShare').value),date:$('pnDate').value||todayStr(),paid:[],book:writeBook(),u:Date.now()});
+  resetPartnerForm();
   saveLocal();toast('✅ পার্টনার যোগ হয়েছে');
 });
 window.delPartner=function(id){
-  askSure('এই পার্টনারকে মুছে ফেলবেন?',function(){
+  askSure('এই পার্টনারকে মুছে ফেলবেন? (তাকে দেওয়া লাভের টাকার খাতা-এন্ট্রি থেকে যাবে)',function(){
     DB.partners=DB.partners.filter(function(x){return x.id!==id;});addTomb('n',id);saveLocal();toast('🗑️ মোছা হয়েছে');
+  });
+};
+/* Partner profit payments live INSIDE the partner record (paid list), so
+   they merge/sync with it; each payment also writes its money-ledger entry
+   and keeps the tx id so it can be removed cleanly. */
+var pnPayId=null;
+window.openPnPay=function(id){
+  var pn=null;DB.partners.forEach(function(x){if(x.id===id)pn=x;});if(!pn)return;
+  pnPayId=id;
+  $('pnPayTitle').textContent=pn.name+' — লাভের টাকা দিন';
+  $('pnPayDate').value=todayStr();$('pnPayAmt').value='';
+  $('pnPayModal').classList.add('open');
+};
+$('pnPayClose').addEventListener('click',function(){$('pnPayModal').classList.remove('open');});
+$('pnPayModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+$('pnPaySave').addEventListener('click',function(){
+  var pn=null;DB.partners.forEach(function(x){if(x.id===pnPayId)pn=x;});if(!pn)return;
+  var amt=num($('pnPayAmt').value),date=$('pnPayDate').value||todayStr();
+  if(!(amt>0)){toast('⚠️ টাকার পরিমাণ লিখুন');return;}
+  var tx={id:uid(),date:date,type:'out',amount:amt,cat:'পার্টনারের লাভ',method:$('pnPayMethod').value,note:pn.name+'-কে লাভের ভাগ দেওয়া হলো',book:bookOf(pn),u:Date.now()};
+  DB.txs.push(tx);
+  if(!Array.isArray(pn.paid))pn.paid=[];
+  pn.paid.push({date:date,amount:amt,method:$('pnPayMethod').value,txId:tx.id});
+  pn.u=Date.now();
+  if(DB.cats.indexOf('পার্টনারের লাভ')<0)DB.cats.push('পার্টনারের লাভ');
+  $('pnPayModal').classList.remove('open');
+  saveLocal();toast('✅ লাভের টাকা দেওয়া হয়েছে — খাতায় খরচ যোগ হয়েছে');
+});
+window.delPnPay=function(pid,idx){
+  askSure('এই লাভ-দেওয়ার রেকর্ড মুছবেন? টাকার খাতার খরচ এন্ট্রিটাও মুছে যাবে।',function(){
+    var pn=null;DB.partners.forEach(function(x){if(x.id===pid)pn=x;});if(!pn||!Array.isArray(pn.paid))return;
+    var rec=pn.paid[idx];if(!rec)return;
+    if(rec.txId){addTomb('t',rec.txId);DB.txs=DB.txs.filter(function(t){return t.id!==rec.txId;});}
+    pn.paid.splice(idx,1);pn.u=Date.now();
+    saveLocal();toast('🗑️ রেকর্ড মোছা হয়েছে');
   });
 };
 function renderPartners(){
@@ -3240,7 +4032,10 @@ function renderPartners(){
   var rows=bPartners().map(function(pn){
     totInvest+=num(pn.invest);totShare+=num(pn.share);
     var shareAmt=mp*num(pn.share)/100;
-    return '<div class="kv"><span><b>'+esc(pn.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">বিনিয়োগ '+money(pn.invest)+' • '+esc(pn.date||'')+' • লাভের ভাগ '+fmt(num(pn.share))+'%</span></span><b style="color:'+(shareAmt>=0?'var(--in)':'var(--out)')+'">'+money(shareAmt)+' <button class="btn small danger noprint" type="button" onclick="delPartner(\''+pn.id+'\')">মুছুন</button></b></div>';
+    var paidList=Array.isArray(pn.paid)?pn.paid:[];
+    var paidTot=0;paidList.forEach(function(r){paidTot+=num(r.amount);});
+    var paidHtml=paidList.length?paidList.map(function(r,idx){return '<div class="kv"><span style="font-size:.9rem">💸 লাভ দেওয়া — '+esc(r.date)+' • '+esc(methodLabel(r.method||'নগদ'))+'</span><b style="font-size:.95rem">'+money(r.amount)+' <button class="btn small danger noprint" type="button" onclick="delPnPay(\''+pn.id+'\','+idx+')">মুছুন</button></b></div>';}).join(''):'';
+    return '<div class="kv" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span><b>'+esc(pn.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">বিনিয়োগ '+money(pn.invest)+' • '+esc(pn.date||'')+' • লাভের ভাগ '+fmt(num(pn.share))+'% • মোট লাভ দেওয়া হয়েছে: '+money(paidTot)+'</span></span><b style="color:'+(shareAmt>=0?'var(--in)':'var(--out)')+'">'+money(shareAmt)+'<br><span class="noprint"><button class="btn small gold" type="button" onclick="openPnPay(\''+pn.id+'\')">💸 লাভ দিন</button> <button class="btn small ghost" type="button" onclick="editPartner(\''+pn.id+'\')">✏️ ঠিক</button> <button class="btn small danger" type="button" onclick="delPartner(\''+pn.id+'\')">মুছুন</button></span></b></div>'+paidHtml+'</div>';
   }).join('');
   $('partnerList').innerHTML='<div class="kv"><span>'+esc(ym)+' মাসের মোট পণ্য-লাভ</span><b>'+money(mp)+'</b></div>'+rows+
   '<div class="kv"><span>মোট বিনিয়োগ • মোট ভাগ</span><b>'+money(totInvest)+' • '+fmt(totShare)+'%</b></div>';
@@ -3321,6 +4116,7 @@ function renderCharts(){
     ml.push(ym.slice(2));mv.push(Math.round(monthProfit(ym)));
   }
   drawBars($('monthChart'),ml,mv);
+  drawIEChart();
 }
 
 /* ---------- ORDER BOOK ---------- */
@@ -3336,6 +4132,24 @@ $('oProd').addEventListener('change',function(){
   if(p){$('oPrice').value=num(p.sell)||'';$('oPname').value='';}
   oCalc();
 });
+var editOrderId=null;
+function resetOrderForm(){
+  editOrderId=null;$('oCust').value='';$('oPhone').value='';$('oPname').value='';$('oQty').value='';$('oPrice').value='';$('oAdvance').value='';$('oDdate').value='';$('oDate').value=todayStr();
+  $('oSave').textContent='✅ অর্ডার সেভ করুন';$('oCancel').style.display='none';oCalc();
+}
+$('oCancel').addEventListener('click',resetOrderForm);
+window.editOrder=function(id){
+  var o=findOrder(id);if(!o||o.status!=='pending')return;
+  editOrderId=id;
+  $('oCust').value=o.cust;$('oPhone').value=o.phone||'';
+  if(o.pid&&findProd(o.pid)){$('oProd').value=o.pid;$('oPname').value='';}else{$('oProd').value='';$('oPname').value=o.pname||'';}
+  $('oQty').value=o.qty;$('oPrice').value=o.price;$('oAdvance').value=num(o.advance)||'';
+  $('oDate').value=o.date;$('oDdate').value=o.ddate||'';
+  if(o.method)$('oMethod').value=o.method;
+  $('oSave').textContent='✅ আপডেট করুন';$('oCancel').style.display='';
+  oCalc();showPageNoScroll('order');window.scrollTo({top:0,behavior:'smooth'});
+  toast('✏️ অর্ডারটা ফর্মে এসেছে — বদলে “আপডেট করুন” চাপুন');
+};
 $('oSave').addEventListener('click',function(){
   var cust=$('oCust').value.trim();
   if(!cust){toast('⚠️ কাস্টমারের নাম লিখুন');$('oCust').focus();return;}
@@ -3345,20 +4159,41 @@ $('oSave').addEventListener('click',function(){
   if(!pname){toast('⚠️ প্রোডাক্ট বাছুন বা নাম লিখুন');return;}
   if(!(qty>0)){toast('⚠️ পরিমাণ লিখুন');return;}
   var date=$('oDate').value||todayStr();
-  var o={id:uid(),cust:cust,phone:$('oPhone').value.trim(),pid:p?p.id:'',pname:pname,qty:qty,price:price,advance:adv,date:date,ddate:$('oDdate').value||'',status:'pending',book:writeBook(),u:Date.now()};
-  if(adv>0)DB.txs.push({id:uid(),date:date,type:'in',amount:adv,cat:'পণ্য বিক্রি',method:'নগদ',note:'অর্ডার অগ্রিম — '+cust+' ('+pname+')',book:writeBook(),u:Date.now()});
+  if(editOrderId){
+    var o=findOrder(editOrderId);
+    if(o){
+      /* Keep the advance money entry in step with the edited advance:
+         adjust the stored tx in place (or create/remove it as needed). */
+      var oldAdv=num(o.advance);
+      if(o.txId){
+        if(adv>0)DB.txs.forEach(function(t){if(t.id===o.txId){t.amount=adv;t.date=date;t.method=$('oMethod').value;t.note='অর্ডার অগ্রিম — '+cust+' ('+pname+')';t.u=Date.now();}});
+        else{addTomb('t',o.txId);DB.txs=DB.txs.filter(function(t){return t.id!==o.txId;});o.txId='';}
+      }else if(adv>0){
+        var ntx={id:uid(),date:date,type:'in',amount:adv,cat:'পণ্য বিক্রি',method:$('oMethod').value,note:'অর্ডার অগ্রিম — '+cust+' ('+pname+')',book:bookOf(o),u:Date.now()};
+        DB.txs.push(ntx);o.txId=ntx.id;
+      }
+      o.cust=cust;o.phone=$('oPhone').value.trim();o.pid=p?p.id:'';o.pname=pname;o.qty=qty;o.price=price;o.advance=adv;o.date=date;o.ddate=$('oDdate').value||'';o.method=$('oMethod').value;o.u=Date.now();
+      resetOrderForm();saveLocal();toast('✅ অর্ডার ঠিক হয়েছে — অগ্রিমের হিসাবও আপডেট হয়েছে');
+      return;
+    }
+    editOrderId=null;
+  }
+  var o={id:uid(),cust:cust,phone:$('oPhone').value.trim(),pid:p?p.id:'',pname:pname,qty:qty,price:price,advance:adv,date:date,ddate:$('oDdate').value||'',status:'pending',method:$('oMethod').value,book:writeBook(),u:Date.now()};
+  if(adv>0){var atx={id:uid(),date:date,type:'in',amount:adv,cat:'পণ্য বিক্রি',method:$('oMethod').value,note:'অর্ডার অগ্রিম — '+cust+' ('+pname+')',book:writeBook(),u:Date.now()};o.txId=atx.id;DB.txs.push(atx);}
   DB.orders.push(o);
-  $('oCust').value='';$('oPhone').value='';$('oPname').value='';$('oQty').value='';$('oAdvance').value='';oCalc();
+  resetOrderForm();
   saveLocal();toast('✅ অর্ডার সেভ হয়েছে'+(adv>0?' — অগ্রিম টাকা খাতায় আয় হয়েছে':''));
 });
+$('oSearch').addEventListener('input',renderOrders);
 function findOrder(id){for(var i=0;i<DB.orders.length;i++)if(DB.orders[i].id===id)return DB.orders[i];return null;}
 window.deliverOrder=function(id){
   var o=findOrder(id);if(!o||o.status!=='pending')return;
-  askSure('“'+o.cust+'”-এর অর্ডার ডেলিভারি হয়েছে? স্টক থেকে '+fmt(num(o.qty))+' কেটে যাবে আর বাকি '+money(orderRemaining(o))+' আয় হিসেবে খাতায় যাবে (অগ্রিম আগেই হিসাব হয়েছে, দুবার হবে না)।',function(){
+  var over=o.pid?stockOverItems([{pid:o.pid,qty:num(o.qty)}]):[];
+  askSure('“'+o.cust+'”-এর অর্ডার ডেলিভারি হয়েছে? স্টক থেকে '+fmt(num(o.qty))+' কেটে যাবে আর বাকি '+money(orderRemaining(o))+' আয় হিসেবে খাতায় যাবে (অগ্রিম আগেই হিসাব হয়েছে, দুবার হবে না)।'+(over.length?' ⚠️ তবে স্টকে কম আছে: '+over.join('; ')+' — স্টক মাইনাস হয়ে যাবে।':''),function(){
     var date=todayStr();
     if(o.pid){var op=findProd(o.pid);DB.logs.push({id:uid(),pid:o.pid,date:date,type:'sale',qty:num(o.qty),price:num(o.price),party:o.cust,book:bookOf(o),u:Date.now(),cost:op?num(op.buy):0});}
     var rem=orderRemaining(o);
-    if(rem>0)DB.txs.push({id:uid(),date:date,type:'in',amount:rem,cat:'পণ্য বিক্রি',method:'নগদ',note:'অর্ডার ডেলিভারি — '+o.cust+' ('+o.pname+')',book:bookOf(o),u:Date.now()});
+    if(rem>0)DB.txs.push({id:uid(),date:date,type:'in',amount:rem,cat:'পণ্য বিক্রি',method:$('oPayMethod').value,note:'অর্ডার ডেলিভারি — '+o.cust+' ('+o.pname+')',book:bookOf(o),u:Date.now()});
     o.status='delivered';o.u=Date.now();
     saveLocal();toast('✅ ডেলিভারি সম্পন্ন — স্টক ও টাকার হিসাব আপডেট হয়েছে');
   });
@@ -3367,7 +4202,7 @@ window.cancelOrder=function(id){
   var o=findOrder(id);if(!o||o.status!=='pending')return;
   var adv=num(o.advance);
   askSure('এই অর্ডার বাতিল করবেন?'+(adv>0?' অগ্রিম '+money(adv)+' ফেরতের খরচ এন্ট্রি হবে।':''),function(){
-    if(adv>0)DB.txs.push({id:uid(),date:todayStr(),type:'out',amount:adv,cat:'অন্যান্য',method:'নগদ',note:'অর্ডার বাতিল — অগ্রিম ফেরত ('+o.cust+')',book:bookOf(o),u:Date.now()});
+    if(adv>0)DB.txs.push({id:uid(),date:todayStr(),type:'out',amount:adv,cat:'অন্যান্য',method:$('oPayMethod').value,note:'অর্ডার বাতিল — অগ্রিম ফেরত ('+o.cust+')',book:bookOf(o),u:Date.now()});
     o.status='cancelled';o.u=Date.now();
     saveLocal();toast('অর্ডার বাতিল হয়েছে');
   });
@@ -3382,14 +4217,16 @@ function orderCard(o){
   return '<div class="rowitem"><div class="r1"><div><b>'+esc(o.cust)+'</b> '+stBadge+'<div class="meta">'+esc(o.pname)+' — '+fmt(num(o.qty))+' × '+money(num(o.price))+' = '+money(orderTotal(o))+'</div>'+
   '<div class="meta">অর্ডার: '+esc(o.date)+(o.ddate?' • ডেলিভারি: '+esc(o.ddate):'')+(o.phone?' • '+esc(o.phone):'')+'</div>'+
   '<div class="meta">অগ্রিম: '+money(num(o.advance))+' • বাকি পাবো: <b>'+money(orderRemaining(o))+'</b></div></div></div>'+
-  (o.status==='pending'?'<div class="iconbtns noprint"><button class="btn small" type="button" onclick="deliverOrder(\''+o.id+'\')">✅ ডেলিভারি হয়েছে</button><button class="btn small danger" type="button" onclick="cancelOrder(\''+o.id+'\')">বাতিল</button></div>':'<div class="iconbtns noprint"><button class="btn small danger" type="button" onclick="delOrder(\''+o.id+'\')">🗑️ রেকর্ড মুছুন</button></div>')+'</div>';
+  (o.status==='pending'?'<div class="iconbtns noprint"><button class="btn small" type="button" onclick="deliverOrder(\''+o.id+'\')">✅ ডেলিভারি হয়েছে</button><button class="btn small ghost" type="button" onclick="editOrder(\''+o.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="cancelOrder(\''+o.id+'\')">বাতিল</button></div>':'<div class="iconbtns noprint"><button class="btn small danger" type="button" onclick="delOrder(\''+o.id+'\')">🗑️ রেকর্ড মুছুন</button></div>')+'</div>';
 }
 function renderOrders(){
   var sel=$('oProd'),cur=sel.value;
   sel.innerHTML='<option value="">— প্রোডাক্ট বাছুন —</option>'+bProducts().map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join('');
   if(cur&&findProd(cur)&&inBook(findProd(cur)))sel.value=cur;
-  var pend=bOrders().filter(function(o){return o.status==='pending';}).slice().sort(function(a,b){return (a.ddate||a.date).localeCompare(b.ddate||b.date);});
-  var done=bOrders().filter(function(o){return o.status!=='pending';}).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  var oq=($('oSearch').value||'').toLowerCase();
+  var omatch=function(o){return !oq||(o.cust||'').toLowerCase().indexOf(oq)>=0||(o.pname||'').toLowerCase().indexOf(oq)>=0||(o.phone||'').indexOf(oq)>=0;};
+  var pend=bOrders().filter(function(o){return o.status==='pending'&&omatch(o);}).slice().sort(function(a,b){return (a.ddate||a.date).localeCompare(b.ddate||b.date);});
+  var done=bOrders().filter(function(o){return o.status!=='pending'&&omatch(o);}).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
   $('orderPending').innerHTML=pend.length?pend.map(orderCard).join(''):'<div class="empty">কোনো অপেক্ষমাণ অর্ডার নেই।</div>';
   $('orderDone').innerHTML=done.length?done.map(orderCard).join(''):'<p class="hint" style="margin:0">এখনো কিছু নেই।</p>';
 }
@@ -3404,17 +4241,62 @@ $('lnDirSeg').querySelectorAll('button').forEach(function(b){
 });
 function loanPaid(lid){var s=0;DB.insts.forEach(function(x){if(x.lid===lid)s+=num(x.amount);});return s;}
 function findLoan(id){for(var i=0;i<DB.loans.length;i++)if(DB.loans[i].id===id)return DB.loans[i];return null;}
+var editLoanId=null;
+function resetLoanForm(){
+  editLoanId=null;$('lnParty').value='';$('lnTotal').value='';$('lnInst').value='';$('lnCount').value='';$('lnInterest').value='';$('lnDueDay').value='';$('lnStart').value=todayStr();
+  $('lnFormTitle').textContent='🏦 নতুন লোন / ধার যোগ করুন';$('lnSave').textContent='✅ লোন সেভ করুন';$('lnCancel').style.display='none';
+}
+$('lnCancel').addEventListener('click',resetLoanForm);
+window.editLoan=function(id){
+  var l=findLoan(id);if(!l)return;
+  editLoanId=id;
+  lnDir=l.dir||'taken';
+  $('lnDirSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===lnDir?'sel-in':'';});
+  $('lnParty').value=l.party;$('lnTotal').value=l.total;$('lnInst').value=num(l.inst)||'';$('lnCount').value=num(l.count)||'';
+  $('lnInterest').value=num(l.interest)||'';$('lnDueDay').value=num(l.dueDay)||'';$('lnStart').value=l.start;
+  if(l.method)$('lnMethod').value=l.method;
+  $('lnFormTitle').textContent='🏦 লোন ঠিক করুন';$('lnSave').textContent='✅ আপডেট করুন';$('lnCancel').style.display='';
+  showPageNoScroll('loan');window.scrollTo({top:0,behavior:'smooth'});
+};
 $('lnSave').addEventListener('click',function(){
   var party=$('lnParty').value.trim(),total=num($('lnTotal').value);
   if(!party){toast('⚠️ নাম লিখুন');$('lnParty').focus();return;}
   if(!(total>0)){toast('⚠️ মোট টাকা লিখুন');return;}
   var date=$('lnStart').value||todayStr();
-  var loan={id:uid(),dir:lnDir,party:party,total:total,inst:num($('lnInst').value),count:num($('lnCount').value),start:date,book:writeBook(),u:Date.now()};
-  var tx={id:uid(),date:date,type:lnDir==='taken'?'in':'out',amount:total,cat:lnDir==='taken'?'ধার নেওয়া':'ধার দেওয়া',method:'নগদ',note:(lnDir==='taken'?'লোন নিলাম — ':'লোন দিলাম — ')+party,book:writeBook(),u:Date.now()};
+  if(editLoanId){
+    var l=findLoan(editLoanId);
+    if(l){
+      /* Replace the original money entry so the ledger matches the edit. */
+      if(l.txId){addTomb('t',l.txId);DB.txs=DB.txs.filter(function(t){return t.id!==l.txId;});}
+      var ntx={id:uid(),date:date,type:lnDir==='taken'?'in':'out',amount:total,cat:lnDir==='taken'?'ধার নেওয়া':'ধার দেওয়া',method:$('lnMethod').value,note:(lnDir==='taken'?'লোন নিলাম — ':'লোন দিলাম — ')+party,book:bookOf(l),u:Date.now()};
+      DB.txs.push(ntx);
+      l.dir=lnDir;l.party=party;l.total=total;l.inst=num($('lnInst').value);l.count=num($('lnCount').value);l.interest=num($('lnInterest').value);l.dueDay=num($('lnDueDay').value);l.start=date;l.method=$('lnMethod').value;l.txId=ntx.id;l.u=Date.now();
+      resetLoanForm();saveLocal();toast('✅ লোন ঠিক হয়েছে — খাতার এন্ট্রিও আপডেট হয়েছে');
+      return;
+    }
+    editLoanId=null;
+  }
+  var loan={id:uid(),dir:lnDir,party:party,total:total,inst:num($('lnInst').value),count:num($('lnCount').value),interest:num($('lnInterest').value),dueDay:num($('lnDueDay').value),start:date,method:$('lnMethod').value,book:writeBook(),u:Date.now()};
+  var tx={id:uid(),date:date,type:lnDir==='taken'?'in':'out',amount:total,cat:lnDir==='taken'?'ধার নেওয়া':'ধার দেওয়া',method:$('lnMethod').value,note:(lnDir==='taken'?'লোন নিলাম — ':'লোন দিলাম — ')+party,book:writeBook(),u:Date.now()};
   loan.txId=tx.id;DB.txs.push(tx);DB.loans.push(loan);
-  $('lnParty').value='';$('lnTotal').value='';$('lnInst').value='';$('lnCount').value='';
+  resetLoanForm();
   saveLocal();toast('✅ লোন সেভ হয়েছে — টাকাটা খাতায় '+(lnDir==='taken'?'আয়':'খরচ')+' হিসেবে গেছে');
 });
+$('lnSearch').addEventListener('input',renderLoans);
+/* Next installment due date: start + one month per installment already
+   paid, on the loan's due-day of month (or the start day), clamped to the
+   month's real length. */
+function loanNextDue(l){
+  var paidN=DB.insts.filter(function(x){return x.lid===l.id;}).length;
+  var base=new Date((l.start||todayStr())+'T00:00:00');
+  if(isNaN(base.getTime()))return '';
+  var d=new Date(base.getFullYear(),base.getMonth()+paidN,1);
+  var day=num(l.dueDay)>0?num(l.dueDay):base.getDate();
+  var dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  d.setDate(Math.min(day,dim));
+  return todayStr(d);
+}
+function loanInterestAmt(l){return num(l.total)*num(l.interest)/100;}
 var imLid=null;
 window.payInst=function(lid){
   var l=findLoan(lid);if(!l)return;imLid=lid;
@@ -3430,7 +4312,7 @@ $('imSave').addEventListener('click',function(){
   var l=findLoan(imLid);if(!l)return;
   var amt=num($('imAmt').value),date=$('imDate').value||todayStr();
   if(!(amt>0)){toast('⚠️ টাকার পরিমাণ লিখুন');return;}
-  var tx={id:uid(),date:date,type:l.dir==='taken'?'out':'in',amount:amt,cat:l.dir==='taken'?'ধার শোধ':'ধার ফেরত পাওয়া',method:'নগদ',note:'কিস্তি — '+l.party,book:bookOf(l),u:Date.now()};
+  var tx={id:uid(),date:date,type:l.dir==='taken'?'out':'in',amount:amt,cat:l.dir==='taken'?'ধার শোধ':'ধার ফেরত পাওয়া',method:$('imMethod').value,note:'কিস্তি — '+l.party,book:bookOf(l),u:Date.now()};
   DB.txs.push(tx);
   DB.insts.push({id:uid(),lid:l.id,date:date,amount:amt,txId:tx.id,book:bookOf(l),u:Date.now()});
   $('instModal').classList.remove('open');
@@ -3462,18 +4344,23 @@ function renderLoans(){
     '<div class="card"><div class="k">দিতে বাকি</div><div class="v neg">'+money(remTaken)+'</div></div>'+
     '<div class="card"><div class="k">📤 লোন দিয়েছি (মোট)</div><div class="v pos">'+money(totGiven)+'</div></div>'+
     '<div class="card"><div class="k">পেতে বাকি</div><div class="v pos">'+money(remGiven)+'</div></div>';
-  if(!bLoans().length){$('loanList').innerHTML='<div class="empty">কোনো লোন নেই — ওপরে যোগ করুন।</div>';return;}
-  $('loanList').innerHTML=bLoans().map(function(l){
+  var lq=($('lnSearch').value||'').toLowerCase();
+  var loanList=bLoans().filter(function(l){return !lq||(l.party||'').toLowerCase().indexOf(lq)>=0;});
+  if(!loanList.length){$('loanList').innerHTML='<div class="empty">'+(lq?'“'+esc(lq)+'” দিয়ে কোনো লোন পাওয়া যায়নি।':'কোনো লোন নেই — ওপরে যোগ করুন।')+'</div>';return;}
+  $('loanList').innerHTML=loanList.map(function(l){
     var paid=loanPaid(l.id),rem=num(l.total)-paid;
     var myInsts=DB.insts.filter(function(x){return x.lid===l.id;}).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
     var left=num(l.count)>0?Math.max(0,num(l.count)-myInsts.length):null;
     var pct=num(l.total)>0?Math.min(100,Math.round(paid/num(l.total)*100)):0;
+    var nd=rem>0?loanNextDue(l):'';
+    var ndBadge=nd?(' • পরের কিস্তি: <b>'+esc(nd)+'</b>'+(nd<todayStr()?' <span class="badge out">⛔ মেয়াদ পার</span>':'')):'';
+    var intAmt=loanInterestAmt(l);
     var hist=myInsts.length?myInsts.map(function(x){return '<div class="kv"><span>'+esc(x.date)+'</span><b>'+money(x.amount)+' <button class="btn small danger noprint" type="button" onclick="delInst(\''+x.id+'\')">মুছুন</button></b></div>';}).join(''):'<p class="hint" style="margin:0">এখনো কোনো কিস্তি হয়নি।</p>';
     return '<div class="rowitem"><div class="r1"><div><b style="font-size:1.05rem">'+esc(l.party)+'</b> '+(l.dir==='taken'?'<span class="badge out">লোন নিয়েছি</span>':'<span class="badge in">লোন দিয়েছি</span>')+
-    '<div class="meta">শুরু: '+esc(l.start)+' • মোট '+money(l.total)+' • প্রতি কিস্তি '+money(l.inst)+(num(l.count)>0?' • মোট '+fmt(num(l.count))+' কিস্তি':'')+'</div>'+
-    '<div class="meta">দেওয়া হয়েছে: '+money(paid)+' ('+fmt(myInsts.length)+' কিস্তি) • <b>বাকি: '+money(rem)+'</b>'+(left!==null?' • কিস্তি বাকি: '+fmt(left)+'টি':'')+'</div>'+
+    '<div class="meta">শুরু: '+esc(l.start)+' • মোট '+money(l.total)+' • প্রতি কিস্তি '+money(l.inst)+(num(l.count)>0?' • মোট '+fmt(num(l.count))+' কিস্তি':'')+(intAmt>0?' • সুদ '+fmt(num(l.interest))+'% = '+money(intAmt)+' (সুদসহ মোট '+money(num(l.total)+intAmt)+')':'')+'</div>'+
+    '<div class="meta">দেওয়া হয়েছে: '+money(paid)+' ('+fmt(myInsts.length)+' কিস্তি) • <b>বাকি: '+money(rem)+'</b>'+(left!==null?' • কিস্তি বাকি: '+fmt(left)+'টি':'')+ndBadge+'</div>'+
     '<div style="background:var(--line);border-radius:999px;height:12px;overflow:hidden;margin-top:6px"><div style="height:100%;width:'+pct+'%;background:var(--in)"></div></div></div></div>'+
-    '<div class="iconbtns noprint">'+(rem>0?'<button class="btn small" type="button" onclick="payInst(\''+l.id+'\')">💵 কিস্তি '+(l.dir==='taken'?'দিন':'নিন')+'</button>':'<span class="badge in">✅ পুরো শোধ</span>')+'<button class="btn small danger" type="button" onclick="delLoan(\''+l.id+'\')">🗑️</button></div>'+
+    '<div class="iconbtns noprint">'+(rem>0?'<button class="btn small" type="button" onclick="payInst(\''+l.id+'\')">💵 কিস্তি '+(l.dir==='taken'?'দিন':'নিন')+'</button>':'<span class="badge in">✅ পুরো শোধ</span>')+'<button class="btn small ghost" type="button" onclick="editLoan(\''+l.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delLoan(\''+l.id+'\')">🗑️</button></div>'+
     '<details class="logbox"><summary>📜 কিস্তির ইতিহাস ('+myInsts.length+' টি)</summary>'+hist+'</details></div>';
   }).join('');
 }
@@ -3507,12 +4394,30 @@ function renderBudgets(){
 
 /* ---------- SAVINGS GOALS ---------- */
 function goalSaved(gid){var s=0;DB.txs.forEach(function(t){if(t.goalId!==gid)return;if(t.type==='save')s+=num(t.amount);else if(t.type==='unsave')s-=num(t.amount);});return s;}
+var editGoalId=null;
+function resetGoalForm(){
+  editGoalId=null;$('glName').value='';$('glTarget').value='';$('glDate').value='';
+  $('glSave').textContent='✅ লক্ষ্য বানান';$('glCancel').style.display='none';
+}
+$('glCancel').addEventListener('click',resetGoalForm);
+window.editGoal=function(id){
+  var g=null;DB.goals.forEach(function(x){if(x.id===id)g=x;});if(!g)return;
+  editGoalId=id;
+  $('glName').value=g.name;$('glTarget').value=num(g.target)||'';$('glDate').value=g.date||'';
+  $('glSave').textContent='✅ আপডেট করুন';$('glCancel').style.display='';
+  showPageNoScroll('report');window.scrollTo({top:0,behavior:'smooth'});
+};
 $('glSave').addEventListener('click',function(){
   var name=$('glName').value.trim(),tgt=num($('glTarget').value);
   if(!name){toast('⚠️ লক্ষ্যের নাম লিখুন');return;}
   if(!(tgt>0)){toast('⚠️ লক্ষ্য টাকা লিখুন');return;}
+  if(editGoalId){
+    for(var i=0;i<DB.goals.length;i++)if(DB.goals[i].id===editGoalId){DB.goals[i].name=name;DB.goals[i].target=tgt;DB.goals[i].date=$('glDate').value||'';DB.goals[i].u=Date.now();}
+    resetGoalForm();saveLocal();toast('✅ লক্ষ্য ঠিক হয়েছে');
+    return;
+  }
   DB.goals.push({id:uid(),name:name,target:tgt,date:$('glDate').value||'',book:writeBook(),u:Date.now()});
-  $('glName').value='';$('glTarget').value='';$('glDate').value='';
+  resetGoalForm();
   saveLocal();toast('✅ সঞ্চয় লক্ষ্য তৈরি হয়েছে');
 });
 var gmGoal=null,gmMode='save';
@@ -3530,7 +4435,7 @@ $('gmSave').addEventListener('click',function(){
   var amt=num($('gmAmt').value);
   if(!(amt>0)){toast('⚠️ টাকা লিখুন');return;}
   if(gmMode==='unsave'&&amt>goalSaved(gmGoal)){toast('⚠️ সঞ্চয়ে এত টাকা নেই — আছে '+money(goalSaved(gmGoal)));return;}
-  DB.txs.push({id:uid(),date:$('gmDate').value||todayStr(),type:gmMode,amount:amt,cat:'সঞ্চয়',method:'নগদ',note:(gmMode==='save'?'সঞ্চয়ে জমা — ':'সঞ্চয় থেকে তোলা — ')+g.name,goalId:gmGoal,book:bookOf(g),u:Date.now()});
+  DB.txs.push({id:uid(),date:$('gmDate').value||todayStr(),type:gmMode,amount:amt,cat:'সঞ্চয়',method:$('gmMethod').value,note:(gmMode==='save'?'সঞ্চয়ে জমা — ':'সঞ্চয় থেকে তোলা — ')+g.name,goalId:gmGoal,book:bookOf(g),u:Date.now()});
   $('goalModal').classList.remove('open');
   saveLocal();toast(gmMode==='save'?'🐷 সঞ্চয়ে জমা হয়েছে — হাতের ক্যাশ থেকে সরে গেছে':'✅ টাকা হাতে ফিরে এসেছে');
 });
@@ -3548,20 +4453,38 @@ function renderGoals(){
     var saved=goalSaved(g.id),tgt=num(g.target),pct=tgt>0?Math.min(100,Math.round(saved/tgt*100)):0;
     return '<div class="rowitem"><div class="r1"><div><b>'+esc(g.name)+'</b><div class="meta">জমেছে '+money(saved)+' / লক্ষ্য '+money(tgt)+(g.date?' • তারিখ: '+esc(g.date):'')+'</div>'+
     '<div style="background:var(--line);border-radius:999px;height:12px;overflow:hidden;margin-top:6px;width:200px;max-width:55vw"><div style="height:100%;width:'+pct+'%;background:var(--in)"></div></div></div><div class="amt">'+fmt(pct)+'%</div></div>'+
-    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="goalMoney(\''+g.id+'\',\'save\')">➕ জমা দিন</button><button class="btn small ghost" type="button" onclick="goalMoney(\''+g.id+'\',\'unsave\')">➖ তুলুন</button><button class="btn small danger" type="button" onclick="delGoal(\''+g.id+'\')">🗑️</button></div></div>';
+    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="goalMoney(\''+g.id+'\',\'save\')">➕ জমা দিন</button><button class="btn small ghost" type="button" onclick="goalMoney(\''+g.id+'\',\'unsave\')">➖ তুলুন</button><button class="btn small ghost" type="button" onclick="editGoal(\''+g.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delGoal(\''+g.id+'\')">🗑️</button></div></div>';
   }).join('');
 }
 
 /* ---------- RECURRING BILLS / REMINDERS ---------- */
+var editRbillId=null;
+function resetRbillForm(){
+  editRbillId=null;$('rbName').value='';$('rbAmt').value='';$('rbDay').value='';$('rbCat').value='';
+  $('rbSave').textContent='✅ বিল যোগ করুন';$('rbCancel').style.display='none';
+}
+$('rbCancel').addEventListener('click',resetRbillForm);
+window.editRbill=function(id){
+  var rb=null;DB.rbills.forEach(function(x){if(x.id===id)rb=x;});if(!rb)return;
+  editRbillId=id;
+  $('rbName').value=rb.name;$('rbAmt').value=num(rb.amount)||'';$('rbDay').value=num(rb.day)||'';$('rbCat').value=rb.cat||'';
+  $('rbSave').textContent='✅ আপডেট করুন';$('rbCancel').style.display='';
+  showPageNoScroll('report');window.scrollTo({top:0,behavior:'smooth'});
+};
 $('rbSave').addEventListener('click',function(){
   var name=$('rbName').value.trim(),amt=num($('rbAmt').value),day=num($('rbDay').value);
   if(!name){toast('⚠️ বিলের নাম লিখুন');return;}
   if(!(amt>0)){toast('⚠️ টাকা লিখুন');return;}
   if(!(day>=1&&day<=31)){toast('⚠️ মাসের তারিখ ১–৩১ এর মধ্যে দিন');return;}
   var cat=$('rbCat').value.trim()||'অন্যান্য';
-  DB.rbills.push({id:uid(),name:name,amount:amt,day:day,cat:cat,book:writeBook(),u:Date.now()});
   if(DB.cats.indexOf(cat)<0)DB.cats.push(cat);
-  $('rbName').value='';$('rbAmt').value='';$('rbDay').value='';$('rbCat').value='';
+  if(editRbillId){
+    for(var i=0;i<DB.rbills.length;i++)if(DB.rbills[i].id===editRbillId){DB.rbills[i].name=name;DB.rbills[i].amount=amt;DB.rbills[i].day=day;DB.rbills[i].cat=cat;DB.rbills[i].u=Date.now();}
+    resetRbillForm();saveLocal();toast('✅ মাসিক বিল ঠিক হয়েছে');
+    return;
+  }
+  DB.rbills.push({id:uid(),name:name,amount:amt,day:day,cat:cat,book:writeBook(),u:Date.now()});
+  resetRbillForm();
   saveLocal();toast('✅ মাসিক বিল যোগ হয়েছে');
 });
 window.delRbill=function(id){
@@ -3584,7 +4507,7 @@ window.payRbill=function(id){
   var rb=null;DB.rbills.forEach(function(x){if(x.id===id)rb=x;});if(!rb)return;
   var ym=todayStr().slice(0,7);
   if(DB.rpays.some(function(x){return x.rid===id&&x.month===ym;})){toast('এই মাসের বিল আগেই পরিশোধ হয়েছে');return;}
-  var tx={id:uid(),date:todayStr(),type:'out',amount:num(rb.amount),cat:rb.cat,method:'নগদ',note:rb.name+' ('+ym+')',book:bookOf(rb),u:Date.now()};
+  var tx={id:uid(),date:todayStr(),type:'out',amount:num(rb.amount),cat:rb.cat,method:$('rbMethod').value,note:rb.name+' ('+ym+')',book:bookOf(rb),u:Date.now()};
   DB.txs.push(tx);
   DB.rpays.push({id:uid(),rid:id,month:ym,txId:tx.id,book:bookOf(rb),u:Date.now()});
   saveLocal();toast('✅ বিল পরিশোধ — খরচের খাতায় চলে গেছে');
@@ -3594,7 +4517,7 @@ function renderRbills(){
   var listHtml=bRbills().length?bRbills().map(function(rb){
     var st=rbillStatus(rb,ym,todayD);
     var badge=st.paid?'<span class="badge in">✅ এই মাসে পরিশোধ</span>':(st.overdue?'<span class="badge out">⛔ মেয়াদ পার</span>':(st.soon?'<span class="badge warn">⏰ '+fmt(st.daysLeft)+' দিন বাকি</span>':'<span class="badge warn">প্রতি মাসের '+fmt(num(rb.day))+' তারিখ</span>'));
-    return '<div class="kv"><span><b>'+esc(rb.name)+'</b> — '+money(rb.amount)+'<br><span style="color:var(--muted);font-size:.87rem">'+esc(rb.cat)+' • মাসের '+fmt(num(rb.day))+' তারিখ</span></span><b>'+badge+' <button class="btn small danger noprint" type="button" onclick="delRbill(\''+rb.id+'\')">মুছুন</button></b></div>';
+    return '<div class="kv"><span><b>'+esc(rb.name)+'</b> — '+money(rb.amount)+'<br><span style="color:var(--muted);font-size:.87rem">'+esc(rb.cat)+' • মাসের '+fmt(num(rb.day))+' তারিখ</span></span><b>'+badge+' <button class="btn small ghost noprint" type="button" onclick="editRbill(\''+rb.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delRbill(\''+rb.id+'\')">মুছুন</button></b></div>';
   }).join(''):'<p class="hint" style="margin:6px 0 0">কোনো মাসিক বিল নেই।</p>';
   $('rbillList').innerHTML=listHtml;
   var alerts=bRbills().filter(function(rb){var st=rbillStatus(rb,ym,todayD);return !st.paid&&(st.overdue||st.soon);});
@@ -3617,6 +4540,13 @@ function mvApplyPriceType(){
   mvUpdate();
 }
 $('mvPriceSeg').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){mvPriceType=b.getAttribute('data-v');mvApplyPriceType();});});
+$('mvVoiceBtn').addEventListener('click',function(){
+  startVoice(function(txt){
+    var m=bnToEnDigits(txt).match(/(\d+(?:\.\d+)?)/);
+    if(m&&num(m[1])>0){$('mvQty').value=num(m[1]);mvUpdate();toast('🎤 পরিমাণ বসে গেছে: '+fmt(num(m[1]))+' — যাচাই করে সেভ করুন');}
+    else toast('⚠️ সংখ্যা বোঝা যায়নি — হাতে লিখুন');
+  });
+});
 
 /* ---------- BOOK SWITCHER UI ---------- */
 function renderBooks(){
@@ -3632,7 +4562,28 @@ function renderBooks(){
   if(hint)hint.textContent=bookView==='all'
     ?'এখন সব খাতার হিসাব একসাথে দেখা যাচ্ছে। নতুন এন্ট্রি দিলে তা “'+bookName(DEFAULT_BOOK)+'” খাতায় যাবে।'
     :'এখন “'+bookName(bookView)+'” খাতার হিসাব দেখা যাচ্ছে — টাকার হিসাব, স্টক, বাকি আর রিপোর্ট সব এই খাতারই। নতুন এন্ট্রি এই খাতাতেই যাবে।';
+  /* Book-picker selects (transfer + the entry/product forms' move-to-book). */
+  var bookOpts=DB.books.map(function(b){return '<option value="'+b.id+'">'+esc(b.name)+'</option>';}).join('');
+  [['tfFrom',writeBook()],['tfTo',DEFAULT_BOOK]].forEach(function(pair){
+    var s=$(pair[0]);if(!s)return;var cur=s.value;s.innerHTML=bookOpts;
+    s.value=(cur&&findBook(cur))?cur:pair[1];
+  });
+  var tb=$('txBook');if(tb){var ctb=tb.value;tb.innerHTML=bookOpts;tb.value=(editTxId&&ctb&&findBook(ctb))?ctb:writeBook();}
+  var pb=$('pBook');if(pb){var cpb=pb.value;pb.innerHTML=bookOpts;pb.value=(editProdId&&cpb&&findBook(cpb))?cpb:writeBook();}
 }
+/* Inter-book transfer: one out-entry in the source book + one in-entry in
+   the destination book, same date and amount — the combined balance never
+   changes, each book's own cash moves correctly. */
+$('tfGo').addEventListener('click',function(){
+  var from=$('tfFrom').value,to=$('tfTo').value,amt=num($('tfAmt').value),date=$('tfDate').value||todayStr();
+  if(!findBook(from)||!findBook(to)){toast('⚠️ খাতা বাছুন');return;}
+  if(from===to){toast('⚠️ দুটো আলাদা খাতা বাছুন');return;}
+  if(!(amt>0)){toast('⚠️ টাকার পরিমাণ লিখুন');$('tfAmt').focus();return;}
+  DB.txs.push({id:uid(),date:date,type:'out',amount:amt,cat:'খাতা স্থানান্তর',method:'নগদ',note:'স্থানান্তর → '+bookName(to)+' খাতায়',book:from,u:Date.now()});
+  DB.txs.push({id:uid(),date:date,type:'in',amount:amt,cat:'খাতা স্থানান্তর',method:'নগদ',note:'স্থানান্তর ← '+bookName(from)+' খাতা থেকে',book:to,u:Date.now()});
+  $('tfAmt').value='';
+  saveLocal();toast('🔁 '+money(amt)+' “'+bookName(from)+'” থেকে “'+bookName(to)+'” খাতায় গেছে');
+});
 window.setBookView=function(v){
   if(v!=='all'&&!findBook(v))v=DEFAULT_BOOK;
   bookView=v;saveBookView();renderAll();
@@ -3882,6 +4833,27 @@ $('pfPhotoRm').addEventListener('click',function(){
    it cleanly removes exactly what it added. */
 function puCalc(){$('puTotal').textContent=money(num($('puQty').value)*num($('puCost').value));}
 ['puQty','puCost'].forEach(function(id){$(id).addEventListener('input',puCalc);});
+$('puSearch').addEventListener('input',renderPurchases);
+var editPurchaseId=null, pendingPuPhoto=null;
+function resetPurchaseForm(){
+  editPurchaseId=null;$('puQty').value='';$('puCost').value='';$('puSupplier').value='';$('puDate').value=todayStr();$('puCash').checked=true;
+  pendingPuPhoto=null;$('puPhoto').value='';if($('puPhotoCam'))$('puPhotoCam').value='';$('puPhotoPrev').style.display='none';$('puPhotoRm').style.display='none';
+  $('puFormTitle').textContent='🛒 কেনা মালের হিসাব';$('puSave').textContent='✅ কেনা সেভ করুন (স্টকে যোগ হবে)';$('puCancel').style.display='none';puCalc();
+}
+$('puCancel').addEventListener('click',resetPurchaseForm);
+window.editPurchase=function(id){
+  var pu=null;(DB.purchases||[]).forEach(function(x){if(x.id===id)pu=x;});if(!pu)return;
+  editPurchaseId=id;
+  if(findProd(pu.pid))$('puProd').value=pu.pid;
+  $('puSupplier').value=pu.supplier||'';$('puQty').value=pu.qty;$('puCost').value=pu.cost;$('puDate').value=pu.date;$('puMethod').value=pu.method||'নগদ';
+  $('puCash').checked=!!pu.txId;
+  pendingPuPhoto=null;$('puPhoto').value='';if($('puPhotoCam'))$('puPhotoCam').value='';
+  if(pu.photo){$('puPhotoPrev').src=pu.photo;$('puPhotoPrev').style.display='';$('puPhotoRm').style.display='';}else{$('puPhotoPrev').style.display='none';$('puPhotoRm').style.display='none';}
+  $('puFormTitle').textContent='🛒 কেনা ঠিক করুন';$('puSave').textContent='✅ আপডেট করুন';$('puCancel').style.display='';
+  puCalc();
+  showPageNoScroll('stock');window.scrollTo({top:0,behavior:'smooth'});
+  toast('✏️ কেনার রেকর্ডটা ফর্মে এসেছে — বদলে “আপডেট করুন” চাপুন');
+};
 $('puSave').addEventListener('click',function(){
   var p=findProd($('puProd').value);
   if(!p){toast('⚠️ আগে প্রোডাক্ট বাছুন (না থাকলে ওপরে যোগ করুন)');return;}
@@ -3890,6 +4862,25 @@ $('puSave').addEventListener('click',function(){
   var qty=num($('puQty').value),cost=num($('puCost').value);
   if(!(qty>0)){toast('⚠️ পরিমাণ লিখুন');$('puQty').focus();return;}
   var date=$('puDate').value||todayStr(),bk=bookOf(p),total=qty*cost;
+  if(editPurchaseId){
+    var old=null;(DB.purchases||[]).forEach(function(x){if(x.id===editPurchaseId)old=x;});
+    if(old){
+      /* Reverse the old purchase's stock + money entries, then re-apply. */
+      if(old.logId){DB.logs=DB.logs.filter(function(l){return l.id!==old.logId;});addTomb('l',old.logId);}
+      if(old.txId){DB.txs=DB.txs.filter(function(t){return t.id!==old.txId;});addTomb('t',old.txId);}
+      var nlog={id:uid(),pid:p.id,date:date,type:'in',qty:qty,price:cost,party:supplier,book:bk,u:Date.now(),cost:cost};
+      DB.logs.push(nlog);
+      var ntxId='';
+      if($('puCash').checked&&total>0){var ntx={id:uid(),date:date,type:'out',amount:total,cat:'পণ্য কেনা',method:$('puMethod').value,note:p.name+' কেনা '+fmt(qty)+' '+p.unit+' — '+supplier,book:bk,u:Date.now()};ntxId=ntx.id;DB.txs.push(ntx);}
+      old.pid=p.id;old.pname=p.name;old.supplier=supplier;old.qty=qty;old.cost=cost;old.date=date;old.method=$('puMethod').value;old.book=bk;old.logId=nlog.id;old.txId=ntxId;old.u=Date.now();
+      if(pendingPuPhoto!==null)old.photo=pendingPuPhoto;
+      if(cost>0){p.buy=cost;p.u=Date.now();}
+      resetPurchaseForm();saveLocal();
+      toast('✅ কেনা ঠিক হয়েছে — স্টক ও খরচের হিসাব অটোমেটিক আপডেট হয়েছে');
+      return;
+    }
+    editPurchaseId=null;
+  }
   var log={id:uid(),pid:p.id,date:date,type:'in',qty:qty,price:cost,party:supplier,book:bk,u:Date.now(),cost:cost};
   DB.logs.push(log);
   var txId='';
@@ -3897,10 +4888,37 @@ $('puSave').addEventListener('click',function(){
     var tx={id:uid(),date:date,type:'out',amount:total,cat:'পণ্য কেনা',method:$('puMethod').value,note:p.name+' কেনা '+fmt(qty)+' '+p.unit+' — '+supplier,book:bk,u:Date.now()};
     txId=tx.id;DB.txs.push(tx);
   }
-  DB.purchases.push({id:uid(),pid:p.id,pname:p.name,supplier:supplier,qty:qty,cost:cost,date:date,method:$('puMethod').value,book:bk,logId:log.id,txId:txId,u:Date.now()});
+  var rec={id:uid(),pid:p.id,pname:p.name,supplier:supplier,qty:qty,cost:cost,date:date,method:$('puMethod').value,book:bk,logId:log.id,txId:txId,u:Date.now()};
+  if(pendingPuPhoto)rec.photo=pendingPuPhoto;
+  DB.purchases.push(rec);
   if(cost>0){p.buy=cost;p.u=Date.now();}
-  $('puQty').value='';puCalc();
+  $('puQty').value='';pendingPuPhoto=null;$('puPhotoPrev').style.display='none';$('puPhotoRm').style.display='none';puCalc();
   saveLocal();toast('✅ কেনা সেভ হয়েছে — স্টকে '+fmt(qty)+' '+p.unit+' যোগ হয়েছে, লাভের হিসাব এই কেনা দামে হবে');
+});
+$('puPhotoCamBtn').addEventListener('click',function(){$('puPhotoCam').click();});
+$('puPhotoGalBtn').addEventListener('click',function(){$('puPhoto').click();});
+function loadPuPhoto(f){
+  compressPhotoFile(f,function(d){
+    if(!d){toast('⚠️ ছবিটা পড়া যায়নি');return;}
+    pendingPuPhoto=d;
+    $('puPhotoPrev').src=d;$('puPhotoPrev').style.display='';$('puPhotoRm').style.display='';
+    toast('🧾 রসিদের ছবি তৈরি — সেভ করলেই থেকে যাবে');
+  });
+}
+$('puPhoto').addEventListener('change',function(){loadPuPhoto(this.files&&this.files[0]);});
+$('puPhotoCam').addEventListener('change',function(){loadPuPhoto(this.files&&this.files[0]);});
+$('puPhotoRm').addEventListener('click',function(){
+  pendingPuPhoto='';$('puPhoto').value='';if($('puPhotoCam'))$('puPhotoCam').value='';$('puPhotoPrev').style.display='none';$('puPhotoRm').style.display='none';
+});
+$('puVoiceBtn').addEventListener('click',function(){
+  startVoice(function(txt){
+    var r=parseVoiceText(txt,prodNameList());
+    if(r.product){var p=findProdByName(r.product);if(p)$('puProd').value=p.id;}
+    if(r.amount>0)$('puCost').value=r.amount;
+    if(!$('puSupplier').value.trim())$('puSupplier').value=txt;
+    puCalc();
+    toast('🎤 ফর্মে বসে গেছে — পরিমাণসহ যাচাই করে সেভ করুন');
+  });
 });
 window.delPurchase=function(id){
   askSure('এই কেনার রেকর্ড মুছবেন? এর সাথে যোগ হওয়া স্টক এন্ট্রি আর খরচের এন্ট্রিও মুছে যাবে (স্টক অটোমেটিক কমে যাবে)।',function(){
@@ -3918,10 +4936,11 @@ function renderPurchases(){
   var cur=sel.value;
   sel.innerHTML=bProducts().length?bProducts().map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join(''):'<option value="">আগে প্রোডাক্ট যোগ করুন</option>';
   if(cur&&findProd(cur)&&inBook(findProd(cur)))sel.value=cur;
-  var list=bPurchases().slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
-  $('puList').innerHTML=list.length?list.slice(0,30).map(function(pu){
-    return '<div class="kv"><span>'+esc(pu.date)+' • <b>'+esc(pu.pname||'')+'</b> — '+esc(pu.supplier||'')+'<br><span style="color:var(--muted);font-size:.87rem">'+fmt(num(pu.qty))+' × '+money(pu.cost)+' • মাধ্যম: '+esc(methodLabel(pu.method||'নগদ'))+'</span></span><b>'+money(num(pu.qty)*num(pu.cost))+' <button class="btn small danger noprint" type="button" onclick="delPurchase(\''+pu.id+'\')">মুছুন</button></b></div>';
-  }).join(''):'<p class="hint" style="margin:0">এখনো কোনো কেনার রেকর্ড নেই।</p>';
+  var pq=($('puSearch').value||'').toLowerCase();
+  var list=bPurchases().filter(function(pu){return !pq||(pu.pname||'').toLowerCase().indexOf(pq)>=0||(pu.supplier||'').toLowerCase().indexOf(pq)>=0||(pu.date||'').indexOf(pq)>=0;}).slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
+  $('puList').innerHTML=list.length?list.map(function(pu){
+    return '<div class="kv"><span>'+esc(pu.date)+' • <b>'+esc(pu.pname||'')+'</b> — '+esc(pu.supplier||'')+'<br><span style="color:var(--muted);font-size:.87rem">'+fmt(num(pu.qty))+' × '+money(pu.cost)+' • মাধ্যম: '+esc(methodLabel(pu.method||'নগদ'))+'</span>'+(pu.photo?'<br><img src="'+pu.photo+'" alt="কেনার রসিদ" style="width:52px;height:52px;object-fit:cover;border-radius:8px;border:1.5px solid var(--line);margin-top:4px" />':'')+'</span><b>'+money(num(pu.qty)*num(pu.cost))+' <button class="btn small ghost noprint" type="button" onclick="editPurchase(\''+pu.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delPurchase(\''+pu.id+'\')">মুছুন</button></b></div>';
+  }).join(''):'<p class="hint" style="margin:0">'+(pq?'“'+esc(pq)+'” দিয়ে কোনো কেনা পাওয়া যায়নি।':'এখনো কোনো কেনার রেকর্ড নেই।')+'</p>';
   var sup={};
   list.forEach(function(pu){var k=pu.supplier||'—';if(!sup[k])sup[k]={amt:0,n:0};sup[k].amt+=num(pu.qty)*num(pu.cost);sup[k].n++;});
   var keys=Object.keys(sup);
@@ -3933,17 +4952,29 @@ function renderPurchases(){
    the paid amount to the money ledger with its payment method, any unpaid
    remainder as a due, and a bill record — all in the right books, all
    offline. qsTotals is the pure math the finish path uses. */
-var posCart={};
+var posCart={}, posPriceType='retail';
+$('qsPriceSeg').querySelectorAll('button').forEach(function(b){
+  b.addEventListener('click',function(){
+    posPriceType=b.getAttribute('data-v');
+    $('qsPriceSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===posPriceType?'sel-gold':'';});
+    renderPos();
+  });
+});
 function qsTotals(lines,paid){
-  var total=0;(lines||[]).forEach(function(l){total+=num(l.qty)*num(l.price);});
+  var sub=0;(lines||[]).forEach(function(l){sub+=num(l.qty)*num(l.price);});
+  var dt=$('qsDiscType').value,dv=num($('qsDiscVal').value),disc=0;
+  if(dt==='pct')disc=sub*dv/100;else if(dt==='flat')disc=dv;
+  if(disc>sub)disc=sub;if(disc<0)disc=0;
+  var total=sub-disc;
   var p=(paid===''||paid==null)?total:num(paid);
   if(p>total)p=total;
-  return{total:total,paid:p,due:Math.max(0,total-p)};
+  return{subtotal:sub,discAmt:disc,total:total,paid:p,due:Math.max(0,total-p)};
 }
 function posLines(){
   return Object.keys(posCart).map(function(pid){
     var p=findProd(pid);if(!p)return null;
-    return{p:p,qty:num(posCart[pid]),price:num(p.sell)};
+    var price=posPriceType==='wholesale'?(num(p.wsell)||num(p.sell)):num(p.sell);
+    return{p:p,qty:num(posCart[pid]),price:price};
   }).filter(function(x){return x&&x.qty>0;});
 }
 function renderPosCart(){
@@ -3954,7 +4985,28 @@ function renderPosCart(){
     '<b style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button class="btn small ghost" type="button" onclick="posQty(\''+l.p.id+'\',-1)">−</button><span>'+fmt(l.qty)+'</span><button class="btn small ghost" type="button" onclick="posQty(\''+l.p.id+'\',1)">+</button><span style="min-width:84px;text-align:right">'+money(l.qty*l.price)+'</span><button class="btn small danger" type="button" onclick="posQty(\''+l.p.id+'\',0)">✖</button></b></div>';
   }).join('');
   var t=qsTotals(lines,$('qsPaid').value);
-  $('qsTotalBox').textContent='মোট = '+money(t.total)+' • জমা = '+money(t.paid)+' • বাকি = '+money(t.due);
+  $('qsDiscBox').textContent=money(t.discAmt);
+  $('qsTotalBox').textContent='মোট = '+money(t.total)+(t.discAmt>0?' (ছাড় '+money(t.discAmt)+')':'')+' • জমা = '+money(t.paid)+' • বাকি = '+money(t.due);
+  savePosDraft();
+}
+/* The POS cart survives a reload: cart + customer + paid + discount are
+   kept per account on this phone until the sale is finished. */
+function savePosDraft(){
+  try{localStorage.setItem(curKey+'_posdraft',JSON.stringify({cart:posCart,priceType:posPriceType,cust:$('qsCust').value,phone:$('qsPhone').value,paid:$('qsPaid').value,method:$('qsMethod').value,discType:$('qsDiscType').value,discVal:$('qsDiscVal').value}));}catch(e){}
+}
+function clearPosDraft(){try{localStorage.removeItem(curKey+'_posdraft');}catch(e){}}
+function restorePosDraft(){
+  var d=null;
+  try{var raw=localStorage.getItem(curKey+'_posdraft');if(raw)d=JSON.parse(raw);}catch(e){}
+  if(!d)return;
+  posCart=(d.cart&&typeof d.cart==='object')?d.cart:{};
+  if(d.priceType==='wholesale'){posPriceType='wholesale';$('qsPriceSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')==='wholesale'?'sel-gold':'';});}
+  if(d.cust)$('qsCust').value=d.cust;
+  if(d.phone)$('qsPhone').value=d.phone;
+  if(d.paid)$('qsPaid').value=d.paid;
+  if(d.method)$('qsMethod').value=d.method;
+  if(d.discType)$('qsDiscType').value=d.discType;
+  if(d.discVal)$('qsDiscVal').value=d.discVal;
 }
 function renderPos(){
   var grid=$('qsGrid');if(!grid)return;
@@ -3966,7 +5018,7 @@ function renderPos(){
     var img=p.photo?'<img src="'+p.photo+'" alt="'+esc(p.name)+'" style="width:100%;height:64px;object-fit:cover;border-radius:8px" />':'<div style="height:64px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--goldbg);border-radius:8px" aria-hidden="true">📦</div>';
     return '<button type="button" onclick="posAdd(\''+p.id+'\')" style="text-align:left;background:var(--card);border:1.5px solid '+(inCart?'var(--gold)':'var(--line)')+';border-radius:12px;padding:8px;color:var(--ink);position:relative;min-height:2.25rem">'+img+
     '<div style="font-weight:700;font-size:.92rem;margin-top:6px;line-height:1.3">'+esc(p.name)+'</div>'+
-    '<div style="color:var(--muted);font-size:.85rem">'+money(p.sell)+' • আছে '+fmt(s.remaining)+' '+esc(p.unit)+'</div>'+
+    '<div style="color:var(--muted);font-size:.85rem">'+money(posPriceType==='wholesale'?(num(p.wsell)||num(p.sell)):num(p.sell))+' • আছে '+fmt(s.remaining)+' '+esc(p.unit)+'</div>'+
     (inCart?'<span class="badge warn" style="position:absolute;top:6px;right:6px">বিলে '+fmt(inCart)+'</span>':'')+'</button>';
   }).join('');
   renderPosCart();
@@ -3979,6 +5031,10 @@ window.posQty=function(pid,d){
 };
 $('qsSearch').addEventListener('input',renderPos);
 $('qsPaid').addEventListener('input',renderPosCart);
+['qsCust','qsPhone'].forEach(function(id){$(id).addEventListener('input',savePosDraft);});
+['qsDiscVal'].forEach(function(id){$(id).addEventListener('input',renderPosCart);});
+$('qsDiscType').addEventListener('change',renderPosCart);
+$('qsMethod').addEventListener('change',savePosDraft);
 $('qsScanBtn').addEventListener('click',function(){
   openScanner(function(code){
     var p=findByBarcode(code);
@@ -3991,22 +5047,24 @@ $('qsScanBtn').addEventListener('click',function(){
 $('qsFinish').addEventListener('click',function(){
   var lines=posLines();
   if(!lines.length){toast('⚠️ আগে প্রোডাক্টে চাপ দিয়ে বিলে যোগ করুন');return;}
-  var t=qsTotals(lines,$('qsPaid').value);
-  var date=todayStr(),cust=$('qsCust').value.trim()||'কাস্টমার',method=$('qsMethod').value,bk=writeBook();
-  lines.forEach(function(l){
-    DB.logs.push({id:uid(),pid:l.p.id,date:date,type:'sale',qty:l.qty,price:l.price,party:cust,book:bookOf(l.p),u:Date.now(),cost:num(l.p.buy)});
-  });
-  if(t.paid>0)DB.txs.push({id:uid(),date:date,type:'in',amount:t.paid,cat:'পণ্য বিক্রি',method:method,note:'দ্রুত বিক্রি — '+cust,book:bk,u:Date.now()});
-  if(t.due>0){
-    var party=null;
-    bParties().forEach(function(p){if(p.name.toLowerCase()===cust.toLowerCase())party=p;});
-    if(!party){party={id:uid(),name:cust,phone:'',kind:'customer',limit:0,book:bk,u:Date.now()};DB.parties.push(party);}
-    DB.dues.push({id:uid(),pid:party.id,date:date,type:'give',amount:t.due,note:'দ্রুত বিক্রির বাকি',book:bookOf(party),u:Date.now()});
-  }
-  DB.bills.push({id:uid(),date:date,customer:cust,phone:'',items:lines.map(function(l){return{pid:l.p.id,name:l.p.name,qty:l.qty,price:l.price};}),subtotal:t.total,discType:'none',discVal:0,discAmt:0,total:t.total,paid:t.paid,due:t.due,note:'দ্রুত বিক্রি',method:method,book:bk,u:Date.now()});
-  posCart={};$('qsCust').value='';$('qsPaid').value='';
-  saveLocal();
-  toast('✅ বিক্রি শেষ — স্টক, টাকার খাতা'+(t.due>0?' ও বাকি হিসাব':'')+' আপডেট হয়েছে');
+  var doFinish=function(){
+    var t=qsTotals(lines,$('qsPaid').value);
+    var date=todayStr(),cust=$('qsCust').value.trim()||'কাস্টমার',phone=$('qsPhone').value.trim(),method=$('qsMethod').value,bk=writeBook();
+    var bill={id:uid(),no:nextBillNo(bk),date:date,customer:cust,phone:phone,items:lines.map(function(l){return{pid:l.p.id,name:l.p.name,qty:l.qty,price:l.price};}),subtotal:t.subtotal,discType:$('qsDiscType').value,discVal:num($('qsDiscVal').value),discAmt:t.discAmt,total:t.total,paid:t.paid,due:t.due,note:'দ্রুত বিক্রি',method:method,book:bk,u:Date.now()};
+    applyBillEntries(bill,{items:bill.items,paid:t.paid,due:t.due});
+    /* applyBillEntries writes the standard 'বিল —' money note; POS bills
+       keep their own note so the two stay distinguishable in the ledger. */
+    if(bill.txId)DB.txs.forEach(function(x){if(x.id===bill.txId)x.note='দ্রুত বিক্রি — '+cust;});
+    if(bill.dueId)DB.dues.forEach(function(x){if(x.id===bill.dueId)x.note='দ্রুত বিক্রির বাকি';});
+    DB.bills.push(bill);
+    posCart={};$('qsCust').value='';$('qsPhone').value='';$('qsPaid').value='';$('qsDiscVal').value='';$('qsDiscType').value='none';
+    clearPosDraft();
+    saveLocal();
+    toast('✅ বিক্রি শেষ — স্টক, টাকার খাতা'+(t.due>0?' ও বাকি হিসাব':'')+' আপডেট হয়েছে');
+  };
+  var over=stockOverItems(lines.map(function(l){return{pid:l.p.id,qty:l.qty};}));
+  if(over.length)askSure('⚠️ স্টকে কম আছে: '+over.join('; ')+'। তবু বিক্রি শেষ করবেন? (স্টক মাইনাস হয়ে যাবে)',doFinish);
+  else doFinish();
 });
 
 /* ---------- ORDER LIST — কী কিনতে হবে (v8) ----------
@@ -4211,6 +5269,35 @@ function renderDash(){
   var lowHtml=lows.map(function(p){var s=prodStats(p);return '<div class="kv"><span>'+esc(p.name)+'</span><b><span class="badge warn">মাত্র '+fmt(s.remaining)+' '+esc(p.unit)+' আছে</span></b></div>';}).join('');
   var expHtml=exps.map(function(p){var ei=expiryInfo(p);return '<div class="kv"><span>'+esc(p.name)+'</span><b>'+(ei.expired?'<span class="badge out">⛔ মেয়াদ শেষ!</span>':'<span class="badge warn">⏰ মেয়াদ '+esc(p.expiry)+' (আর '+fmt(ei.days)+' দিন)</span>')+'</b></div>';}).join('');
   $('lowStockBox').innerHTML=(lowHtml+expHtml)||'<p class="hint" style="margin:0">সব প্রোডাক্টের স্টক ঠিক আছে ✅</p>';
+  /* Trial / plan ending soon — warn on the dashboard while there is
+     still time to act (only for the signed-in account's own state). */
+  var dw=$('dashWarn');
+  if(dw){
+    var warnHtml='';
+    if(currentUser&&!isOwner()&&!SUB.free){
+      if(trialActive()&&trialDaysLeft()<=2)warnHtml='<div class="panel" style="border-color:var(--gold);background:var(--goldbg)"><b>⏰ ফ্রি ট্রায়াল শেষ হতে আর মাত্র '+fmt(trialDaysLeft())+' দিন বাকি!</b><br><span style="color:var(--muted)">ট্রায়াল শেষ হলে অ্যাপ লক হয়ে যাবে — হিসাব নিরাপদ থাকবে, প্রিমিয়াম কিনলেই আবার খুলবে। প্রোফাইল থেকে “💎 প্রিমিয়াম কিনুন” চাপুন।</span></div>';
+      else if(num(SUB.expiresAt)>Date.now()&&num(SUB.expiresAt)-Date.now()<=3*DAYMS)warnHtml='<div class="panel" style="border-color:var(--gold);background:var(--goldbg)"><b>⏰ আপনার প্ল্যানের মেয়াদ শেষ হতে চলেছে — '+fmtDate(SUB.expiresAt)+'</b><br><span style="color:var(--muted)">মেয়াদ শেষ হলে অ্যাপ লক হয়ে যাবে — হিসাব নিরাপদ থাকবে। প্রোফাইল থেকে আবার প্ল্যান কিনুন।</span></div>';
+    }
+    dw.innerHTML=warnHtml;
+  }
+  /* Upcoming installments (due within 7 days or overdue) and order
+     deliveries (due within 3 days or overdue), across the visible books. */
+  var up=$('upcomingPanel'),ub=$('upcomingBox');
+  if(up&&ub){
+    var rowsHtml='',t7=new Date();t7.setDate(t7.getDate()+7);var t7s=todayStr(t7);
+    var t3=new Date();t3.setDate(t3.getDate()+3);var t3s=todayStr(t3);
+    bLoans().forEach(function(l){
+      var rem=num(l.total)-loanPaid(l.id);if(!(rem>0))return;
+      var nd=loanNextDue(l);if(!nd||nd>t7s)return;
+      rowsHtml+='<div class="kv"><span>'+(nd<t?'⛔':'⏰')+' <b>কিস্তি — '+esc(l.party)+'</b><br><span style="color:var(--muted);font-size:.87rem">তারিখ: '+esc(nd)+(nd<t?' (মেয়াদ পার!)':'')+'</span></span><b>বাকি '+money(rem)+'</b></div>';
+    });
+    bOrders().forEach(function(o){
+      if(o.status!=='pending'||!o.ddate||o.ddate>t3s)return;
+      rowsHtml+='<div class="kv"><span>'+(o.ddate<t?'⛔':'🚚')+' <b>ডেলিভারি — '+esc(o.cust)+'</b><br><span style="color:var(--muted);font-size:.87rem">'+esc(o.pname)+' • ডেলিভারির তারিখ: '+esc(o.ddate)+(o.ddate<t?' (পার হয়ে গেছে!)':'')+'</span></span><b>'+money(orderRemaining(o))+'</b></div>';
+    });
+    if(rowsHtml){up.style.display='';ub.innerHTML=rowsHtml;}
+    else up.style.display='none';
+  }
   var recent=bTxs().slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);}).slice(0,5);
   $('recentBox').innerHTML=recent.length?recent.map(function(x){
     return '<div class="kv"><span>'+esc(x.date)+' • '+esc(x.note||x.cat)+'</span><b style="color:'+(x.type==='in'?'var(--in)':'var(--out)')+'">'+(x.type==='in'?'+':'−')+' '+money(x.amount)+'</b></div>';
@@ -4224,11 +5311,16 @@ function renderLedger(){
   sorted.forEach(function(x){run+=(x.type==='in'||x.type==='unsave')?num(x.amount):-num(x.amount);runMap[x.id]=run;});
   var all=totals(bTxs());
   $('ledgerSummary').innerHTML='<div class="kv"><span>মোট আয়</span><b style="color:var(--in)">'+money(all.inn)+'</b></div><div class="kv"><span>মোট খরচ</span><b style="color:var(--out)">'+money(all.out)+'</b></div>'+((all.save||all.unsave)?'<div class="kv"><span>🐷 সঞ্চয়ে জমা আছে (হাতের ক্যাশের বাইরে)</span><b>'+money(all.save-all.unsave)+'</b></div>':'')+'<div class="kv"><span><b>হাতে আছে (আয় − খরচ)</b></span><b>'+money(all.bal)+'</b></div>';
+  var mf=$('txMethodF').value,cf=$('txCatF').value,df=$('txFrom').value,dt2=$('txTo').value;
   var list=sorted.filter(function(x){
     if(f==='in'&&x.type!=='in')return false;
     if(f==='out'&&x.type!=='out')return false;
     if(f==='today'&&x.date!==t)return false;
     if(f==='month'&&x.date.slice(0,7)!==ym)return false;
+    if(mf&&(x.method||'নগদ')!==mf)return false;
+    if(cf&&x.cat!==cf)return false;
+    if(df&&x.date<df)return false;
+    if(dt2&&x.date>dt2)return false;
     if(q&&((x.note||'')+' '+x.cat+' '+x.method).toLowerCase().indexOf(q)<0)return false;
     return true;
   }).reverse();
@@ -4257,7 +5349,7 @@ function renderProducts(){
   bProducts().forEach(function(p){var s=prodStats(p);tv+=s.stockValue;ts+=s.sellValue;tp+=s.profit;});
   $('stockSummary').innerHTML='<div class="kv"><span>স্টকের মোট কেনা মূল্য</span><b>'+money(tv)+'</b></div><div class="kv"><span>সব বিক্রি হলে পাওয়া যাবে</span><b>'+money(ts)+'</b></div><div class="kv"><span>এ পর্যন্ত মোট লাভ</span><b style="color:'+(tp>=0?'var(--in)':'var(--out)')+'">'+money(tp)+'</b></div>';
   var list=bProducts().filter(function(p){
-    if(q&&p.name.toLowerCase().indexOf(q)<0)return false;
+    if(q&&p.name.toLowerCase().indexOf(q)<0&&(p.barcode||'').toLowerCase().indexOf(q)<0)return false;
     var s=prodStats(p),ei=expiryInfo(p);
     if(f==='low'&&!(s.remaining<=num(p.low)))return false;
     if(f==='expiry'&&!(ei&&(ei.expired||ei.soon)))return false;
@@ -4273,7 +5365,7 @@ function renderProducts(){
     var logHtml=logs.length?logs.map(function(l){
       var lbl=l.type==='sale'?'🛒 বিক্রি':(l.type==='in'?'📥 মাল এলো':'📤 বের হলো');
       var sign=l.type==='in'?'+':'−';
-      return '<div class="kv"><span>'+esc(l.date)+' • '+lbl+' '+fmt(l.qty)+' '+esc(p.unit)+' × '+money(l.price)+(l.party?' • '+esc(l.party):'')+'</span><b>'+sign+' '+money(num(l.qty)*num(l.price))+' <button class="btn small danger noprint" type="button" onclick="delLog(\''+l.id+'\')">মুছুন</button></b></div>';
+      return '<div class="kv"><span>'+esc(l.date)+' • '+lbl+' '+fmt(l.qty)+' '+esc(p.unit)+' × '+money(l.price)+(l.party?' • '+esc(l.party):'')+'</span><b>'+sign+' '+money(num(l.qty)*num(l.price))+' <button class="btn small ghost noprint" type="button" onclick="editLog(\''+l.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delLog(\''+l.id+'\')">মুছুন</button></b></div>';
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো বিক্রি / মাল আসার এন্ট্রি নেই।</p>';
     return '<div class="rowitem" data-rowid="'+p.id+'"><div style="display:flex;gap:12px;align-items:flex-start">'+photoHtml+
     '<div style="flex:1;min-width:0"><b style="font-size:1.12rem">'+esc(p.name)+'</b>'+(s.remaining<=num(p.low)?' <span class="badge warn">স্টক কম!</span>':'')+expBadge+
@@ -4286,6 +5378,21 @@ function renderProducts(){
   }).join('');
   placeFormAfterRender('prodFormTitle','prodList',editProdId);
 }
+/* Per-product stats for ONE month (sales columns follow the report's
+   selected month; remaining stock is always the current figure). */
+function prodStatsMonth(p,ym){
+  var sold=0,soldAmt=0,profit=0;
+  bLogs().forEach(function(l){
+    if(l.pid!==p.id||l.type!=='sale'||l.date.slice(0,7)!==ym)return;
+    var q=num(l.qty);sold+=q;soldAmt+=q*num(l.price);profit+=q*(num(l.price)-logCost(l,p));
+  });
+  return{sold:sold,soldAmt:soldAmt,profit:profit,remaining:prodStats(p).remaining};
+}
+function prevYm(ym){
+  var p=String(ym||'').split('-');if(p.length!==2)return ym;
+  var d=new Date(num(p[0]),num(p[1])-2,1);
+  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2);
+}
 function renderReport(){
   var ym=$('repMonth').value||todayStr().slice(0,7);
   var mTx=bTxs().filter(function(x){return x.date.slice(0,7)===ym;});
@@ -4297,20 +5404,120 @@ function renderReport(){
   var byCat={};
   mTx.forEach(function(x){byCat[x.cat]=byCat[x.cat]||{inn:0,out:0};if(x.type==='in')byCat[x.cat].inn+=num(x.amount);else byCat[x.cat].out+=num(x.amount);});
   var catRows=Object.keys(byCat).sort().map(function(c){return '<tr><td>'+esc(c)+'</td><td class="num" style="color:var(--in)">'+money(byCat[c].inn)+'</td><td class="num" style="color:var(--out)">'+money(byCat[c].out)+'</td></tr>';}).join('');
+  var pym=prevYm(ym);
+  var pTx=bTxs().filter(function(x){return x.date.slice(0,7)===pym;});
+  var pt=totals(pTx),pp=monthProfit(pym);
+  function diffRow(lbl,cur,prev){
+    var d=cur-prev;
+    return '<div class="kv"><span>'+lbl+' — এই মাস / আগের মাস ('+esc(pym)+')</span><b>'+money(cur)+' / '+money(prev)+' <span style="color:'+(d>=0?'var(--in)':'var(--out)')+'">('+(d>=0?'▲ +':'▼ ')+money(d)+')</span></b></div>';
+  }
   $('monthReport').innerHTML=
     '<div class="kv"><span>মোট আয়</span><b style="color:var(--in)">'+money(mt.inn)+'</b></div>'+
     '<div class="kv"><span>মোট খরচ</span><b style="color:var(--out)">'+money(mt.out)+'</b></div>'+
     '<div class="kv"><span><b>মাসে হাতে বাড়ল / কমল (আয় − খরচ)</b></span><b>'+money(mt.bal)+'</b></div>'+
     '<div class="kv"><span>পণ্য বিক্রি (পরিমাণ / টাকা)</span><b>'+fmt(soldQty)+' / '+money(soldAmt)+'</b></div>'+
     '<div class="kv"><span><b>মাসের পণ্য-লাভ</b></span><b style="color:'+(mp>=0?'var(--in)':'var(--out)')+'">'+money(mp)+'</b></div>'+
+    '<h3>আগের মাসের সাথে তুলনা</h3>'+
+    diffRow('আয়',mt.inn,pt.inn)+diffRow('খরচ',mt.out,pt.out)+diffRow('পণ্য-লাভ',mp,pp)+
     (catRows?'<h3>খাত অনুযায়ী</h3><table><tr><th>খাত</th><th class="num">আয়</th><th class="num">খরচ</th></tr>'+catRows+'</table>':'')+
     '<h3>পেমেন্ট মাধ্যম অনুযায়ী</h3>'+(methodRowsHtml(mTx)||'<p class="hint" style="margin:0">এই মাসে কোনো এন্ট্রি নেই</p>');
-  if(!bProducts().length){$('profitTable').innerHTML='<div class="empty">কোনো প্রোডাক্ট নেই।</div>';renderPartners();renderBudgets();renderGoals();renderRbills();renderCharts();return;}
-  var rows=bProducts().map(function(p){var s=prodStats(p);return '<tr><td><b>'+esc(p.name)+'</b><br><span style="color:var(--muted);font-size:.85rem">কেনা '+money(p.buy)+' • বিক্রি '+money(p.sell)+'</span></td><td class="num">'+fmt(s.sold)+' '+esc(p.unit)+'</td><td class="num">'+money(s.soldAmt)+'</td><td class="num" style="color:'+(s.profit>=0?'var(--in)':'var(--out)')+';font-weight:700">'+money(s.profit)+'</td><td class="num">'+fmt(s.remaining)+' '+esc(p.unit)+'</td></tr>';}).join('');
-  var totP=0,totS=0;bProducts().forEach(function(p){var s=prodStats(p);totP+=s.profit;totS+=s.soldAmt;});
-  $('profitTable').innerHTML='<div style="overflow-x:auto"><table><tr><th>প্রোডাক্ট</th><th class="num">বিক্রি</th><th class="num">বিক্রির টাকা</th><th class="num">লাভ</th><th class="num">বাকি স্টক</th></tr>'+rows+'<tr><td><b>মোট</b></td><td></td><td class="num"><b>'+money(totS)+'</b></td><td class="num"><b>'+money(totP)+'</b></td><td></td></tr></table></div>';
-  renderPartners();renderBudgets();renderGoals();renderRbills();renderCharts();
+  if(!bProducts().length){$('profitTable').innerHTML='<div class="empty">কোনো প্রোডাক্ট নেই।</div>';renderPartners();renderBudgets();renderGoals();renderRbills();renderCatMgr();renderCharts();return;}
+  var rows=bProducts().map(function(p){var s=prodStatsMonth(p,ym);return '<tr><td><b>'+esc(p.name)+'</b><br><span style="color:var(--muted);font-size:.85rem">কেনা '+money(p.buy)+' • বিক্রি '+money(p.sell)+'</span></td><td class="num">'+fmt(s.sold)+' '+esc(p.unit)+'</td><td class="num">'+money(s.soldAmt)+'</td><td class="num" style="color:'+(s.profit>=0?'var(--in)':'var(--out)')+';font-weight:700">'+money(s.profit)+'</td><td class="num">'+fmt(s.remaining)+' '+esc(p.unit)+'</td></tr>';}).join('');
+  var totP=0,totS=0;bProducts().forEach(function(p){var s=prodStatsMonth(p,ym);totP+=s.profit;totS+=s.soldAmt;});
+  $('profitTable').innerHTML='<p class="hint" style="margin:0 0 6px">বিক্রি / বিক্রির টাকা / লাভ — বাছাই করা মাসের ('+esc(ym)+'); বাকি স্টক — এখনকার।</p><div style="overflow-x:auto"><table><tr><th>প্রোডাক্ট</th><th class="num">বিক্রি</th><th class="num">বিক্রির টাকা</th><th class="num">লাভ</th><th class="num">বাকি স্টক</th></tr>'+rows+'<tr><td><b>মোট</b></td><td></td><td class="num"><b>'+money(totS)+'</b></td><td class="num"><b>'+money(totP)+'</b></td><td></td></tr></table></div>';
+  renderPartners();renderBudgets();renderGoals();renderRbills();renderCatMgr();renderCharts();
 }
+/* ---------- YEAR + CUSTOM RANGE REPORTS ---------- */
+$('repYearBtn').addEventListener('click',function(){
+  var y=num($('repYear').value)||new Date().getFullYear();
+  var rows='',ti=0,to=0,tp=0;
+  for(var m=1;m<=12;m++){
+    var ym=y+'-'+('0'+m).slice(-2);
+    var txs=bTxs().filter(function(x){return x.date.slice(0,7)===ym;});
+    var t=totals(txs),pr=monthProfit(ym);
+    ti+=t.inn;to+=t.out;tp+=pr;
+    rows+='<tr><td>'+esc(ym)+'</td><td class="num" style="color:var(--in)">'+money(t.inn)+'</td><td class="num" style="color:var(--out)">'+money(t.out)+'</td><td class="num" style="color:'+(pr>=0?'var(--in)':'var(--out)')+'">'+money(pr)+'</td></tr>';
+  }
+  $('yearReport').innerHTML='<div style="overflow-x:auto"><table><tr><th>মাস</th><th class="num">আয়</th><th class="num">খরচ</th><th class="num">পণ্য-লাভ</th></tr>'+rows+'<tr><td><b>মোট ('+fmt(y)+')</b></td><td class="num"><b>'+money(ti)+'</b></td><td class="num"><b>'+money(to)+'</b></td><td class="num"><b>'+money(tp)+'</b></td></tr></table></div>';
+});
+$('repRangeBtn').addEventListener('click',function(){
+  var f=$('repFrom').value,t=$('repTo').value;
+  if(!f||!t){toast('⚠️ দুটো তারিখই বাছুন');return;}
+  if(f>t){var tmp=f;f=t;t=tmp;}
+  var txs=bTxs().filter(function(x){return x.date>=f&&x.date<=t;});
+  var tt=totals(txs);
+  var pr=0;
+  bLogs().forEach(function(l){if(l.type!=='sale'||l.date<f||l.date>t)return;var p=findProd(l.pid);if(p)pr+=num(l.qty)*(num(l.price)-logCost(l,p));});
+  $('rangeReport').innerHTML='<div class="kv"><span>সময়: '+esc(f)+' → '+esc(t)+'</span><b>'+fmt(txs.length)+' টি এন্ট্রি</b></div>'+
+  '<div class="kv"><span>মোট আয়</span><b style="color:var(--in)">'+money(tt.inn)+'</b></div>'+
+  '<div class="kv"><span>মোট খরচ</span><b style="color:var(--out)">'+money(tt.out)+'</b></div>'+
+  '<div class="kv"><span><b>এই সময়ে হাতে বাড়ল / কমল</b></span><b>'+money(tt.bal)+'</b></div>'+
+  '<div class="kv"><span><b>পণ্য-লাভ</b></span><b style="color:'+(pr>=0?'var(--in)':'var(--out)')+'">'+money(pr)+'</b></div>'+
+  '<h3>পেমেন্ট মাধ্যম অনুযায়ী</h3>'+(methodRowsHtml(txs)||'<p class="hint" style="margin:0">এই সময়ে কোনো এন্ট্রি নেই</p>');
+});
+/* ---------- INCOME / EXPENSE CHART (paired bars, last 6 months) ---------- */
+function drawIEChart(){
+  var canvas=$('ieChart');if(!canvas)return;
+  var W=canvas.clientWidth||0;if(W<40)return;
+  var H=210,dpr=window.devicePixelRatio||1;
+  canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  var ink=getComputedStyle(document.documentElement).getPropertyValue('--ink')||'#222';
+  var muted=getComputedStyle(document.documentElement).getPropertyValue('--muted')||'#777';
+  var labels=[],ins=[],outs=[];
+  var now=new Date();
+  for(var j=5;j>=0;j--){
+    var d2=new Date(now.getFullYear(),now.getMonth()-j,1);
+    var ym=d2.getFullYear()+'-'+('0'+(d2.getMonth()+1)).slice(-2);
+    labels.push(ym.slice(2));
+    var t=totals(bTxs().filter(function(x){return x.date.slice(0,7)===ym;}));
+    ins.push(Math.round(t.inn));outs.push(Math.round(t.out));
+  }
+  var max=1;ins.concat(outs).forEach(function(v){if(v>max)max=v;});
+  var padT=22,padB=26,plotH=H-padT-padB,baseY=padT+plotH;
+  ctx.strokeStyle=muted;ctx.globalAlpha=.5;ctx.beginPath();ctx.moveTo(0,baseY);ctx.lineTo(W,baseY);ctx.stroke();ctx.globalAlpha=1;
+  var n=labels.length,step=W/n,bw=Math.max(3,step*0.3);
+  ctx.font='10px sans-serif';ctx.textAlign='center';
+  for(var i=0;i<n;i++){
+    var cx=step*i+step/2;
+    var hi=plotH*ins[i]/max,ho=plotH*outs[i]/max;
+    ctx.fillStyle='#157347';ctx.fillRect(cx-bw-2,baseY-Math.max(2,hi),bw,Math.max(2,hi));
+    ctx.fillStyle='#b02a20';ctx.fillRect(cx+2,baseY-Math.max(2,ho),bw,Math.max(2,ho));
+    ctx.fillStyle=ink;ctx.fillText(fmt(ins[i])+' / '+fmt(outs[i]),cx,padT-8>0?baseY-Math.max(hi,ho)-5:10);
+    ctx.fillStyle=muted;ctx.fillText(labels[i],cx,H-8);
+  }
+}
+/* ---------- CATEGORY MANAGER ---------- */
+function allCatNames(){
+  var seen={},list=[];
+  DEFAULT_CATS.concat(DB.cats).forEach(function(c){if(c&&!seen[c]){seen[c]=1;list.push(c);}});
+  DB.txs.forEach(function(t){if(t.cat&&!seen[t.cat]){seen[t.cat]=1;list.push(t.cat);}});
+  return list;
+}
+function renderCatMgr(){
+  var box=$('catMgr');if(!box)return;
+  box.innerHTML=allCatNames().map(function(c){
+    var custom=DB.cats.indexOf(c)>=0;
+    return '<div class="kv"><span style="flex:1 1 auto"><input type="text" id="cm_'+esc(c)+'" value="'+esc(c)+'" style="max-width:280px" aria-label="ক্যাটাগরির নাম" /></span><b><button class="btn small gold" type="button" onclick="catRename(\''+esc(c)+'\')">নাম বদলান</button>'+(custom?' <button class="btn small danger" type="button" onclick="catDelete(\''+esc(c)+'\')">মুছুন</button>':'')+'</b></div>';
+  }).join('')||'<p class="hint" style="margin:0">কোনো ক্যাটাগরি নেই।</p>';
+}
+window.catRename=function(oldName){
+  var inp=document.getElementById('cm_'+oldName);
+  var nn=(inp?inp.value:'').trim();
+  if(!nn||nn===oldName){toast('নতুন নাম লিখুন');return;}
+  DB.txs.forEach(function(t){if(t.cat===oldName){t.cat=nn;t.u=Date.now();}});
+  DB.budgets.forEach(function(b){if(b.cat===oldName){b.cat=nn;b.u=Date.now();}});
+  DB.rbills.forEach(function(r){if(r.cat===oldName){r.cat=nn;r.u=Date.now();}});
+  var ci=DB.cats.indexOf(oldName);if(ci>=0)DB.cats[ci]=nn;
+  if(DB.cats.indexOf(nn)<0&&DEFAULT_CATS.indexOf(nn)<0)DB.cats.push(nn);
+  saveLocal();toast('✅ ক্যাটাগরি “'+oldName+'” → “'+nn+'” হয়ে গেছে — সব এন্ট্রিতে বদলে গেছে');
+};
+window.catDelete=function(name){
+  askSure('“'+name+'” ক্যাটাগরিটা লিস্ট থেকে সরাবেন? যেসব এন্ট্রিতে এই নাম আছে সেগুলোর নাম থেকে যাবে — শুধু বাছাইয়ের লিস্ট থেকে সরে যাবে।',function(){
+    DB.cats=DB.cats.filter(function(c){return c!==name;});
+    saveLocal();toast('ক্যাটাগরি লিস্ট থেকে সরানো হয়েছে');
+  });
+};
 function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();renderProfileDevices();}
 
 /* ---------- BACKUP / CSV / PRINT ---------- */
@@ -4330,8 +5537,25 @@ $('upBackup').addEventListener('change',function(){
 function csvCell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}
 $('dlCsvTx').addEventListener('click',function(){
   var rows=[['Date','Type','Category','Method','Note','Amount (BDT)'].join(',')];
-  DB.txs.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(x){rows.push([x.date,x.type==='in'?'Income':'Expense',csvCell(x.cat),csvCell(x.method),csvCell(x.note||''),num(x.amount)].join(','));});
+  var lbl={in:'Income',out:'Expense',save:'Savings Deposit',unsave:'Savings Withdrawal'};
+  DB.txs.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(x){rows.push([x.date,lbl[x.type]||x.type,csvCell(x.cat),csvCell(x.method),csvCell(x.note||''),num(x.amount)].join(','));});
   download('money-ledger-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ CSV ডাউনলোড হয়েছে');
+});
+$('dlCsvBills').addEventListener('click',function(){
+  var rows=[['Bill No','Date','Customer','Phone','Items','Subtotal','Discount','Total','Paid','Due','Method'].join(',')];
+  DB.bills.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(b){rows.push([num(b.no)||'',b.date,csvCell(b.customer),csvCell(b.phone||''),csvCell((b.items||[]).map(function(it){return it.name+' x'+it.qty;}).join('; ')),num(b.subtotal),num(b.discAmt),num(b.total),num(b.paid),num(b.due),csvCell(b.method||'')].join(','));});
+  download('bills-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ বিল CSV ডাউনলোড হয়েছে');
+});
+$('dlCsvDues').addEventListener('click',function(){
+  var rows=[['Date','Person','Type','Amount (BDT)','Due Date','Note'].join(',')];
+  var lbl={give:'Given (receivable)',take:'Taken (payable)',recv:'Payment received',sent:'Payment made'};
+  DB.dues.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(d){var p=findParty(d.pid);rows.push([d.date,csvCell(p?p.name:''),lbl[d.type]||d.type,num(d.amount),d.dueDate||'',csvCell(d.note||'')].join(','));});
+  download('dues-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ বাকি CSV ডাউনলোড হয়েছে');
+});
+$('dlCsvPurchases').addEventListener('click',function(){
+  var rows=[['Date','Product','Supplier','Qty','Unit Cost','Total','Method'].join(',')];
+  (DB.purchases||[]).slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(pu){rows.push([pu.date,csvCell(pu.pname||''),csvCell(pu.supplier||''),num(pu.qty),num(pu.cost),num(pu.qty)*num(pu.cost),csvCell(pu.method||'')].join(','));});
+  download('purchases-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ কেনার CSV ডাউনলোড হয়েছে');
 });
 $('dlCsvStock').addEventListener('click',function(){
   var rows=[['Date','Product','Type','Qty','Unit Price','Total','Party'].join(',')];
@@ -4363,9 +5587,29 @@ if('serviceWorker' in navigator){
   });
 }
 
+/* ---------- FORM DRAFTS (per account, restored on load / login) ---------- */
+var draftsForKey='';
+function loadDrafts(){
+  if(draftsForKey===curKey)return;
+  draftsForKey=curKey;
+  editBillId=null;posCart={};posPriceType='retail';
+  $('qsPriceSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')==='retail'?'sel-gold':'';});
+  $('bCust').value='';$('bPhone').value='';$('bPaid').value='';$('bNote').value='';$('bDiscVal').value='';$('bDiscType').value='none';$('bDate').value=todayStr();
+  $('billItems').innerHTML='';addBillRow();billCalc();
+  $('qsCust').value='';$('qsPhone').value='';$('qsPaid').value='';$('qsDiscVal').value='';$('qsDiscType').value='none';
+  restoreBillDraft();
+  restorePosDraft();
+  renderPos();
+}
+$('page-bill').addEventListener('input',saveBillDraft);
+$('page-bill').addEventListener('change',saveBillDraft);
+
 /* ---------- INIT ---------- */
 loadLocal();loadSub();loadReqs();loadBookView();loadLock();
+themeInit();
 $('txDate').value=todayStr();
+$('tfDate').value=todayStr();
+$('repYear').value=new Date().getFullYear();
 $('repMonth').value=todayStr().slice(0,7);
 $('duDate').value=todayStr();
 $('cdDate').value=todayStr();
@@ -4377,6 +5621,7 @@ $('puDate').value=todayStr();
 duSetType('give');
 addBillRow();billCalc();oCalc();
 updOpenTotal();
+loadDrafts();
 renderAll();
 netUpdate();
 initFirebase();
