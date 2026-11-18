@@ -160,6 +160,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <button type="button" data-tab="stock">📦 প্রোডাক্ট স্টক</button>
     <button type="button" data-tab="dues">🤝 বাকি হিসাব</button>
     <button type="button" data-tab="bill">🧾 বিল</button>
+    <button type="button" data-tab="pos">⚡ দ্রুত বিক্রি</button>
     <button type="button" data-tab="order">📋 অর্ডার বুক</button>
     <button type="button" data-tab="loan">🏦 লোন / কিস্তি</button>
     <button type="button" data-tab="staff">👥 বেতন</button>
@@ -190,6 +191,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="cdCounted">শেষে গুনে পেলাম (৳)</label><input type="number" id="cdCounted" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
       </div>
       <div class="live-total" id="cdResult">তারিখ বাছুন — হিসাব এখানে দেখা যাবে</div>
+      <div id="cdMethods"></div>
       <button class="btn" id="cdSave" type="button">✅ ক্যাশ হিসাব সেভ করুন</button>
       <div id="cdHistory" style="margin-top:10px"></div>
     </div>
@@ -289,6 +291,23 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
           <select id="txMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
       </div>
       <div class="field"><label for="txNote">বিবরণ (কার কাছে / কী জন্য)</label><input type="text" id="txNote" placeholder="যেমন: রহিমের কাছে চাল বিক্রি" /></div>
+      <div class="field"><label>রসিদ / বিলের ছবি (ঐচ্ছিক)</label>
+        <input type="file" id="txPhoto" accept="image/*" style="display:none" />
+        <input type="file" id="txPhotoCam" accept="image/*" capture="environment" style="display:none" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small" id="txPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
+          <button class="btn small ghost" id="txPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <img id="txPhotoPrev" alt="রসিদের ছবি" style="display:none;width:74px;height:74px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line)" />
+          <button class="btn small danger" id="txPhotoRm" type="button" style="display:none">ছবি সরান</button>
+        </div>
+        <p class="hint" style="margin:4px 0 0">খরচ বা আয়ের বিলের ছবি লাগিয়ে রাখুন — এন্ট্রির পাশে ছোট ছবি দেখা যাবে, চাপ দিলে বড় হবে। ছবি ফোনেই ছোট করে সেভ হয়।</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn gold" id="txVoiceBtn" type="button">🎤 ভয়েসে হিসাব বলুন</button>
+      </div>
+      <p class="hint" id="txVoiceMsg" style="margin:0 0 10px">ভয়েসে বললে ফর্মে লেখা হয়ে যাবে — <b>নিজে সেভ না করা পর্যন্ত কিছুই সেভ হবে না</b>, আগে দেখে ঠিক করে নিন। ভয়েস চিনতে ইন্টারনেট লাগে, মাঝে মাঝে ভুল শুনতে পারে — হাতে বদলে নেওয়া সবসময় যায়।</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="txSave" type="button">✅ সেভ করুন</button>
         <button class="btn ghost" id="txCancel" type="button" style="display:none">বাতিল</button>
@@ -360,6 +379,46 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="searchrow noprint"><input type="search" id="pSearch" placeholder="🔍 প্রোডাক্ট খুঁজুন…" /><select id="pStockFilter"><option value="all">সব প্রোডাক্ট</option><option value="low">⚠️ শুধু কম স্টক</option><option value="expiry">⏰ মেয়াদ শেষ হতে চলেছে</option></select></div>
       <div id="prodList"></div>
     </div>
+    <div class="panel">
+      <h2>🛒 কেনা মালের হিসাব</h2>
+      <p class="hint">কোন সাপ্লায়ারের কাছ থেকে, কত দামে মাল কিনলেন — এখানে লিখলেই স্টকে যোগ হবে, কেনার ইতিহাস থেকে যাবে, আর লাভের হিসাব এই কেনা দাম দিয়েই হবে।</p>
+      <div class="grid2">
+        <div class="field"><label for="puProd">প্রোডাক্ট</label><select id="puProd"></select></div>
+        <div class="field"><label for="puSupplier">সাপ্লায়ারের নাম</label><input type="text" id="puSupplier" placeholder="যেমন: আলম ট্রেডার্স" /></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="puQty">পরিমাণ</label><input type="number" id="puQty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="puCost">কেনা দাম (প্রতি একক ৳)</label><input type="number" id="puCost" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="puDate">তারিখ</label><input type="date" id="puDate" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="puMethod">পেমেন্ট মাধ্যম</label>
+          <select id="puMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
+        <div class="field"><label>মোট কেনা মূল্য (অটোমেটিক)</label><div class="live-total" id="puTotal" style="margin:0">৳ 0</div></div>
+      </div>
+      <div class="field">
+        <label style="display:flex;gap:8px;align-items:center;min-height:2.25rem"><input type="checkbox" id="puCash" checked style="width:22px;height:22px;flex:0 0 auto" /> টাকার খাতায় খরচ হিসেবে যোগ করুন</label>
+      </div>
+      <button class="btn" id="puSave" type="button">✅ কেনা সেভ করুন (স্টকে যোগ হবে)</button>
+      <h3 style="margin:16px 0 6px">কেনার ইতিহাস</h3>
+      <div id="puList"></div>
+      <h3 style="margin:16px 0 6px">সাপ্লায়ার অনুযায়ী মোট কেনা</h3>
+      <div id="puSuppliers"></div>
+    </div>
+    <div class="panel">
+      <h2>🛒 কী কিনতে হবে (অর্ডার লিস্ট)</h2>
+      <p class="hint">স্টক কমে গেলেই এই লিস্ট নিজে নিজে তৈরি হয় — কোনটা কতটুকু কিনতে হবে তাও সাজেস্ট করে। চাইলে পরিমাণ বদলানো, নিজে আইটেম যোগ করা বা বাদ দেওয়া যায়।</p>
+      <div id="olList"></div>
+      <div class="grid3" style="margin-top:10px">
+        <div class="field"><label for="olName">নিজে আইটেম যোগ করুন</label><input type="text" id="olName" placeholder="আইটেমের নাম" /></div>
+        <div class="field"><label for="olQty">পরিমাণ</label><input type="number" id="olQty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn gold" id="olAdd" type="button" style="width:100%">➕ যোগ করুন</button></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="olPhone">সাপ্লায়ারের WhatsApp নম্বর (ঐচ্ছিক)</label><input type="tel" id="olPhone" placeholder="01XXXXXXXXX" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn" id="olShare" type="button" style="width:100%;background:#1faa55;color:#fff">🟢 WhatsApp-এ সাপ্লায়ারকে পাঠান</button></div>
+      </div>
+    </div>
   </section>
 
   <!-- DUES / BAKI -->
@@ -423,6 +482,12 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label for="bDate">তারিখ</label><input type="date" id="bDate" /></div>
         <div class="field"><label for="bPaid">জমা / পরিশোধ (৳)</label><input type="number" id="bPaid" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
       </div>
+      <div class="grid2">
+        <div class="field"><label for="bMethod">পেমেন্ট মাধ্যম (জমা টাকার)</label>
+          <select id="bMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+        <div class="field"><label>ভয়েসে হিসাব</label><button class="btn gold" id="billVoiceBtn" type="button" style="width:100%">🎤 ভয়েসে বলুন</button></div>
+      </div>
+      <p class="hint" id="billVoiceMsg" style="margin:0 0 10px">ভয়েসে বললে বিলে বসে যাবে — <b>সেভ করার আগে যাচাই করুন, অটোমেটিক সেভ হয় না</b>। ভয়েস চিনতে ইন্টারনেট লাগে, মাঝে মাঝে ভুল শুনতে পারে।</p>
       <button class="btn gold" id="billScanBtn" type="button" style="margin-bottom:10px">📷 বারকোড স্ক্যান করে আইটেম যোগ করুন</button>
       <div id="billItems"></div>
       <button class="btn small gold" id="billAddRow" type="button">➕ আইটেম যোগ করুন</button>
@@ -438,6 +503,34 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <div class="panel">
       <h2>সব বিল</h2>
       <div id="billList"></div>
+    </div>
+  </section>
+
+  <!-- QUICK SALE / POS -->
+  <section class="page" id="page-pos">
+    <div class="panel">
+      <h2>⚡ দ্রুত বিক্রি</h2>
+      <p class="hint">ভিড়ের সময়ের জন্য — প্রোডাক্টে চাপ দিলেই বিলে যোগ হবে। শেষে “বিক্রি শেষ করুন” চাপলেই স্টক, টাকার খাতা আর বাকি — সব অটোমেটিক আপডেট হবে। ইন্টারনেট ছাড়াই চলে।</p>
+      <div class="searchrow noprint"><input type="search" id="qsSearch" placeholder="🔍 প্রোডাক্ট খুঁজুন…" /></div>
+      <button class="btn gold" id="qsScanBtn" type="button" style="margin-bottom:10px">📷 বারকোড স্ক্যান করে যোগ করুন</button>
+      <div id="qsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px"></div>
+    </div>
+    <div class="panel" id="qsCartPanel">
+      <h2>🧾 বর্তমান বিল</h2>
+      <div id="qsCart"></div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="field"><label for="qsCust">কাস্টমারের নাম (ঐচ্ছিক)</label><input type="text" id="qsCust" placeholder="নাম লিখুন" /></div>
+        <div class="field"><label for="qsMethod">পেমেন্ট মাধ্যম</label>
+          <select id="qsMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="qsPaid">জমা / পরিশোধ (৳) — খালি রাখলে পুরো টাকা</label><input type="number" id="qsPaid" inputmode="decimal" min="0" step="any" placeholder="পুরো টাকা" /></div>
+        <div class="field"><label>ভয়েসে হিসাব</label><button class="btn gold" id="qsVoiceBtn" type="button" style="width:100%">🎤 ভয়েসে বলুন</button></div>
+      </div>
+      <p class="hint" id="qsVoiceMsg" style="margin:0 0 8px">ভয়েসে বললে বিলে বসে যাবে — <b>“বিক্রি শেষ করুন” না চাপা পর্যন্ত কিছুই সেভ হবে না</b>। ভয়েস চিনতে ইন্টারনেট লাগে, মাঝে মাঝে ভুল শুনতে পারে।</p>
+      <div class="live-total" id="qsTotalBox">মোট = ৳ 0 • বাকি = ৳ 0</div>
+      <button class="btn" id="qsFinish" type="button" style="width:100%;font-size:1.08rem;min-height:3.1rem">✅ বিক্রি শেষ করুন</button>
+      <p class="hint" style="margin:8px 0 0">কম টাকা দিলে বাকিটা অটোমেটিক বাকি হিসাবে চলে যাবে (কাস্টমারের নাম লিখলে তার নামে)।</p>
     </div>
   </section>
 
@@ -856,6 +949,8 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="field"><label for="mvPrice">একক দাম (৳)</label><input type="number" id="mvPrice" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
       <div class="field"><label for="mvParty">কার কাছে / কার কাছ থেকে (ঐচ্ছিক)</label><input type="text" id="mvParty" placeholder="নাম লিখুন" /></div>
     </div>
+    <div class="field"><label for="mvMethod">পেমেন্ট মাধ্যম (টাকার খাতার এন্ট্রির জন্য)</label>
+      <select id="mvMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
     <div class="live-total" id="mvTotal">মোট = ৳ 0</div>
     <div class="live-total" id="mvAfter" style="background:var(--inbg);border-color:var(--in)">এই এন্ট্রির পর স্টক থাকবে: 0</div>
     <div class="field" id="mvCashWrap">
@@ -890,6 +985,15 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <button class="btn ghost" id="billPrint" type="button">🖨️ প্রিন্ট</button>
       <button class="btn ghost" id="billClose" type="button">বন্ধ করুন</button>
     </div>
+  </div>
+</div>
+
+<!-- RECEIPT PHOTO VIEWER MODAL -->
+<div class="modal" id="photoModal" role="dialog" aria-modal="true">
+  <div class="box">
+    <h2>🧾 রসিদের ছবি</h2>
+    <img id="photoImg" alt="রসিদের ছবি" style="width:100%;border-radius:12px;border:1.5px solid var(--line)" />
+    <button class="btn ghost" id="photoClose" type="button" style="width:100%;margin-top:12px">বন্ধ করুন</button>
   </div>
 </div>
 
@@ -1059,7 +1163,7 @@ function $(id){return document.getElementById(id);}
 /* ---------- DATA (local first, per-account) ---------- */
 /* App name lives in ONE place: change APP_NAME here + <title> + manifest to rename. */
 var APP_NAME='Black Ghost Hisab';
-function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,tombs:[],updatedAt:0,rev:0};}
+function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],purchases:[],olist:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,tombs:[],updatedAt:0,rev:0};}
 /* ---------- SEPARATE BOOKS (আলাদা খাতা) ----------
    Every entry/product/party/etc. carries a `book` field = the id of the
    book it belongs to. Entries saved before books existed have NO book
@@ -1100,6 +1204,7 @@ function bBudgets(){return DB.budgets.filter(inBook);}
 function bGoals(){return DB.goals.filter(inBook);}
 function bRbills(){return DB.rbills.filter(inBook);}
 function bCashdays(){return DB.cashdays.filter(inBook);}
+function bPurchases(){return (DB.purchases||[]).filter(inBook);}
 function bPartners(){return DB.partners.filter(inBook);}
 function findBook(id){for(var i=0;i<DB.books.length;i++)if(DB.books[i].id===id)return DB.books[i];return null;}
 function bookName(id){var b=findBook(id);return b?b.name:'প্রধান খাতা';}
@@ -1108,7 +1213,7 @@ function bookName(id){var b=findBook(id);return b?b.name:'প্রধান খ
    rev   = local revision counter, bumped on every save. */
 function normDB(d){
   if(!d||typeof d!=='object')return blankDB();
-  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev)};
+  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],purchases:Array.isArray(d.purchases)?d.purchases:[],olist:Array.isArray(d.olist)?d.olist:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev)};
 }
 var DB=blankDB();
 var curKey=LS_KEY; /* guest (this-phone-only) key until login */
@@ -1144,7 +1249,7 @@ function mergeData(a,b){
   a.tombs.concat(b.tombs).forEach(function(t){if(t&&!tombSet[t]){tombSet[t]=1;tombs.push(t);}});
   var catSet={},catList=[];
   a.cats.concat(b.cats).forEach(function(c){if(c&&!catSet[c]){catSet[c]=1;catList.push(c);}});
-  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
+  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
 }
 function addTomb(p,id){var t=p+id;if(DB.tombs.indexOf(t)<0)DB.tombs.push(t);}
 function persistLocal(){try{localStorage.setItem(curKey,JSON.stringify(DB));}catch(e){}}
@@ -1285,7 +1390,7 @@ function syncNow(){
     }else{
       processDevices({});
     }
-    var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,books:DB.books,targetAmt:DB.targetAmt,targetU:DB.targetU,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
+    var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,purchases:DB.purchases,olist:DB.olist,books:DB.books,targetAmt:DB.targetAmt,targetU:DB.targetU,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
       sub:subPayload(),plans:PLANS,planCfgU:CFG.u||0,payNum:CFG.payNumber||'',planReqs:PLANREQS,planReqsU:PLANREQS_U,devices:DEVICES};
     userDoc().set(payload).then(function(){finish(true);},function(){finish(false);});
   }).catch(function(){finish(false);});
@@ -1531,11 +1636,16 @@ $('gateSwitchBtn').addEventListener('click',function(){doLogout();});
 
 /* ---------- AUTO CALCULATIONS ---------- */
 function totals(list){var i=0,o=0,sv=0,us=0;list.forEach(function(t){if(t.type==='in')i+=num(t.amount);else if(t.type==='out')o+=num(t.amount);else if(t.type==='save')sv+=num(t.amount);else if(t.type==='unsave')us+=num(t.amount);});return{inn:i,out:o,save:sv,unsave:us,bal:i+us-o-sv};}
+/* The cost price a sale was made against: every sale log stamped since v8
+   carries its own `cost` (the purchase cost recorded at sale time), so
+   profit uses the RECORDED cost price. Older logs without `cost` fall back
+   to the product's current buy price — exactly the old behaviour. */
+function logCost(l,p){return (l&&l.cost!=null&&l.cost!=='')?num(l.cost):(p?num(p.buy):0);}
 function prodStats(p){
   var pin=0,sold=0,soldAmt=0,buyAmt=0,outQty=0,profit=0;
   bLogs().forEach(function(l){if(l.pid!==p.id)return;var q=num(l.qty);
     if(l.type==='in'){pin+=q;buyAmt+=q*num(l.price);}
-    else if(l.type==='sale'){sold+=q;soldAmt+=q*num(l.price);profit+=q*(num(l.price)-num(p.buy));}
+    else if(l.type==='sale'){sold+=q;soldAmt+=q*num(l.price);profit+=q*(num(l.price)-logCost(l,p));}
     else if(l.type==='out'){outQty+=q;}
   });
   var opening=num(p.opening);
@@ -1546,12 +1656,12 @@ function prodStats(p){
 function logsForRange(from,to){return DB.logs.filter(function(l){return l.date>=from&&l.date<=to;});}
 function dayProfit(dateStr){
   var pr=0;
-  bLogs().forEach(function(l){if(l.date!==dateStr||l.type!=='sale')return;var p=findProd(l.pid);if(p)pr+=num(l.qty)*(num(l.price)-num(p.buy));});
+  bLogs().forEach(function(l){if(l.date!==dateStr||l.type!=='sale')return;var p=findProd(l.pid);if(p)pr+=num(l.qty)*(num(l.price)-logCost(l,p));});
   return pr;
 }
 function monthProfit(ym){
   var pr=0;
-  bLogs().forEach(function(l){if(l.type!=='sale'||l.date.slice(0,7)!==ym)return;var p=findProd(l.pid);if(p)pr+=num(l.qty)*(num(l.price)-num(p.buy));});
+  bLogs().forEach(function(l){if(l.type!=='sale'||l.date.slice(0,7)!==ym)return;var p=findProd(l.pid);if(p)pr+=num(l.qty)*(num(l.price)-logCost(l,p));});
   return pr;
 }
 function findProd(id){for(var i=0;i<DB.products.length;i++)if(DB.products[i].id===id)return DB.products[i];return null;}
@@ -1657,7 +1767,7 @@ $('txTypeSeg').querySelectorAll('button').forEach(function(b){
     b.className=txType==='in'?'sel-in':'sel-out';
   });
 });
-function resetTxForm(){editTxId=null;$('txAmount').value='';$('txNote').value='';$('txDate').value=todayStr();$('txFormTitle').textContent='নতুন টাকার এন্ট্রি';$('txSave').textContent='✅ সেভ করুন';$('txCancel').style.display='none';formToHome('txFormTitle');}
+function resetTxForm(){editTxId=null;$('txAmount').value='';$('txNote').value='';$('txDate').value=todayStr();pendingTxPhoto=null;$('txPhoto').value='';if($('txPhotoCam'))$('txPhotoCam').value='';$('txPhotoPrev').style.display='none';$('txPhotoRm').style.display='none';$('txFormTitle').textContent='নতুন টাকার এন্ট্রি';$('txSave').textContent='✅ সেভ করুন';$('txCancel').style.display='none';formToHome('txFormTitle');}
 $('txSave').addEventListener('click',function(){
   var wasEditTx=editTxId, txPos=wasEditTx?rowPosBefore('txList',wasEditTx):null;
   var amt=num($('txAmount').value);
@@ -1666,10 +1776,12 @@ $('txSave').addEventListener('click',function(){
   var catVal=$('txCat').value.trim()||'অন্যান্য';
   if(DB.cats.indexOf(catVal)<0)DB.cats.push(catVal);
   if(editTxId){
-    for(var i=0;i<DB.txs.length;i++)if(DB.txs[i].id===editTxId){DB.txs[i]={id:editTxId,date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:bookOf(DB.txs[i]),u:Date.now()};}
+    for(var i=0;i<DB.txs.length;i++)if(DB.txs[i].id===editTxId){var nt={id:editTxId,date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:bookOf(DB.txs[i]),u:Date.now()};if(pendingTxPhoto!==null){if(pendingTxPhoto)nt.photo=pendingTxPhoto;}else if(DB.txs[i].photo)nt.photo=DB.txs[i].photo;DB.txs[i]=nt;}
     toast('✅ এন্ট্রি ঠিক করা হয়েছে — হিসাব অটোমেটিক আপডেট হয়েছে');
   }else{
-    DB.txs.push({id:uid(),date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:writeBook(),u:Date.now()});
+    var ntx={id:uid(),date:date,type:txType,amount:amt,cat:catVal,method:$('txMethod').value,note:$('txNote').value.trim(),book:writeBook(),u:Date.now()};
+    if(pendingTxPhoto)ntx.photo=pendingTxPhoto;
+    DB.txs.push(ntx);
     toast(txType==='in'?'✅ আয় যোগ হয়েছে — ব্যালেন্স অটোমেটিক বেড়েছে':'✅ খরচ যোগ হয়েছে — ব্যালেন্স অটোমেটিক কমেছে');
   }
   resetTxForm();saveLocal();
@@ -1685,6 +1797,8 @@ window.editTx=function(id){
   editTxId=id;txType=t.type;
   $('txTypeSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===t.type?(t.type==='in'?'sel-in':'sel-out'):'';});
   $('txDate').value=t.date;$('txAmount').value=t.amount;$('txCat').value=t.cat;$('txMethod').value=t.method;$('txNote').value=t.note||'';
+  pendingTxPhoto=null;$('txPhoto').value='';if($('txPhotoCam'))$('txPhotoCam').value='';
+  if(t.photo){$('txPhotoPrev').src=t.photo;$('txPhotoPrev').style.display='';$('txPhotoRm').style.display='';}else{$('txPhotoPrev').style.display='none';$('txPhotoRm').style.display='none';}
   $('txFormTitle').textContent='এন্ট্রি ঠিক করুন';$('txSave').textContent='✅ আপডেট করুন';$('txCancel').style.display='';
   showPageNoScroll('ledger');
   formToRow('txFormTitle','txList',id);
@@ -1784,10 +1898,10 @@ $('mvSave').addEventListener('click',function(){
   if(!(q>0)){toast('⚠️ পরিমাণ লিখুন');$('mvQty').focus();return;}
   var pr=num($('mvPrice').value), date=$('mvDate').value||todayStr(), party=$('mvParty').value.trim();
   var total=q*pr;
-  DB.logs.push({id:uid(),pid:p.id,date:date,type:mvType,qty:q,price:pr,party:party,book:bookOf(p),u:Date.now()});
+  DB.logs.push({id:uid(),pid:p.id,date:date,type:mvType,qty:q,price:pr,party:party,book:bookOf(p),u:Date.now(),cost:(mvType==='sale'?num(p.buy):pr)});
   if($('mvCash').checked&&total>0){
-    if(mvType==='sale')DB.txs.push({id:uid(),date:date,type:'in',amount:total,cat:'পণ্য বিক্রি',method:'নগদ',note:p.name+' বিক্রি '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()});
-    else if(mvType==='in')DB.txs.push({id:uid(),date:date,type:'out',amount:total,cat:'পণ্য কেনা',method:'নগদ',note:p.name+' কেনা '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()});
+    if(mvType==='sale')DB.txs.push({id:uid(),date:date,type:'in',amount:total,cat:'পণ্য বিক্রি',method:$('mvMethod').value,note:p.name+' বিক্রি '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()});
+    else if(mvType==='in')DB.txs.push({id:uid(),date:date,type:'out',amount:total,cat:'পণ্য কেনা',method:$('mvMethod').value,note:p.name+' কেনা '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()});
   }
   $('moveModal').classList.remove('open');
   toast('✅ সেভ হয়েছে — স্টক, টাকা ও লাভ অটোমেটিক আপডেট হয়েছে');
@@ -2711,6 +2825,8 @@ function cdUpdate(){
   else if(r.diff<0)txt+='  •  ⚠️ কম আছে: '+money(-r.diff);
   else txt+='  •  বেশি আছে: '+money(r.diff);
   $('cdResult').textContent=txt;
+  var cm=$('cdMethods');
+  if(cm){var mrows=methodRowsHtml(bTxs().filter(function(x){return x.date===r.date;}));cm.innerHTML=mrows?('<h3 style="margin:10px 0 2px;font-size:.98rem">সেদিনের পেমেন্ট মাধ্যম অনুযায়ী</h3>'+mrows):'';}
 }
 ['cdOpen','cdCounted'].forEach(function(id){$(id).addEventListener('input',cdUpdate);});
 $('cdDate').addEventListener('change',function(){
@@ -2817,9 +2933,9 @@ $('billSave').addEventListener('click',function(){
   var c=billCalc();
   if(!c.items.length){toast('⚠️ অন্তত একটা আইটেম (নাম + পরিমাণ) যোগ করুন');return;}
   var date=$('bDate').value||todayStr();
-  var bill={id:uid(),date:date,customer:cust,phone:$('bPhone').value.trim(),items:c.items,subtotal:c.subtotal,discType:$('bDiscType').value,discVal:num($('bDiscVal').value),discAmt:c.discAmt,total:c.total,paid:c.paid,due:c.due,note:$('bNote').value.trim(),book:writeBook(),u:Date.now()};
-  c.items.forEach(function(it){if(it.pid){var ip=findProd(it.pid);DB.logs.push({id:uid(),pid:it.pid,date:date,type:'sale',qty:it.qty,price:it.price,party:cust,book:ip?bookOf(ip):writeBook(),u:Date.now()});}});
-  if(c.paid>0)DB.txs.push({id:uid(),date:date,type:'in',amount:c.paid,cat:'পণ্য বিক্রি',method:'নগদ',note:'বিল — '+cust,book:writeBook(),u:Date.now()});
+  var bill={id:uid(),date:date,customer:cust,phone:$('bPhone').value.trim(),items:c.items,subtotal:c.subtotal,discType:$('bDiscType').value,discVal:num($('bDiscVal').value),discAmt:c.discAmt,total:c.total,paid:c.paid,due:c.due,note:$('bNote').value.trim(),method:$('bMethod').value,book:writeBook(),u:Date.now()};
+  c.items.forEach(function(it){if(it.pid){var ip=findProd(it.pid);DB.logs.push({id:uid(),pid:it.pid,date:date,type:'sale',qty:it.qty,price:it.price,party:cust,book:ip?bookOf(ip):writeBook(),u:Date.now(),cost:ip?num(ip.buy):0});}});
+  if(c.paid>0)DB.txs.push({id:uid(),date:date,type:'in',amount:c.paid,cat:'পণ্য বিক্রি',method:$('bMethod').value,note:'বিল — '+cust,book:writeBook(),u:Date.now()});
   if(c.due>0){
     var party=null;
     bParties().forEach(function(p){if(p.name.toLowerCase()===cust.toLowerCase())party=p;});
@@ -2855,6 +2971,7 @@ window.openBill=function(id){
   (num(b.discAmt)>0?'<div class="kv"><span>মোট</span><b>'+money(b.subtotal)+'</b></div><div class="kv"><span>ছাড়</span><b style="color:var(--in)">− '+money(b.discAmt)+'</b></div>':'')+
   '<div class="kv"><span><b>সর্বমোট</b></span><b>'+money(b.total)+'</b></div>'+
   '<div class="kv"><span>জমা / পরিশোধ</span><b style="color:var(--in)">'+money(b.paid)+'</b></div>'+
+  (b.method?'<div class="kv"><span>পেমেন্ট মাধ্যম</span><b>'+esc(methodLabel(b.method))+'</b></div>':'')+
   '<div class="kv"><span>বাকি</span><b style="color:'+(b.due>0?'var(--out)':'var(--in)')+'">'+money(b.due)+'</b></div>'+
   (b.note?'<p class="hint" style="margin:8px 0 0">নোট: '+esc(b.note)+'</p>':'')+
   '<p style="text-align:center;color:var(--muted);margin:12px 0 0">ধন্যবাদ! 🙏</p>';
@@ -3126,7 +3243,7 @@ window.deliverOrder=function(id){
   var o=findOrder(id);if(!o||o.status!=='pending')return;
   askSure('“'+o.cust+'”-এর অর্ডার ডেলিভারি হয়েছে? স্টক থেকে '+fmt(num(o.qty))+' কেটে যাবে আর বাকি '+money(orderRemaining(o))+' আয় হিসেবে খাতায় যাবে (অগ্রিম আগেই হিসাব হয়েছে, দুবার হবে না)।',function(){
     var date=todayStr();
-    if(o.pid)DB.logs.push({id:uid(),pid:o.pid,date:date,type:'sale',qty:num(o.qty),price:num(o.price),party:o.cust,book:bookOf(o),u:Date.now()});
+    if(o.pid){var op=findProd(o.pid);DB.logs.push({id:uid(),pid:o.pid,date:date,type:'sale',qty:num(o.qty),price:num(o.price),party:o.cust,book:bookOf(o),u:Date.now(),cost:op?num(op.buy):0});}
     var rem=orderRemaining(o);
     if(rem>0)DB.txs.push({id:uid(),date:date,type:'in',amount:rem,cat:'পণ্য বিক্রি',method:'নগদ',note:'অর্ডার ডেলিভারি — '+o.cust+' ('+o.pname+')',book:bookOf(o),u:Date.now()});
     o.status='delivered';o.u=Date.now();
@@ -3516,6 +3633,371 @@ $('billScanBtn').addEventListener('click',function(){
   });
 });
 
+/* ---------- PAYMENT METHODS (v8) ----------
+   Every sale / expense records HOW the money moved. Stored values stay
+   exactly as before ('নগদ' = cash, 'নগদ (Nagad)' = the Nagad wallet) so old
+   entries keep working; the LABELS keep cash and the Nagad wallet clearly
+   apart, as fixed in v7. */
+var METHOD_LABELS={'নগদ':'নগদ (ক্যাশ)','নগদ (Nagad)':'নগদ ওয়ালেট (Nagad)','বিকাশ':'বিকাশ','ব্যাংক':'ব্যাংক','বাকি':'বাকি'};
+function methodLabel(m){return METHOD_LABELS[m]||m||'নগদ (ক্যাশ)';}
+function methodTotals(list){
+  var out={};
+  (list||[]).forEach(function(t){
+    var m=t.method||'নগদ';
+    if(!out[m])out[m]={inn:0,out:0};
+    if(t.type==='in')out[m].inn+=num(t.amount);
+    else if(t.type==='out')out[m].out+=num(t.amount);
+  });
+  return out;
+}
+function methodRowsHtml(list){
+  var mt=methodTotals(list),keys=Object.keys(mt);
+  if(!keys.length)return '';
+  return keys.map(function(m){return '<div class="kv"><span>'+esc(methodLabel(m))+'</span><b><span style="color:var(--in)">আয় '+money(mt[m].inn)+'</span> • <span style="color:var(--out)">খরচ '+money(mt[m].out)+'</span></b></div>';}).join('');
+}
+
+/* ---------- RECEIPT PHOTO on ledger entries (v8) ----------
+   Same two-option picker as product photos (camera / gallery), same
+   on-phone compression (max 600px JPEG). pendingTxPhoto mirrors the
+   product flow: null = untouched (edit keeps the old photo), '' = removed,
+   a data URL = the new photo. */
+var pendingTxPhoto=null;
+function compressPhotoFile(f,cb){
+  if(!f){cb(null);return;}
+  var url=URL.createObjectURL(f),img=new Image();
+  img.onload=function(){
+    var max=600,w=img.width,h=img.height,sc=Math.min(1,max/Math.max(w||1,h||1));
+    var c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*sc));c.height=Math.max(1,Math.round(h*sc));
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url);cb(c.toDataURL('image/jpeg',0.7));
+  };
+  img.onerror=function(){URL.revokeObjectURL(url);cb(null);};
+  img.src=url;
+}
+function loadTxPhoto(f){
+  compressPhotoFile(f,function(d){
+    if(!d){toast('⚠️ ছবিটা পড়া যায়নি');return;}
+    pendingTxPhoto=d;
+    $('txPhotoPrev').src=d;$('txPhotoPrev').style.display='';$('txPhotoRm').style.display='';
+    toast('🧾 রসিদের ছবি তৈরি — সেভ করলেই এন্ট্রিতে থেকে যাবে');
+  });
+}
+$('txPhotoCamBtn').addEventListener('click',function(){$('txPhotoCam').click();});
+$('txPhotoGalBtn').addEventListener('click',function(){$('txPhoto').click();});
+$('txPhoto').addEventListener('change',function(){loadTxPhoto(this.files&&this.files[0]);});
+$('txPhotoCam').addEventListener('change',function(){loadTxPhoto(this.files&&this.files[0]);});
+$('txPhotoRm').addEventListener('click',function(){
+  pendingTxPhoto='';$('txPhoto').value='';if($('txPhotoCam'))$('txPhotoCam').value='';$('txPhotoPrev').style.display='none';$('txPhotoRm').style.display='none';
+});
+window.viewTxPhoto=function(id){
+  var t=null;DB.txs.forEach(function(x){if(x.id===id)t=x;});
+  if(!t||!t.photo)return;
+  $('photoImg').src=t.photo;
+  $('photoModal').classList.add('open');
+};
+$('photoClose').addEventListener('click',function(){$('photoModal').classList.remove('open');});
+$('photoModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+/* ---------- PURCHASES — কেনা মালের হিসাব (v8) ----------
+   A purchase records supplier + product + qty + cost price + date. Saving
+   one adds a stock 'in' log at that cost, optionally posts the expense to
+   the money ledger, and makes the recorded cost the product's buy price —
+   and every later sale log is stamped with that cost, so profit math runs
+   on the recorded cost price. The purchase keeps its log/tx ids so deleting
+   it cleanly removes exactly what it added. */
+function puCalc(){$('puTotal').textContent=money(num($('puQty').value)*num($('puCost').value));}
+['puQty','puCost'].forEach(function(id){$(id).addEventListener('input',puCalc);});
+$('puSave').addEventListener('click',function(){
+  var p=findProd($('puProd').value);
+  if(!p){toast('⚠️ আগে প্রোডাক্ট বাছুন (না থাকলে ওপরে যোগ করুন)');return;}
+  var supplier=$('puSupplier').value.trim();
+  if(!supplier){toast('⚠️ সাপ্লায়ারের নাম লিখুন');$('puSupplier').focus();return;}
+  var qty=num($('puQty').value),cost=num($('puCost').value);
+  if(!(qty>0)){toast('⚠️ পরিমাণ লিখুন');$('puQty').focus();return;}
+  var date=$('puDate').value||todayStr(),bk=bookOf(p),total=qty*cost;
+  var log={id:uid(),pid:p.id,date:date,type:'in',qty:qty,price:cost,party:supplier,book:bk,u:Date.now(),cost:cost};
+  DB.logs.push(log);
+  var txId='';
+  if($('puCash').checked&&total>0){
+    var tx={id:uid(),date:date,type:'out',amount:total,cat:'পণ্য কেনা',method:$('puMethod').value,note:p.name+' কেনা '+fmt(qty)+' '+p.unit+' — '+supplier,book:bk,u:Date.now()};
+    txId=tx.id;DB.txs.push(tx);
+  }
+  DB.purchases.push({id:uid(),pid:p.id,pname:p.name,supplier:supplier,qty:qty,cost:cost,date:date,method:$('puMethod').value,book:bk,logId:log.id,txId:txId,u:Date.now()});
+  if(cost>0){p.buy=cost;p.u=Date.now();}
+  $('puQty').value='';puCalc();
+  saveLocal();toast('✅ কেনা সেভ হয়েছে — স্টকে '+fmt(qty)+' '+p.unit+' যোগ হয়েছে, লাভের হিসাব এই কেনা দামে হবে');
+});
+window.delPurchase=function(id){
+  askSure('এই কেনার রেকর্ড মুছবেন? এর সাথে যোগ হওয়া স্টক এন্ট্রি আর খরচের এন্ট্রিও মুছে যাবে (স্টক অটোমেটিক কমে যাবে)।',function(){
+    var pu=null;(DB.purchases||[]).forEach(function(x){if(x.id===id)pu=x;});
+    if(pu){
+      if(pu.logId){DB.logs=DB.logs.filter(function(l){return l.id!==pu.logId;});addTomb('l',pu.logId);}
+      if(pu.txId){DB.txs=DB.txs.filter(function(t){return t.id!==pu.txId;});addTomb('t',pu.txId);}
+    }
+    DB.purchases=(DB.purchases||[]).filter(function(x){return x.id!==id;});addTomb('h',id);
+    saveLocal();toast('🗑️ কেনার রেকর্ড মোছা হয়েছে');
+  });
+};
+function renderPurchases(){
+  var sel=$('puProd');if(!sel)return;
+  var cur=sel.value;
+  sel.innerHTML=bProducts().length?bProducts().map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join(''):'<option value="">আগে প্রোডাক্ট যোগ করুন</option>';
+  if(cur&&findProd(cur)&&inBook(findProd(cur)))sel.value=cur;
+  var list=bPurchases().slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
+  $('puList').innerHTML=list.length?list.slice(0,30).map(function(pu){
+    return '<div class="kv"><span>'+esc(pu.date)+' • <b>'+esc(pu.pname||'')+'</b> — '+esc(pu.supplier||'')+'<br><span style="color:var(--muted);font-size:.87rem">'+fmt(num(pu.qty))+' × '+money(pu.cost)+' • মাধ্যম: '+esc(methodLabel(pu.method||'নগদ'))+'</span></span><b>'+money(num(pu.qty)*num(pu.cost))+' <button class="btn small danger noprint" type="button" onclick="delPurchase(\''+pu.id+'\')">মুছুন</button></b></div>';
+  }).join(''):'<p class="hint" style="margin:0">এখনো কোনো কেনার রেকর্ড নেই।</p>';
+  var sup={};
+  list.forEach(function(pu){var k=pu.supplier||'—';if(!sup[k])sup[k]={amt:0,n:0};sup[k].amt+=num(pu.qty)*num(pu.cost);sup[k].n++;});
+  var keys=Object.keys(sup);
+  $('puSuppliers').innerHTML=keys.length?keys.map(function(k){return '<div class="kv"><span>'+esc(k)+'</span><b>'+money(sup[k].amt)+' ('+fmt(sup[k].n)+' বার কেনা)</b></div>';}).join(''):'<p class="hint" style="margin:0">—</p>';
+}
+
+/* ---------- QUICK SALE / POS — দ্রুত বিক্রি (v8) ----------
+   Tap products into a cart; one finish tap writes the sale logs (stock),
+   the paid amount to the money ledger with its payment method, any unpaid
+   remainder as a due, and a bill record — all in the right books, all
+   offline. qsTotals is the pure math the finish path uses. */
+var posCart={};
+function qsTotals(lines,paid){
+  var total=0;(lines||[]).forEach(function(l){total+=num(l.qty)*num(l.price);});
+  var p=(paid===''||paid==null)?total:num(paid);
+  if(p>total)p=total;
+  return{total:total,paid:p,due:Math.max(0,total-p)};
+}
+function posLines(){
+  return Object.keys(posCart).map(function(pid){
+    var p=findProd(pid);if(!p)return null;
+    return{p:p,qty:num(posCart[pid]),price:num(p.sell)};
+  }).filter(function(x){return x&&x.qty>0;});
+}
+function renderPosCart(){
+  var lines=posLines(),box=$('qsCart');if(!box)return;
+  if(!lines.length)box.innerHTML='<div class="empty">এখনো কিছু যোগ হয়নি — ওপরে প্রোডাক্টে চাপ দিন।</div>';
+  else box.innerHTML=lines.map(function(l){
+    return '<div class="kv"><span><b>'+esc(l.p.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">'+money(l.price)+' × '+fmt(l.qty)+' '+esc(l.p.unit)+'</span></span>'+
+    '<b style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button class="btn small ghost" type="button" onclick="posQty(\''+l.p.id+'\',-1)">−</button><span>'+fmt(l.qty)+'</span><button class="btn small ghost" type="button" onclick="posQty(\''+l.p.id+'\',1)">+</button><span style="min-width:84px;text-align:right">'+money(l.qty*l.price)+'</span><button class="btn small danger" type="button" onclick="posQty(\''+l.p.id+'\',0)">✖</button></b></div>';
+  }).join('');
+  var t=qsTotals(lines,$('qsPaid').value);
+  $('qsTotalBox').textContent='মোট = '+money(t.total)+' • জমা = '+money(t.paid)+' • বাকি = '+money(t.due);
+}
+function renderPos(){
+  var grid=$('qsGrid');if(!grid)return;
+  var q=($('qsSearch').value||'').toLowerCase();
+  var list=bProducts().filter(function(p){return !q||p.name.toLowerCase().indexOf(q)>=0;});
+  if(!list.length)grid.innerHTML='<div class="empty" style="grid-column:1/-1">কোনো প্রোডাক্ট নেই — আগে “প্রোডাক্ট স্টক” থেকে প্রোডাক্ট যোগ করুন।</div>';
+  else grid.innerHTML=list.map(function(p){
+    var s=prodStats(p),inCart=num(posCart[p.id]);
+    var img=p.photo?'<img src="'+p.photo+'" alt="'+esc(p.name)+'" style="width:100%;height:64px;object-fit:cover;border-radius:8px" />':'<div style="height:64px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--goldbg);border-radius:8px" aria-hidden="true">📦</div>';
+    return '<button type="button" onclick="posAdd(\''+p.id+'\')" style="text-align:left;background:var(--card);border:1.5px solid '+(inCart?'var(--gold)':'var(--line)')+';border-radius:12px;padding:8px;color:var(--ink);position:relative;min-height:2.25rem">'+img+
+    '<div style="font-weight:700;font-size:.92rem;margin-top:6px;line-height:1.3">'+esc(p.name)+'</div>'+
+    '<div style="color:var(--muted);font-size:.85rem">'+money(p.sell)+' • আছে '+fmt(s.remaining)+' '+esc(p.unit)+'</div>'+
+    (inCart?'<span class="badge warn" style="position:absolute;top:6px;right:6px">বিলে '+fmt(inCart)+'</span>':'')+'</button>';
+  }).join('');
+  renderPosCart();
+}
+window.posAdd=function(pid){posCart[pid]=num(posCart[pid])+1;renderPos();};
+window.posQty=function(pid,d){
+  if(d===0)delete posCart[pid];
+  else{posCart[pid]=num(posCart[pid])+d;if(posCart[pid]<=0)delete posCart[pid];}
+  renderPos();
+};
+$('qsSearch').addEventListener('input',renderPos);
+$('qsPaid').addEventListener('input',renderPosCart);
+$('qsScanBtn').addEventListener('click',function(){
+  openScanner(function(code){
+    var p=findByBarcode(code);
+    if(!p){toast('⚠️ এই বারকোডের ('+code+') কোনো প্রোডাক্ট পাওয়া যায়নি — আগে প্রোডাক্টে বারকোডটা সেভ করুন');return;}
+    if(bookView!=='all'&&bookOf(p)!==bookView){bookView=bookOf(p);saveBookView();renderAll();}
+    posAdd(p.id);
+    toast('✅ '+p.name+' বিলে যোগ হয়েছে');
+  });
+});
+$('qsFinish').addEventListener('click',function(){
+  var lines=posLines();
+  if(!lines.length){toast('⚠️ আগে প্রোডাক্টে চাপ দিয়ে বিলে যোগ করুন');return;}
+  var t=qsTotals(lines,$('qsPaid').value);
+  var date=todayStr(),cust=$('qsCust').value.trim()||'কাস্টমার',method=$('qsMethod').value,bk=writeBook();
+  lines.forEach(function(l){
+    DB.logs.push({id:uid(),pid:l.p.id,date:date,type:'sale',qty:l.qty,price:l.price,party:cust,book:bookOf(l.p),u:Date.now(),cost:num(l.p.buy)});
+  });
+  if(t.paid>0)DB.txs.push({id:uid(),date:date,type:'in',amount:t.paid,cat:'পণ্য বিক্রি',method:method,note:'দ্রুত বিক্রি — '+cust,book:bk,u:Date.now()});
+  if(t.due>0){
+    var party=null;
+    bParties().forEach(function(p){if(p.name.toLowerCase()===cust.toLowerCase())party=p;});
+    if(!party){party={id:uid(),name:cust,phone:'',kind:'customer',limit:0,book:bk,u:Date.now()};DB.parties.push(party);}
+    DB.dues.push({id:uid(),pid:party.id,date:date,type:'give',amount:t.due,note:'দ্রুত বিক্রির বাকি',book:bookOf(party),u:Date.now()});
+  }
+  DB.bills.push({id:uid(),date:date,customer:cust,phone:'',items:lines.map(function(l){return{pid:l.p.id,name:l.p.name,qty:l.qty,price:l.price};}),subtotal:t.total,discType:'none',discVal:0,discAmt:0,total:t.total,paid:t.paid,due:t.due,note:'দ্রুত বিক্রি',method:method,book:bk,u:Date.now()});
+  posCart={};$('qsCust').value='';$('qsPaid').value='';
+  saveLocal();
+  toast('✅ বিক্রি শেষ — স্টক, টাকার খাতা'+(t.due>0?' ও বাকি হিসাব':'')+' আপডেট হয়েছে');
+});
+
+/* ---------- ORDER LIST — কী কিনতে হবে (v8) ----------
+   Auto-built from products at/below their low-stock threshold, with a
+   suggested order quantity (top back up to twice the threshold). Manual
+   rows, quantity overrides and removals live in DB.olist: an item with a
+   pid + qty overrides that product's suggestion; pid + off hides it;
+   pid '' is a hand-added row. */
+function olSuggested(p,remaining){
+  var base=num(p.low)>0?num(p.low)*2:10;
+  var q=Math.ceil(base-num(remaining));
+  return q>0?q:1;
+}
+function olistItemFor(pid){
+  var f=null;
+  (DB.olist||[]).forEach(function(o){if(o.pid===pid&&inBook(o))f=o;});
+  return f;
+}
+function orderListRows(){
+  var rows=[];
+  bProducts().forEach(function(p){
+    var s=prodStats(p);
+    if(!(s.remaining<=num(p.low)))return;
+    var o=olistItemFor(p.id);
+    if(o&&o.off)return;
+    rows.push({pid:p.id,oid:o?o.id:'',name:p.name,stock:s.remaining,unit:p.unit,qty:(o&&num(o.qty)>0)?num(o.qty):olSuggested(p,s.remaining),auto:true});
+  });
+  (DB.olist||[]).filter(inBook).forEach(function(o){
+    if(!o.pid&&!o.off)rows.push({pid:'',oid:o.id,name:o.name,stock:null,unit:'',qty:num(o.qty),auto:false});
+  });
+  return rows;
+}
+function renderOrderList(){
+  var box=$('olList');if(!box)return;
+  var rows=orderListRows();
+  if(!rows.length){box.innerHTML='<div class="empty">সব প্রোডাক্টের স্টক ঠিক আছে — কেনার কিছু নেই ✅</div>';return;}
+  box.innerHTML=rows.map(function(r){
+    return '<div class="kv"><span><b>'+esc(r.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">'+(r.auto?('স্টকে আছে মাত্র '+fmt(r.stock)+' '+esc(r.unit)):('নিজে যোগ করা'))+'</span></span>'+
+    '<b style="display:flex;gap:6px;align-items:center"><input type="number" value="'+esc(String(r.qty))+'" min="0" step="any" style="width:84px" onchange="olSetQty(\''+r.pid+'\',\''+r.oid+'\',this.value)" aria-label="কেনার পরিমাণ" /><button class="btn small danger" type="button" onclick="olRemove(\''+r.pid+'\',\''+r.oid+'\')">✖ বাদ</button></b></div>';
+  }).join('');
+}
+window.olSetQty=function(pid,oid,val){
+  var q=num(val);if(!(q>0))q=1;
+  if(oid){(DB.olist||[]).forEach(function(o){if(o.id===oid){o.qty=q;o.off=false;o.u=Date.now();}});}
+  else if(pid){var p=findProd(pid);DB.olist.push({id:uid(),pid:pid,name:p?p.name:'',qty:q,off:false,book:p?bookOf(p):writeBook(),u:Date.now()});}
+  saveLocal();
+};
+window.olRemove=function(pid,oid){
+  if(pid){
+    var done=false;
+    (DB.olist||[]).forEach(function(o){if(o.pid===pid&&inBook(o)){o.off=true;o.u=Date.now();done=true;}});
+    if(!done){var p=findProd(pid);DB.olist.push({id:uid(),pid:pid,name:p?p.name:'',qty:0,off:true,book:p?bookOf(p):writeBook(),u:Date.now()});}
+  }else if(oid){
+    DB.olist=(DB.olist||[]).filter(function(o){return o.id!==oid;});addTomb('z',oid);
+  }
+  saveLocal();toast('লিস্ট থেকে সরানো হয়েছে');
+};
+$('olAdd').addEventListener('click',function(){
+  var name=$('olName').value.trim(),q=num($('olQty').value);
+  if(!name){toast('⚠️ আইটেমের নাম লিখুন');$('olName').focus();return;}
+  if(!(q>0)){toast('⚠️ পরিমাণ লিখুন');$('olQty').focus();return;}
+  DB.olist.push({id:uid(),pid:'',name:name,qty:q,off:false,book:writeBook(),u:Date.now()});
+  $('olName').value='';$('olQty').value='';
+  saveLocal();toast('✅ অর্ডার লিস্টে যোগ হয়েছে');
+});
+$('olShare').addEventListener('click',function(){
+  var rows=orderListRows();
+  if(!rows.length){toast('অর্ডার লিস্ট খালি — পাঠানোর কিছু নেই');return;}
+  var lines=['🛒 *কেনার অর্ডার লিস্ট* — Black Ghost Hisab','তারিখ: '+todayStr(),''];
+  rows.forEach(function(r,i){lines.push((i+1)+'. '+r.name+' — '+fmt(r.qty)+(r.unit?' '+r.unit:''));});
+  lines.push('','অনুগ্রহ করে মালগুলো পাঠিয়ে দিন। ধন্যবাদ!');
+  var ph=($('olPhone').value||'').replace(/[^0-9]/g,''),target='';
+  if(ph.length>=10)target=(ph.indexOf('880')===0)?ph:('880'+(ph.charAt(0)==='0'?ph.slice(1):ph));
+  window.open('https://wa.me/'+target+'?text='+encodeURIComponent(lines.join('\n')),'_blank');
+});
+
+/* ---------- VOICE ENTRY — ভয়েসে হিসাব (v8) ----------
+   The mic fills the form — it NEVER saves. The user always reviews the
+   pre-filled form and taps save themselves. Recognition needs internet
+   and can mis-hear; the form stays fully editable by hand.
+   parseVoiceText is pure (amount + type + product) so it can be tested:
+   Bengali/Arabic digits are normalised, হাজার/শত/শো act as multipliers,
+   বিক্রি → sale, খরচ/কেনা → expense, and the longest matching product
+   name in the text wins. */
+function bnToEnDigits(s){
+  return String(s==null?'':s)
+    .replace(/[০-৯]/g,function(c){return String('০১২৩৪৫৬৭৮৯'.indexOf(c));})
+    .replace(/[٠-٩]/g,function(c){return String('٠١٢٣٤٥٦٧٨٩'.indexOf(c));});
+}
+var BN_WORD_NUM={'এক':1,'দুই':2,'তিন':3,'চার':4,'পাঁচ':5,'ছয়':6,'সাত':7,'আট':8,'নয়':9,'দশ':10};
+function parseVoiceText(text,prodNames){
+  var raw=String(text||'').trim();
+  var t=bnToEnDigits(raw);
+  var res={amount:0,type:'',product:'',note:raw};
+  var m=t.match(/(\d+(?:\.\d+)?)\s*(হাজার|শত|শো)?/);
+  if(m)res.amount=num(m[1])*(m[2]==='হাজার'?1000:(m[2]?100:1));
+  else{
+    var wm=t.match(/(এক|দুই|তিন|চার|পাঁচ|ছয়|সাত|আট|নয়|দশ)\s*(শো|শত|হাজার)/);
+    if(wm)res.amount=(BN_WORD_NUM[wm[1]]||0)*(wm[2]==='হাজার'?1000:100);
+  }
+  if(/বিক্রি|বেচা|বেচলাম|বিক্রয়/.test(t))res.type='sale';
+  else if(/খরচ|কিনলাম|কেনা|কিনেছি|ক্রয়/.test(t))res.type='expense';
+  else if(/বাকি/.test(t))res.type='due';
+  var best='';
+  (prodNames||[]).forEach(function(n){if(n&&t.indexOf(n)>=0&&n.length>best.length)best=n;});
+  res.product=best;
+  return res;
+}
+function findProdByName(n){for(var i=0;i<DB.products.length;i++)if(DB.products[i].name===n)return DB.products[i];return null;}
+function prodNameList(){return DB.products.map(function(p){return p.name;});}
+function startVoice(onText){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('⚠️ এই ব্রাউজারে ভয়েস চেনা যায় না — Chrome ব্রাউজারে চেষ্টা করুন, অথবা হাতে লিখুন');return;}
+  if(!navigator.onLine){toast('⚠️ ভয়েস চিনতে ইন্টারনেট লাগে — নেট চালু করে আবার চেষ্টা করুন');return;}
+  var rec;
+  try{rec=new SR();}catch(e){toast('⚠️ মাইক চালু হয়নি');return;}
+  rec.lang='bn-BD';rec.interimResults=false;rec.maxAlternatives=1;
+  toast('🎤 বলুন… (যেমন: ৫০০ টাকার বিস্কুট বিক্রি)');
+  rec.onresult=function(e){if(e.results&&e.results[0]&&e.results[0][0])onText(e.results[0][0].transcript);};
+  rec.onerror=function(){toast('⚠️ ভয়েস শোনা যায়নি — আবার চেষ্টা করুন বা হাতে লিখুন');};
+  try{rec.start();}catch(e){toast('⚠️ মাইক চালু হয়নি');}
+}
+function setTxTypeUI(t){
+  txType=t;
+  $('txTypeSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===t?(t==='in'?'sel-in':'sel-out'):'';});
+}
+$('txVoiceBtn').addEventListener('click',function(){
+  startVoice(function(txt){
+    var r=parseVoiceText(txt,prodNameList());
+    if(r.amount>0)$('txAmount').value=r.amount;
+    if(r.type==='sale'){setTxTypeUI('in');$('txCat').value='পণ্য বিক্রি';}
+    else if(r.type==='expense'){setTxTypeUI('out');if(r.product)$('txCat').value='পণ্য কেনা';}
+    $('txNote').value=txt;
+    $('txVoiceMsg').textContent='🎤 শুনেছি: “'+txt+'” — ফর্মে বসিয়ে দিয়েছি। ঠিক আছে কিনা দেখে তারপর “সেভ করুন” চাপুন — অটোমেটিক কিছুই সেভ হয়নি।';
+    toast('🎤 ফর্মে বসে গেছে — যাচাই করে সেভ করুন');
+  });
+});
+$('billVoiceBtn').addEventListener('click',function(){
+  startVoice(function(txt){
+    var r=parseVoiceText(txt,prodNameList());
+    if(r.amount>0)$('bPaid').value=r.amount;
+    if(r.product){
+      var p=findProdByName(r.product);
+      if(p){
+        var rows=document.querySelectorAll('#billItems .billrow'),row=null;
+        rows.forEach(function(rw){if(!row&&!rw.querySelector('.b-pid').value&&!(rw.querySelector('.b-name').value||'').trim())row=rw;});
+        if(!row){addBillRow();rows=document.querySelectorAll('#billItems .billrow');row=rows[rows.length-1];}
+        if(row){row.querySelector('.b-pid').value=p.id;row.querySelector('.b-price').value=num(p.sell)||'';if(!(num(row.querySelector('.b-qty').value)>0))row.querySelector('.b-qty').value=1;}
+      }
+    }
+    billCalc();
+    $('billVoiceMsg').textContent='🎤 শুনেছি: “'+txt+'” — বিলে বসিয়ে দিয়েছি। যাচাই করে “বিল সেভ করুন” চাপুন — অটোমেটিক কিছুই সেভ হয়নি।';
+    toast('🎤 বিলে বসে গেছে — যাচাই করে সেভ করুন');
+  });
+});
+$('qsVoiceBtn').addEventListener('click',function(){
+  startVoice(function(txt){
+    var r=parseVoiceText(txt,prodNameList());
+    if(r.product){var p=findProdByName(r.product);if(p)posAdd(p.id);}
+    if(r.amount>0)$('qsPaid').value=r.amount;
+    renderPosCart();
+    $('qsVoiceMsg').textContent='🎤 শুনেছি: “'+txt+'” — বিলে বসিয়ে দিয়েছি। যাচাই করে “বিক্রি শেষ করুন” চাপুন — অটোমেটিক কিছুই সেভ হয়নি।';
+    toast('🎤 বিলে বসে গেছে — যাচাই করে শেষ করুন');
+  });
+});
+
 /* ---------- RENDER ---------- */
 function renderDash(){
   var all=totals(bTxs()), t=todayStr();
@@ -3546,7 +4028,8 @@ function renderDash(){
     '<div class="kv"><span>আজকের খরচ</span><b style="color:var(--out)">'+money(tt.out)+'</b></div>'+
     '<div class="kv"><span>আজকে হাতে বাড়ল / কমল</span><b>'+money(tt.bal)+'</b></div>'+
     '<div class="kv"><span>আজকের পণ্য-লাভ</span><b>'+money(dayProfit(t))+'</b></div>'+
-    '<div class="kv"><span>সব মিলিয়ে হাতে আছে</span><b>'+money(all.bal)+'</b></div>';
+    '<div class="kv"><span>সব মিলিয়ে হাতে আছে</span><b>'+money(all.bal)+'</b></div>'+
+    '<h3 style="margin:12px 0 2px;font-size:.98rem">আজকের পেমেন্ট মাধ্যম অনুযায়ী</h3>'+(methodRowsHtml(todayTx)||'<p class="hint" style="margin:0">আজ কোনো এন্ট্রি নেই</p>');
   var lows=bProducts().filter(function(p){return prodStats(p).remaining<=num(p.low);});
   var lst=$('lowStockTitle');if(lst)lst.textContent=lows.length?'⚠️ স্টক কমে গেছে':'📦 স্টক অবস্থা';
   $('lowStockBox').innerHTML=lows.length?lows.map(function(p){var s=prodStats(p);return '<div class="kv"><span>'+esc(p.name)+'</span><b><span class="badge warn">মাত্র '+fmt(s.remaining)+' '+esc(p.unit)+' আছে</span></b></div>';}).join(''):'<p class="hint" style="margin:0">সব প্রোডাক্টের স্টক ঠিক আছে ✅</p>';
@@ -3577,7 +4060,7 @@ function renderLedger(){
     var badge=x.type==='in'?'আয় ＋':(x.type==='out'?'খরচ －':(x.type==='save'?'🐷 সঞ্চয় জমা':'🐷 সঞ্চয় ফেরত'));
     var bcls=x.type==='out'?'out':(x.type==='save'?'warn':'in');
     var col=x.type==='out'?'var(--out)':(x.type==='save'?'var(--gold)':'var(--in)');
-    return '<div class="rowitem" data-rowid="'+x.id+'"><div class="r1"><div><span class="badge '+bcls+'">'+badge+'</span> <b>'+esc(x.cat)+'</b><div class="meta">'+esc(x.date)+' • '+esc(x.method)+(x.note?' • '+esc(x.note):'')+'</div><div class="bal">এই এন্ট্রির পর ব্যালেন্স: '+money(runMap[x.id])+'</div></div><div class="amt" style="color:'+col+'">'+(isIn?'+':'−')+' '+money(x.amount)+'</div></div><div class="iconbtns noprint">'+(isSave?'':'<button class="btn small ghost" type="button" onclick="editTx(\''+x.id+'\')">✏️ ঠিক করুন</button>')+'<button class="btn small danger" type="button" onclick="delTx(\''+x.id+'\')">🗑️ মুছুন</button></div></div>';
+    return '<div class="rowitem" data-rowid="'+x.id+'"><div class="r1"><div><span class="badge '+bcls+'">'+badge+'</span> <b>'+esc(x.cat)+'</b><div class="meta">'+esc(x.date)+' • '+esc(methodLabel(x.method))+(x.note?' • '+esc(x.note):'')+'</div>'+(x.photo?'<img src="'+x.photo+'" alt="রসিদের ছবি" onclick="viewTxPhoto(\''+x.id+'\')" style="width:52px;height:52px;object-fit:cover;border-radius:8px;border:1.5px solid var(--line);margin-top:6px;cursor:pointer" />':'')+'<div class="bal">এই এন্ট্রির পর ব্যালেন্স: '+money(runMap[x.id])+'</div></div><div class="amt" style="color:'+col+'">'+(isIn?'+':'−')+' '+money(x.amount)+'</div></div><div class="iconbtns noprint">'+(isSave?'':'<button class="btn small ghost" type="button" onclick="editTx(\''+x.id+'\')">✏️ ঠিক করুন</button>')+'<button class="btn small danger" type="button" onclick="delTx(\''+x.id+'\')">🗑️ মুছুন</button></div></div>';
   }).join('');
   placeFormAfterRender('txFormTitle','txList',editTxId);
 }
@@ -3642,14 +4125,15 @@ function renderReport(){
     '<div class="kv"><span><b>মাসে হাতে বাড়ল / কমল (আয় − খরচ)</b></span><b>'+money(mt.bal)+'</b></div>'+
     '<div class="kv"><span>পণ্য বিক্রি (পরিমাণ / টাকা)</span><b>'+fmt(soldQty)+' / '+money(soldAmt)+'</b></div>'+
     '<div class="kv"><span><b>মাসের পণ্য-লাভ</b></span><b style="color:'+(mp>=0?'var(--in)':'var(--out)')+'">'+money(mp)+'</b></div>'+
-    (catRows?'<h3>খাত অনুযায়ী</h3><table><tr><th>খাত</th><th class="num">আয়</th><th class="num">খরচ</th></tr>'+catRows+'</table>':'');
+    (catRows?'<h3>খাত অনুযায়ী</h3><table><tr><th>খাত</th><th class="num">আয়</th><th class="num">খরচ</th></tr>'+catRows+'</table>':'')+
+    '<h3>পেমেন্ট মাধ্যম অনুযায়ী</h3>'+(methodRowsHtml(mTx)||'<p class="hint" style="margin:0">এই মাসে কোনো এন্ট্রি নেই</p>');
   if(!bProducts().length){$('profitTable').innerHTML='<div class="empty">কোনো প্রোডাক্ট নেই।</div>';renderPartners();renderBudgets();renderGoals();renderRbills();renderCharts();return;}
   var rows=bProducts().map(function(p){var s=prodStats(p);return '<tr><td><b>'+esc(p.name)+'</b><br><span style="color:var(--muted);font-size:.85rem">কেনা '+money(p.buy)+' • বিক্রি '+money(p.sell)+'</span></td><td class="num">'+fmt(s.sold)+' '+esc(p.unit)+'</td><td class="num">'+money(s.soldAmt)+'</td><td class="num" style="color:'+(s.profit>=0?'var(--in)':'var(--out)')+';font-weight:700">'+money(s.profit)+'</td><td class="num">'+fmt(s.remaining)+' '+esc(p.unit)+'</td></tr>';}).join('');
   var totP=0,totS=0;bProducts().forEach(function(p){var s=prodStats(p);totP+=s.profit;totS+=s.soldAmt;});
   $('profitTable').innerHTML='<div style="overflow-x:auto"><table><tr><th>প্রোডাক্ট</th><th class="num">বিক্রি</th><th class="num">বিক্রির টাকা</th><th class="num">লাভ</th><th class="num">বাকি স্টক</th></tr>'+rows+'<tr><td><b>মোট</b></td><td></td><td class="num"><b>'+money(totS)+'</b></td><td class="num"><b>'+money(totP)+'</b></td><td></td></tr></table></div>';
   renderPartners();renderBudgets();renderGoals();renderRbills();renderCharts();
 }
-function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderReport();renderDues();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();}
+function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();}
 
 /* ---------- BACKUP / CSV / PRINT ---------- */
 function download(name,content,type){
@@ -3711,6 +4195,7 @@ $('bDate').value=todayStr();
 $('oDate').value=todayStr();
 $('lnStart').value=todayStr();
 $('pnDate').value=todayStr();
+$('puDate').value=todayStr();
 duSetType('give');
 addBillRow();billCalc();oCalc();
 updOpenTotal();
