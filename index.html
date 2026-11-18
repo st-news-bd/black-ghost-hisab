@@ -181,6 +181,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <button type="button" data-tab="ledger">💰 টাকার হিসাব</button>
     <button type="button" data-tab="stock">📦 প্রোডাক্ট স্টক</button>
     <button type="button" data-tab="dues">🤝 বাকি হিসাব</button>
+    <button type="button" data-tab="dealer">🏪 ডিলার খাতা</button>
     <button type="button" data-tab="bill">🧾 বিল</button>
     <button type="button" data-tab="pos">⚡ দ্রুত বিক্রি</button>
     <button type="button" data-tab="order">📋 অর্ডার বুক</button>
@@ -609,6 +610,79 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
   </section>
 
+  <!-- DEALER KHATA -->
+  <section class="page" id="page-dealer">
+    <div class="cards" id="dlCards"></div>
+    <div class="panel">
+      <h2 id="dlFormTitle">🏪 নতুন ডিলার যোগ করুন</h2>
+      <p class="hint">যে ডিলারের সাথে মালের লেনদেন হয় (আইসক্রিম ডিলার, কোম্পানির ডিলার — যে কেউ) তার নাম একবার যোগ করুন। তারপর তার নিজের খাতায় মাল দেওয়া, টাকা পাওয়া আর বাকির হিসাব — সব অটোমেটিক চলবে, খাতা-কলম ধরতে হবে না।</p>
+      <div class="grid2">
+        <div class="field"><label for="dlName">ডিলারের নাম</label><input type="text" id="dlName" placeholder="যেমন: রফিক উদ্দিন" /></div>
+        <div class="field"><label for="dlPhone">মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" id="dlPhone" placeholder="01XXXXXXXXX" /></div>
+      </div>
+      <div class="field"><label for="dlCompany">কোম্পানি / ব্র্যান্ড (ঐচ্ছিক)</label><input type="text" id="dlCompany" placeholder="যেমন: গোল্ডেন আইসক্রিম, প্রাণ, স্কয়ার" /></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="dlSave" type="button">✅ ডিলার সেভ করুন</button>
+        <button class="btn ghost" id="dlCancel" type="button" style="display:none">বাতিল</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>💰 কার কাছে কত বাকি</h2>
+      <p class="hint">সব ডিলার মিলিয়ে কে কত টাকা বাকি রেখেছে — এক নজরে।</p>
+      <div id="dlOweList"></div>
+    </div>
+    <div class="panel">
+      <h2>সব ডিলার</h2>
+      <div class="searchrow noprint"><input type="search" id="dlSearch" placeholder="🔍 ডিলার বা কোম্পানি খুঁজুন…" /></div>
+      <div id="dealerList"></div>
+    </div>
+    <div class="panel" id="dlDetail" style="display:none">
+      <h2 id="dlDetailTitle">ডিলারের হিসাব</h2>
+      <div id="dlDetailTotals"></div>
+      <h3 style="margin:18px 0 4px">🧺 এই ডিলারের প্রোডাক্ট — বক্সের দাম</h3>
+      <p class="hint">এক বক্সের দাম আর বক্সে কয়টা পিস থাকে লিখলেই <b>এক পিসের দাম অটোমেটিক</b> বের হয়ে যাবে। যেমন: ১ বক্স কাপ ৳৪৫০, বক্সে ১০টা পিস → একটা কাপের দাম ৳৪৫।</p>
+      <div class="grid3">
+        <div class="field"><label for="dpName">প্রোডাক্টের নাম</label><input type="text" id="dpName" placeholder="যেমন: কাপ আইসক্রিম" /></div>
+        <div class="field"><label for="dpBoxPrice">এক বক্সের দাম (৳)</label><input type="number" id="dpBoxPrice" inputmode="decimal" min="0" step="any" placeholder="যেমন: 450" /></div>
+        <div class="field"><label for="dpPerBox">এক বক্সে কয়টা পিস</label><input type="number" id="dpPerBox" inputmode="decimal" min="0" step="any" placeholder="যেমন: 10" /></div>
+      </div>
+      <div class="live-total" id="dpUnitBox">এক পিসের দাম: ৳ 0</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="dpSave" type="button">✅ প্রোডাক্ট সেভ করুন</button>
+        <button class="btn ghost" id="dpCancel" type="button" style="display:none">বাতিল</button>
+      </div>
+      <div id="dpList" style="margin-top:10px"></div>
+      <h3 style="margin:20px 0 4px" id="dgFormTitle">📦 মাল দিন</h3>
+      <p class="hint">একসাথে কয়েকটা প্রোডাক্ট দিতে পারবেন — কাপ, কোন, চকবার যাই হোক। পরিমাণ পিসেও লিখতে পারবেন, বক্সেও — মোট টাকা অটোমেটিক হিসাব হবে।</p>
+      <div class="grid2">
+        <div class="field"><label for="dgDate">তারিখ</label><input type="date" id="dgDate" /></div>
+        <div class="field"><label for="dgNote">নোট (ঐচ্ছিক)</label><input type="text" id="dgNote" placeholder="যেমন: সাপ্তাহিক ডেলিভারি" /></div>
+      </div>
+      <div id="dgItems"></div>
+      <button class="btn small gold noprint" id="dgAddRow" type="button">➕ আরেকটা প্রোডাক্ট যোগ করুন</button>
+      <div class="live-total" id="dgTotalBox">মোট = ৳ 0</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="dgSave" type="button">✅ মাল দেওয়া সেভ করুন</button>
+        <button class="btn ghost" id="dgCancel" type="button" style="display:none">বাতিল</button>
+      </div>
+      <h3 style="margin:20px 0 4px" id="drFormTitle">💵 টাকা নিন</h3>
+      <p class="hint">ডিলার টাকা দিলে এখানে লিখুন — তার বাকি অটোমেটিক কমে যাবে।</p>
+      <div class="grid3">
+        <div class="field"><label for="drDate">তারিখ</label><input type="date" id="drDate" /></div>
+        <div class="field"><label for="drAmt">টাকার পরিমাণ (৳)</label><input type="number" id="drAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="drMethod">পেমেন্ট মাধ্যম</label>
+          <select id="drMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+      </div>
+      <div class="field"><label for="drNote">নোট (ঐচ্ছিক)</label><input type="text" id="drNote" placeholder="নোট লিখুন" /></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="drSave" type="button">✅ টাকা পাওয়া সেভ করুন</button>
+        <button class="btn ghost" id="drCancel" type="button" style="display:none">বাতিল</button>
+      </div>
+      <h3 style="margin:20px 0 6px">📜 এই ডিলারের পুরো ইতিহাস</h3>
+      <div id="dlHist"></div>
+    </div>
+  </section>
+
   <!-- BILL / INVOICE -->
   <section class="page" id="page-bill">
     <div class="panel">
@@ -921,7 +995,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 11 (v11)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 12 (v12)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -1425,7 +1499,7 @@ function $(id){return document.getElementById(id);}
 /* ---------- DATA (local first, per-account) ---------- */
 /* App name lives in ONE place: change APP_NAME here + <title> + manifest to rename. */
 var APP_NAME='Black Ghost Hisab';
-function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],purchases:[],olist:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,profilePhoto:'',profilePhotoU:0,tombs:[],updatedAt:0,rev:0};}
+function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],purchases:[],olist:[],dealers:[],dprods:[],dtxs:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,profilePhoto:'',profilePhotoU:0,tombs:[],updatedAt:0,rev:0};}
 /* ---------- SEPARATE BOOKS (আলাদা খাতা) ----------
    Every entry/product/party/etc. carries a `book` field = the id of the
    book it belongs to. Entries saved before books existed have NO book
@@ -1468,6 +1542,9 @@ function bRbills(){return DB.rbills.filter(inBook);}
 function bCashdays(){return DB.cashdays.filter(inBook);}
 function bPurchases(){return (DB.purchases||[]).filter(inBook);}
 function bPartners(){return DB.partners.filter(inBook);}
+function bDealers(){return DB.dealers.filter(inBook);}
+function bDprods(){return DB.dprods.filter(inBook);}
+function bDtxs(){return DB.dtxs.filter(inBook);}
 function findBook(id){for(var i=0;i<DB.books.length;i++)if(DB.books[i].id===id)return DB.books[i];return null;}
 function bookName(id){var b=findBook(id);return b?b.name:'প্রধান খাতা';}
 /* Normalise any stored / cloud / backup object into the full data shape.
@@ -1475,7 +1552,7 @@ function bookName(id){var b=findBook(id);return b?b.name:'প্রধান খ
    rev   = local revision counter, bumped on every save. */
 function normDB(d){
   if(!d||typeof d!=='object')return blankDB();
-  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],purchases:Array.isArray(d.purchases)?d.purchases:[],olist:Array.isArray(d.olist)?d.olist:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),profilePhoto:typeof d.profilePhoto==='string'?d.profilePhoto:'',profilePhotoU:num(d.profilePhotoU),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev)};
+  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],purchases:Array.isArray(d.purchases)?d.purchases:[],olist:Array.isArray(d.olist)?d.olist:[],dealers:Array.isArray(d.dealers)?d.dealers:[],dprods:Array.isArray(d.dprods)?d.dprods:[],dtxs:Array.isArray(d.dtxs)?d.dtxs:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),profilePhoto:typeof d.profilePhoto==='string'?d.profilePhoto:'',profilePhotoU:num(d.profilePhotoU),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev)};
 }
 var DB=blankDB();
 var curKey=LS_KEY; /* guest (this-phone-only) key until login */
@@ -1511,7 +1588,7 @@ function mergeData(a,b){
   a.tombs.concat(b.tombs).forEach(function(t){if(t&&!tombSet[t]){tombSet[t]=1;tombs.push(t);}});
   var catSet={},catList=[];
   a.cats.concat(b.cats).forEach(function(c){if(c&&!catSet[c]){catSet[c]=1;catList.push(c);}});
-  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),profilePhoto:(b.profilePhotoU>a.profilePhotoU?b.profilePhoto:a.profilePhoto),profilePhotoU:Math.max(a.profilePhotoU,b.profilePhotoU),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
+  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),dealers:mergeArr(a.dealers,b.dealers,'D',tombSet),dprods:mergeArr(a.dprods,b.dprods,'P',tombSet),dtxs:mergeArr(a.dtxs,b.dtxs,'X',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),profilePhoto:(b.profilePhotoU>a.profilePhotoU?b.profilePhoto:a.profilePhoto),profilePhotoU:Math.max(a.profilePhotoU,b.profilePhotoU),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
 }
 function addTomb(p,id){var t=p+id;if(DB.tombs.indexOf(t)<0)DB.tombs.push(t);}
 function persistLocal(){try{localStorage.setItem(curKey,JSON.stringify(DB));}catch(e){}}
@@ -1655,7 +1732,7 @@ function syncNow(){
     }else{
       processDevices({});
     }
-    var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,purchases:DB.purchases,olist:DB.olist,books:DB.books,targetAmt:DB.targetAmt,targetU:DB.targetU,profilePhoto:DB.profilePhoto||'',profilePhotoU:DB.profilePhotoU||0,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
+    var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,purchases:DB.purchases,olist:DB.olist,dealers:DB.dealers,dprods:DB.dprods,dtxs:DB.dtxs,books:DB.books,targetAmt:DB.targetAmt,targetU:DB.targetU,profilePhoto:DB.profilePhoto||'',profilePhotoU:DB.profilePhotoU||0,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
       sub:subPayload(),plans:PLANS,planCfgU:CFG.u||0,payNum:CFG.payNumber||'',planReqs:PLANREQS,planReqsU:PLANREQS_U,devices:DEVICES};
     userDoc().set(payload).then(function(){finish(true);},function(){finish(false);});
   }).catch(function(){finish(false);});
@@ -5518,7 +5595,310 @@ window.catDelete=function(name){
     saveLocal();toast('ক্যাটাগরি লিস্ট থেকে সরানো হয়েছে');
   });
 };
-function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();renderProfileDevices();}
+function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderDealers();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();renderProfileDevices();}
+
+/* ---------- DEALER KHATA (ডিলার খাতা) ----------
+   dealers: {id,name,phone,company,book,u}
+   dprods:  {id,did,name,boxPrice,perBox,book,u} — এক পিসের দাম = boxPrice ÷ perBox
+   dtxs:    {id,did,kind:'give'|'recv',date,items:[{pid,name,qty,byBox,pieces,price,total}],amount,method,note,book,u}
+   সব হিসাব অটোমেটিক: মাল দেওয়ার মোট = Σ(pieces × price); বাকি = মোট দিয়েছি − মোট পেয়েছি। */
+function findDealer(id){for(var i=0;i<DB.dealers.length;i++)if(DB.dealers[i].id===id)return DB.dealers[i];return null;}
+function findDprod(id){for(var i=0;i<DB.dprods.length;i++)if(DB.dprods[i].id===id)return DB.dprods[i];return null;}
+function findDtx(id){for(var i=0;i<DB.dtxs.length;i++)if(DB.dtxs[i].id===id)return DB.dtxs[i];return null;}
+function dUnitPrice(dp){var pb=num(dp?dp.perBox:0);return pb>0?num(dp.boxPrice)/pb:0;}
+function dtxTotal(t){var s=0;(t.items||[]).forEach(function(it){s+=it.total!=null?num(it.total):num(it.pieces||it.qty)*num(it.price);});return s;}
+function dealerTotals(did){
+  var given=0,recv=0;
+  bDtxs().forEach(function(t){if(t.did!==did)return;if(t.kind==='give')given+=dtxTotal(t);else recv+=num(t.amount);});
+  return{given:given,recv:recv,due:given-recv};
+}
+function dealerProds(did){return bDprods().filter(function(p){return p.did===did;});}
+/* ----- dealer add / edit ----- */
+var editDealerId=null;
+function resetDealerForm(){
+  editDealerId=null;$('dlName').value='';$('dlPhone').value='';$('dlCompany').value='';
+  $('dlFormTitle').textContent='🏪 নতুন ডিলার যোগ করুন';$('dlSave').textContent='✅ ডিলার সেভ করুন';$('dlCancel').style.display='none';
+}
+$('dlCancel').addEventListener('click',function(){resetDealerForm();formToHome('dlFormTitle');});
+window.editDealer=function(id){
+  var d=findDealer(id);if(!d)return;
+  editDealerId=id;
+  $('dlName').value=d.name;$('dlPhone').value=d.phone||'';$('dlCompany').value=d.company||'';
+  $('dlFormTitle').textContent='🏪 ডিলার ঠিক করুন';$('dlSave').textContent='✅ আপডেট করুন';$('dlCancel').style.display='';
+  showPageNoScroll('dealer');formToRow('dlFormTitle','dealerList',id);
+  $('dlName').focus();
+};
+$('dlSave').addEventListener('click',function(){
+  var name=$('dlName').value.trim();
+  if(!name){toast('⚠️ ডিলারের নাম লিখুন');$('dlName').focus();return;}
+  if(editDealerId){
+    var d=findDealer(editDealerId);
+    if(d){d.name=name;d.phone=$('dlPhone').value.trim();d.company=$('dlCompany').value.trim();d.u=Date.now();}
+    resetDealerForm();saveLocal();toast('✅ ডিলার ঠিক হয়েছে');return;
+  }
+  DB.dealers.push({id:uid(),name:name,phone:$('dlPhone').value.trim(),company:$('dlCompany').value.trim(),book:writeBook(),u:Date.now()});
+  resetDealerForm();saveLocal();toast('✅ ডিলার যোগ হয়েছে — এবার তার কার্ডে “📖 হিসাব” চেপে প্রোডাক্ট ও লেনদেন যোগ করুন');
+});
+window.delDealer=function(id){
+  var d=findDealer(id);
+  askSure('“'+(d?d.name:'')+'” ডিলার ও তার সব প্রোডাক্ট ও লেনদেনের হিসাব মুছে ফেলবেন?',function(){
+    DB.dprods.forEach(function(p){if(p.did===id)addTomb('P',p.id);});
+    DB.dtxs.forEach(function(t){if(t.did===id)addTomb('X',t.id);});
+    DB.dprods=DB.dprods.filter(function(p){return p.did!==id;});
+    DB.dtxs=DB.dtxs.filter(function(t){return t.did!==id;});
+    addTomb('D',id);
+    DB.dealers=DB.dealers.filter(function(x){return x.id!==id;});
+    if(dlSelId===id){dlSelId=null;resetDprodForm();resetGiveForm();resetRecvForm();}
+    if(editDealerId===id)resetDealerForm();
+    saveLocal();toast('🗑️ ডিলার মোছা হয়েছে');
+  });
+};
+/* ----- dealer detail (products + give + receive + history) ----- */
+var dlSelId=null, dgForDealer=null;
+window.openDealer=function(id,focus){
+  if(!findDealer(id))return;
+  dlSelId=id;
+  showPageNoScroll('dealer');
+  renderDealers();
+  var det=$('dlDetail');
+  if(det)setTimeout(function(){det.scrollIntoView({behavior:'smooth',block:'start'});},40);
+  if(focus==='give')setTimeout(function(){var el=$('dgFormTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},260);
+  if(focus==='recv')setTimeout(function(){var el=$('drFormTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},260);
+};
+/* ----- dealer products (box pricing) ----- */
+var editDprodId=null;
+function dpUnitUpdate(){
+  var bp=num($('dpBoxPrice').value),pb=num($('dpPerBox').value);
+  $('dpUnitBox').textContent=pb>0?('এক পিসের দাম: '+money(bp/pb)+'  (বক্স '+money(bp)+' ÷ '+fmt(pb)+' পিস)'):'এক পিসের দাম: ৳ 0 — বক্সের দাম আর পিসের সংখ্যা লিখলেই হিসাব হবে';
+}
+['dpBoxPrice','dpPerBox'].forEach(function(id){$(id).addEventListener('input',dpUnitUpdate);});
+function resetDprodForm(){
+  editDprodId=null;$('dpName').value='';$('dpBoxPrice').value='';$('dpPerBox').value='';
+  $('dpSave').textContent='✅ প্রোডাক্ট সেভ করুন';$('dpCancel').style.display='none';dpUnitUpdate();
+}
+$('dpCancel').addEventListener('click',resetDprodForm);
+window.editDprod=function(id){
+  var p=findDprod(id);if(!p)return;
+  editDprodId=id;
+  $('dpName').value=p.name;$('dpBoxPrice').value=num(p.boxPrice)||'';$('dpPerBox').value=num(p.perBox)||'';
+  $('dpSave').textContent='✅ আপডেট করুন';$('dpCancel').style.display='';dpUnitUpdate();
+  var el=$('dpName');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}
+};
+$('dpSave').addEventListener('click',function(){
+  var d=findDealer(dlSelId);if(!d){toast('⚠️ আগে একজন ডিলার বাছুন');return;}
+  var name=$('dpName').value.trim(),bp=num($('dpBoxPrice').value),pb=num($('dpPerBox').value);
+  if(!name){toast('⚠️ প্রোডাক্টের নাম লিখুন');$('dpName').focus();return;}
+  if(!(bp>0)){toast('⚠️ এক বক্সের দাম লিখুন');$('dpBoxPrice').focus();return;}
+  if(!(pb>0)){toast('⚠️ এক বক্সে কয়টা পিস থাকে লিখুন');$('dpPerBox').focus();return;}
+  if(editDprodId){
+    var p=findDprod(editDprodId);
+    if(p){p.name=name;p.boxPrice=bp;p.perBox=pb;p.u=Date.now();}
+    resetDprodForm();saveLocal();toast('✅ প্রোডাক্ট ঠিক হয়েছে — এক পিসের দাম '+money(bp/pb));return;
+  }
+  DB.dprods.push({id:uid(),did:d.id,name:name,boxPrice:bp,perBox:pb,book:bookOf(d),u:Date.now()});
+  resetDprodForm();saveLocal();toast('✅ প্রোডাক্ট সেভ হয়েছে — এক পিসের দাম '+money(bp/pb));
+});
+window.delDprod=function(id){
+  var p=findDprod(id);
+  askSure('“'+(p?p.name:'')+'” প্রোডাক্টটা এই ডিলারের লিস্ট থেকে মুছবেন? আগের লেনদেনের হিসাব আগের মতোই থেকে যাবে।',function(){
+    DB.dprods=DB.dprods.filter(function(x){return x.id!==id;});addTomb('P',id);
+    if(editDprodId===id)resetDprodForm();
+    saveLocal();toast('🗑️ প্রোডাক্ট মোছা হয়েছে');
+  });
+};
+/* ----- give goods (multi-product, pieces or boxes) ----- */
+var editDtxGiveId=null;
+function dgRowHtml(){
+  var opts='<option value="">— প্রোডাক্ট বাছুন —</option>'+dealerProds(dlSelId).map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' (১ পিস '+money(dUnitPrice(p))+')</option>';}).join('');
+  return '<div class="dgrow" style="border:1.5px solid var(--line);border-radius:12px;padding:10px;margin-bottom:9px">'+
+  '<input type="hidden" class="dg-snapprice" value="" /><input type="hidden" class="dg-snapbox" value="" />'+
+  '<div class="grid2"><div class="field" style="margin:0"><label>প্রোডাক্ট</label><select class="dg-pid">'+opts+'</select></div>'+
+  '<div class="field" style="margin:0"><label>একক</label><select class="dg-unit"><option value="pc">পিস</option><option value="box">বক্স</option></select></div></div>'+
+  '<div class="grid3" style="margin-top:8px"><div class="field" style="margin:0"><label>পরিমাণ</label><input type="number" class="dg-qty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>'+
+  '<div class="field" style="margin:0"><label>এক পিসের দাম</label><div class="live-total dg-unitprice" style="margin:0">৳ 0</div></div>'+
+  '<div class="field" style="margin:0"><label>মোট</label><div class="live-total dg-line" style="margin:0">৳ 0</div></div></div>'+
+  '<button class="btn small danger dg-rm noprint" type="button" style="margin-top:8px">✖ আইটেম সরান</button></div>';
+}
+function addDgRow(){$('dgItems').insertAdjacentHTML('beforeend',dgRowHtml());}
+$('dgAddRow').addEventListener('click',function(){addDgRow();dgCalc();});
+function dgCollect(){
+  var items=[];
+  document.querySelectorAll('#dgItems .dgrow').forEach(function(row){
+    var pid=row.querySelector('.dg-pid').value;
+    var p=pid?findDprod(pid):null;
+    var price=p?dUnitPrice(p):num(row.querySelector('.dg-snapprice').value);
+    var perBox=p?num(p.perBox):num(row.querySelector('.dg-snapbox').value);
+    var byBox=row.querySelector('.dg-unit').value==='box';
+    var qty=num(row.querySelector('.dg-qty').value);
+    var pieces=byBox?qty*(perBox>0?perBox:1):qty;
+    var total=pieces*price;
+    var upEl=row.querySelector('.dg-unitprice');if(upEl)upEl.textContent=money(price);
+    var lnEl=row.querySelector('.dg-line');if(lnEl)lnEl.textContent=money(total);
+    if(p&&qty>0)items.push({pid:pid,name:p.name,qty:qty,byBox:byBox,pieces:pieces,price:price,total:total});
+    else if(!p&&pid&&qty>0)items.push({pid:pid,name:'প্রোডাক্ট',qty:qty,byBox:byBox,pieces:pieces,price:price,total:total});
+  });
+  return items;
+}
+function dgCalc(){
+  var items=dgCollect(),s=0;
+  items.forEach(function(it){s+=it.total;});
+  $('dgTotalBox').textContent='মোট = '+money(s);
+  return{items:items,total:s};
+}
+$('dgItems').addEventListener('input',dgCalc);
+$('dgItems').addEventListener('change',dgCalc);
+$('dgItems').addEventListener('click',function(e){
+  if(e.target.classList.contains('dg-rm')){var r=e.target.closest('.dgrow');if(r)r.remove();dgCalc();}
+});
+function resetGiveForm(){
+  editDtxGiveId=null;
+  $('dgDate').value=todayStr();$('dgNote').value='';
+  $('dgItems').innerHTML='';addDgRow();dgCalc();
+  $('dgSave').textContent='✅ মাল দেওয়া সেভ করুন';$('dgCancel').style.display='none';
+  dgForDealer=dlSelId;
+}
+$('dgCancel').addEventListener('click',resetGiveForm);
+$('dgSave').addEventListener('click',function(){
+  var d=findDealer(dlSelId);if(!d){toast('⚠️ আগে একজন ডিলার বাছুন');return;}
+  var c=dgCalc();
+  if(!c.items.length){toast('⚠️ অন্তত একটা প্রোডাক্ট বেছে পরিমাণ লিখুন');return;}
+  var date=$('dgDate').value||todayStr(),note=$('dgNote').value.trim();
+  if(editDtxGiveId){
+    var t=findDtx(editDtxGiveId);
+    if(t){t.date=date;t.items=c.items;t.note=note;t.u=Date.now();}
+    resetGiveForm();saveLocal();toast('✅ মাল দেওয়ার হিসাব ঠিক হয়েছে');return;
+  }
+  DB.dtxs.push({id:uid(),did:d.id,kind:'give',date:date,items:c.items,amount:0,method:'',note:note,book:bookOf(d),u:Date.now()});
+  resetGiveForm();saveLocal();toast('✅ মাল দেওয়া সেভ হয়েছে — মোট '+money(c.total)+', বাকিতে যোগ হয়েছে');
+});
+/* ----- receive payment ----- */
+var editDtxRecvId=null;
+function resetRecvForm(){
+  editDtxRecvId=null;
+  $('drDate').value=todayStr();$('drAmt').value='';$('drNote').value='';
+  $('drSave').textContent='✅ টাকা পাওয়া সেভ করুন';$('drCancel').style.display='none';
+}
+$('drCancel').addEventListener('click',resetRecvForm);
+$('drSave').addEventListener('click',function(){
+  var d=findDealer(dlSelId);if(!d){toast('⚠️ আগে একজন ডিলার বাছুন');return;}
+  var amt=num($('drAmt').value);
+  if(!(amt>0)){toast('⚠️ টাকার পরিমাণ লিখুন');$('drAmt').focus();return;}
+  var date=$('drDate').value||todayStr(),note=$('drNote').value.trim(),method=$('drMethod').value;
+  if(editDtxRecvId){
+    var t=findDtx(editDtxRecvId);
+    if(t){t.date=date;t.amount=amt;t.method=method;t.note=note;t.u=Date.now();}
+    resetRecvForm();saveLocal();toast('✅ টাকা পাওয়ার হিসাব ঠিক হয়েছে');return;
+  }
+  DB.dtxs.push({id:uid(),did:d.id,kind:'recv',date:date,items:[],amount:amt,method:method,note:note,book:bookOf(d),u:Date.now()});
+  resetRecvForm();saveLocal();toast('✅ টাকা পাওয়া সেভ হয়েছে — বাকি কমে গেছে');
+});
+/* ----- transaction edit / delete ----- */
+window.editDtx=function(id){
+  var t=findDtx(id);if(!t)return;
+  dlSelId=t.did;
+  showPageNoScroll('dealer');
+  renderDealers();
+  if(t.kind==='give'){
+    editDtxGiveId=id;
+    $('dgDate').value=t.date;$('dgNote').value=t.note||'';
+    $('dgItems').innerHTML='';
+    (t.items||[]).forEach(function(it){
+      addDgRow();
+      var rows=document.querySelectorAll('#dgItems .dgrow'),row=rows[rows.length-1];
+      var sel=row.querySelector('.dg-pid');
+      if(it.pid&&!findDprod(it.pid)){var o=document.createElement('option');o.value=it.pid;o.textContent=it.name+' (আগের দামে)';sel.appendChild(o);}
+      sel.value=it.pid||'';
+      row.querySelector('.dg-snapprice').value=num(it.price)||'';
+      var pp=findDprod(it.pid);row.querySelector('.dg-snapbox').value=pp?num(pp.perBox):(it.byBox&&num(it.qty)>0?num(it.pieces)/num(it.qty):'');
+      row.querySelector('.dg-unit').value=it.byBox?'box':'pc';
+      row.querySelector('.dg-qty').value=num(it.qty)||'';
+    });
+    if(!document.querySelectorAll('#dgItems .dgrow').length)addDgRow();
+    dgCalc();
+    $('dgSave').textContent='✅ আপডেট করুন';$('dgCancel').style.display='';
+    dgForDealer=dlSelId;
+    var el=$('dgFormTitle');if(el)setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'});},40);
+  }else{
+    editDtxRecvId=id;
+    $('drDate').value=t.date;$('drAmt').value=num(t.amount)||'';$('drNote').value=t.note||'';
+    if(t.method)$('drMethod').value=t.method;
+    $('drSave').textContent='✅ আপডেট করুন';$('drCancel').style.display='';
+    var el2=$('drFormTitle');if(el2)setTimeout(function(){el2.scrollIntoView({behavior:'smooth',block:'start'});},40);
+  }
+};
+window.delDtx=function(id){
+  var t=findDtx(id);
+  askSure(t&&t.kind==='give'?'এই মাল দেওয়ার এন্ট্রি ('+money(dtxTotal(t))+') মুছবেন? ডিলারের বাকি হিসাব বদলে যাবে।':'এই টাকা পাওয়ার এন্ট্রি মুছবেন? ডিলারের বাকি হিসাব বদলে যাবে।',function(){
+    DB.dtxs=DB.dtxs.filter(function(x){return x.id!==id;});addTomb('X',id);
+    if(editDtxGiveId===id)resetGiveForm();
+    if(editDtxRecvId===id)resetRecvForm();
+    saveLocal();toast('🗑️ এন্ট্রি মোছা হয়েছে');
+  });
+};
+/* ----- render ----- */
+$('dlSearch').addEventListener('input',renderDealers);
+function renderDealers(){
+  detachFormFromList('dealerList','dlFormTitle');
+  var all=bDealers(),totG=0,totR=0;
+  all.forEach(function(d){var t=dealerTotals(d.id);totG+=t.given;totR+=t.recv;});
+  $('dlCards').innerHTML=
+    '<div class="card"><div class="k">📦 মোট মাল দিয়েছি (সব ডিলার)</div><div class="v">'+money(totG)+'</div></div>'+
+    '<div class="card"><div class="k">💵 মোট টাকা পেয়েছি</div><div class="v pos">'+money(totR)+'</div></div>'+
+    '<div class="card"><div class="k">💰 মোট বাকি পাবো (ক্যাশ পাওনা)</div><div class="v" style="color:'+((totG-totR)>0?'var(--out)':'var(--in)')+'">'+money(totG-totR)+'</div></div>'+
+    '<div class="card"><div class="k">🏪 মোট ডিলার</div><div class="v">'+fmt(all.length)+' জন</div></div>';
+  var owing=all.map(function(d){return{d:d,t:dealerTotals(d.id)};}).filter(function(x){return x.t.due>0.005;}).sort(function(a,b){return b.t.due-a.t.due;});
+  $('dlOweList').innerHTML=owing.length?owing.map(function(x){
+    return '<div class="kv"><span><b>'+esc(x.d.name)+'</b>'+(x.d.company?' • '+esc(x.d.company):'')+'<br><span style="color:var(--muted);font-size:.85rem">মাল দিয়েছি '+money(x.t.given)+' • পেয়েছি '+money(x.t.recv)+'</span></span><b style="color:var(--out)">বাকি '+money(x.t.due)+' <button class="btn small noprint" type="button" onclick="openDealer(\''+x.d.id+'\')">📖 হিসাব</button></b></div>';
+  }).join(''):'<div class="empty">কারো কাছে কোনো বাকি নেই ✅</div>';
+  var q=($('dlSearch').value||'').toLowerCase();
+  var list=all.filter(function(d){return !q||d.name.toLowerCase().indexOf(q)>=0||(d.company||'').toLowerCase().indexOf(q)>=0||(d.phone||'').indexOf(q)>=0;});
+  if(!list.length){$('dealerList').innerHTML='<div class="empty">কোনো ডিলার নেই — ওপরে নতুন ডিলার যোগ করুন।</div>';}
+  else $('dealerList').innerHTML=list.map(function(d){
+    var t=dealerTotals(d.id);
+    var dueHtml=t.due>0.005?'<span class="badge out">বাকি পাবো '+money(t.due)+'</span>':(t.due<-0.005?'<span class="badge warn">বেশি দিয়েছে '+money(-t.due)+'</span>':'<span class="badge in">✅ হিসাব শোধ</span>');
+    return '<div class="rowitem" data-rowid="'+d.id+'"><div class="r1"><div><b style="font-size:1.1rem">'+esc(d.name)+'</b> '+dueHtml+
+    '<div class="meta">'+(d.company?'🏢 '+esc(d.company):'কোম্পানি দেওয়া নেই')+(d.phone?' • 📱 '+esc(d.phone):'')+'</div>'+
+    '<div class="meta">মাল দিয়েছি মোট '+money(t.given)+' • টাকা পেয়েছি '+money(t.recv)+' • প্রোডাক্ট '+fmt(dealerProds(d.id).length)+' টা</div>'+
+    '</div></div>'+
+    '<div class="iconbtns noprint"><button class="btn small gold" type="button" onclick="openDealer(\''+d.id+'\')">📖 হিসাব খুলুন</button><button class="btn small" type="button" onclick="openDealer(\''+d.id+'\',\'give\')">📦 মাল দিন</button><button class="btn small" type="button" onclick="openDealer(\''+d.id+'\',\'recv\')">💵 টাকা নিন</button><button class="btn small ghost" type="button" onclick="editDealer(\''+d.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delDealer(\''+d.id+'\')">🗑️</button></div></div>';
+  }).join('');
+  placeFormAfterRender('dlFormTitle','dealerList',editDealerId);
+  /* detail panel */
+  var det=$('dlDetail'),d=dlSelId?findDealer(dlSelId):null;
+  if(!d||!inBook(d)){det.style.display='none';if(dlSelId&&!d)dlSelId=null;}
+  else{
+    det.style.display='';
+    var t=dealerTotals(d.id);
+    $('dlDetailTitle').textContent='🏪 '+d.name+(d.company?' — '+d.company:'');
+    $('dlDetailTotals').innerHTML=
+      '<div class="kv"><span>📦 মোট মাল দিয়েছি</span><b>'+money(t.given)+'</b></div>'+
+      '<div class="kv"><span>💵 মোট টাকা পেয়েছি</span><b style="color:var(--in)">'+money(t.recv)+'</b></div>'+
+      '<div class="kv"><span><b>💰 বাকি পাবো (ক্যাশ পাওনা)</b></span><b style="color:'+(t.due>0.005?'var(--out)':'var(--in)')+'">'+(t.due<-0.005?'বেশি দিয়েছে '+money(-t.due):money(t.due))+'</b></div>';
+    var prods=dealerProds(d.id);
+    $('dpList').innerHTML=prods.length?prods.map(function(p){
+      return '<div class="kv"><span><b>'+esc(p.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">১ বক্স = '+money(p.boxPrice)+' • বক্সে '+fmt(p.perBox)+' পিস</span></span><b>১ পিস = '+money(dUnitPrice(p))+' <button class="btn small ghost noprint" type="button" onclick="editDprod(\''+p.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDprod(\''+p.id+'\')">মুছুন</button></b></div>';
+    }).join(''):'<p class="hint" style="margin:0">এখনো কোনো প্রোডাক্ট নেই — ওপরে বক্সের দাম দিয়ে প্রোডাক্ট যোগ করুন।</p>';
+    /* give form rows belong to the selected dealer — rebuild only when the selection changes */
+    if(dgForDealer!==d.id&&editDtxGiveId===null){$('dgItems').innerHTML='';addDgRow();dgForDealer=d.id;dgCalc();}
+    /* history with running balance */
+    var txs=bDtxs().filter(function(x){return x.did===d.id;});
+    var asc=txs.slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.id.localeCompare(b.id);});
+    var run=0,runMap={};
+    asc.forEach(function(x){run+=x.kind==='give'?dtxTotal(x):-num(x.amount);runMap[x.id]=run;});
+    var desc=txs.slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
+    $('dlHist').innerHTML=desc.length?desc.map(function(x){
+      var bal=runMap[x.id];
+      var balTxt='এরপর বাকি: '+(bal<-0.005?'বেশি দিয়েছে '+money(-bal):money(Math.max(0,bal)));
+      if(x.kind==='give'){
+        var lines=(x.items||[]).map(function(it){return esc(it.name)+' — '+(it.byBox?fmt(it.qty)+' বক্স ('+fmt(it.pieces)+' পিস)':fmt(it.pieces)+' পিস')+' × '+money(it.price)+' = '+money(it.total!=null?it.total:num(it.pieces)*num(it.price));}).join('<br>');
+        return '<div class="kv"><span>'+esc(x.date)+' • 📦 <b>মাল দিলাম</b>'+(x.note?' • '+esc(x.note):'')+'<br><span style="font-size:.9rem">'+lines+'</span><br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b>+ '+money(dtxTotal(x))+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
+      }
+      return '<div class="kv"><span>'+esc(x.date)+' • 💵 <b>টাকা পেলাম</b>'+(x.method?' • '+esc(x.method):'')+(x.note?' • '+esc(x.note):'')+'<br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b style="color:var(--in)">− '+money(x.amount)+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
+    }).join(''):'<p class="hint" style="margin:0">এখনো কোনো লেনদেন নেই — ওপরে প্রোডাক্ট যোগ করে মাল দিন বা টাকা নিন।</p>';
+  }
+}
+$('dgDate').value=todayStr();
+$('drDate').value=todayStr();
 
 /* ---------- BACKUP / CSV / PRINT ---------- */
 function download(name,content,type){
