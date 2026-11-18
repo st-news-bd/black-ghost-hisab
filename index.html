@@ -640,23 +640,30 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <h2 id="dlDetailTitle">ডিলারের হিসাব</h2>
       <div id="dlDetailTotals"></div>
       <h3 style="margin:18px 0 4px">🧺 এই ডিলারের প্রোডাক্ট — বক্সের দাম</h3>
-      <p class="hint">এক বক্সের দাম আর বক্সে কয়টা পিস থাকে লিখলেই <b>এক পিসের দাম অটোমেটিক</b> বের হয়ে যাবে। যেমন: ১ বক্স কাপ ৳৪৫০, বক্সে ১০টা পিস → একটা কাপের দাম ৳৪৫।</p>
+      <p class="hint">এক বক্সের দাম আর বক্সে কয়টা পিস থাকে লিখলেই <b>এক পিসের দাম অটোমেটিক</b> বের হয়ে যাবে। যেমন: ১ বক্স কাপ ৳৪৫০, বক্সে ১০টা পিস → একটা কাপের দাম ৳৪৫। এই দামটা <b>একবার লিখলেই সেভ হয়ে থাকবে</b> — পরের বার মাল দেওয়ার সময় আর লিখতে হবে না। চাইলে অটো দামটা বদলে নিজের দামও দিতে পারবেন (যেমন অটো ৳৪৫৫ হলে নিজে ৳৪৫০ ধরা) — সেটাই সেভ থাকবে, পরে যেকোনো সময় “✏️ ঠিক” চেপে বদলানো যাবে।</p>
       <div class="grid3">
         <div class="field"><label for="dpName">প্রোডাক্টের নাম</label><input type="text" id="dpName" placeholder="যেমন: কাপ আইসক্রিম" /></div>
         <div class="field"><label for="dpBoxPrice">এক বক্সের দাম (৳)</label><input type="number" id="dpBoxPrice" inputmode="decimal" min="0" step="any" placeholder="যেমন: 450" /></div>
         <div class="field"><label for="dpPerBox">এক বক্সে কয়টা পিস</label><input type="number" id="dpPerBox" inputmode="decimal" min="0" step="any" placeholder="যেমন: 10" /></div>
       </div>
-      <div class="live-total" id="dpUnitBox">এক পিসের দাম: ৳ 0</div>
+      <div class="grid2">
+        <div class="field"><label for="dpUnit">এক পিসের দাম (৳) — সেভ থাকবে, চাইলে বদলাতে পারবেন</label><input type="number" id="dpUnit" inputmode="decimal" min="0" step="any" placeholder="যেমন: 450" /></div>
+        <div class="field"><label>বক্স থেকে অটো হিসাব</label><div class="live-total" id="dpUnitBox" style="margin:0">এক পিসের দাম: ৳ 0</div></div>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="dpSave" type="button">✅ প্রোডাক্ট সেভ করুন</button>
         <button class="btn ghost" id="dpCancel" type="button" style="display:none">বাতিল</button>
       </div>
       <div id="dpList" style="margin-top:10px"></div>
       <h3 style="margin:20px 0 4px" id="dgFormTitle">📦 মাল দিন</h3>
-      <p class="hint">একসাথে কয়েকটা প্রোডাক্ট দিতে পারবেন — কাপ, কোন, চকবার যাই হোক। পরিমাণ পিসেও লিখতে পারবেন, বক্সেও — মোট টাকা অটোমেটিক হিসাব হবে।</p>
+      <p class="hint">একসাথে কয়েকটা প্রোডাক্ট দিতে পারবেন — কাপ, কোন, চকবার যাই হোক। পরিমাণ পিসেও লিখতে পারবেন, বক্সেও — মোট টাকা অটোমেটিক হিসাব হবে। প্রোডাক্ট বাছলেই তার <b>সেভ করা এক পিসের দাম</b> নিজে থেকে আসবে। সেদিনের হিসাবে <b>কমিশন (পার্সেন্টেজ)</b> থাকলে নিচে ১%–২০% থেকে বেছে দিন — কমিশনের টাকা অটোমেটিক কেটে বাকি হিসাব হবে।</p>
       <div class="grid2">
         <div class="field"><label for="dgDate">তারিখ</label><input type="date" id="dgDate" /></div>
         <div class="field"><label for="dgNote">নোট (ঐচ্ছিক)</label><input type="text" id="dgNote" placeholder="যেমন: সাপ্তাহিক ডেলিভারি" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="dgPct">কমিশন / পার্সেন্টেজ (%)</label><select id="dgPct"></select></div>
+        <div class="field"><label>কমিশন বাদে বাকিতে যোগ হবে</label><div class="live-total" id="dgNetBox" style="margin:0">৳ 0</div></div>
       </div>
       <div id="dgItems"></div>
       <button class="btn small gold noprint" id="dgAddRow" type="button">➕ আরেকটা প্রোডাক্ট যোগ করুন</button>
@@ -995,7 +1002,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 12 (v12)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 13 (v13)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -5599,18 +5606,21 @@ function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();
 
 /* ---------- DEALER KHATA (ডিলার খাতা) ----------
    dealers: {id,name,phone,company,book,u}
-   dprods:  {id,did,name,boxPrice,perBox,book,u} — এক পিসের দাম = boxPrice ÷ perBox
-   dtxs:    {id,did,kind:'give'|'recv',date,items:[{pid,name,qty,byBox,pieces,price,total}],amount,method,note,book,u}
-   সব হিসাব অটোমেটিক: মাল দেওয়ার মোট = Σ(pieces × price); বাকি = মোট দিয়েছি − মোট পেয়েছি। */
+   dprods:  {id,did,name,boxPrice,perBox,unitPrice,book,u} — unitPrice = সেভ করা এক পিসের দাম (একবার লিখলেই থাকে;
+            অটো হিসাব boxPrice ÷ perBox, মালিক চাইলে বদলে নিজের দাম দিতে পারেন — যেমন ৪৫৫ → ৪৫০; unitPrice না থাকলে অটো হিসাব)
+   dtxs:    {id,did,kind:'give'|'recv',date,items:[{pid,name,qty,byBox,pieces,price,total}],amount,method,note,pct,commission,book,u}
+            pct = সেদিনের কমিশন % (0–20); commission = মোট × pct%
+   সব হিসাব অটোমেটিক: মাল দেওয়ার মোট = Σ(pieces × price); বাকি = মোট দিয়েছি − মোট কমিশন − মোট পেয়েছি। */
 function findDealer(id){for(var i=0;i<DB.dealers.length;i++)if(DB.dealers[i].id===id)return DB.dealers[i];return null;}
 function findDprod(id){for(var i=0;i<DB.dprods.length;i++)if(DB.dprods[i].id===id)return DB.dprods[i];return null;}
 function findDtx(id){for(var i=0;i<DB.dtxs.length;i++)if(DB.dtxs[i].id===id)return DB.dtxs[i];return null;}
-function dUnitPrice(dp){var pb=num(dp?dp.perBox:0);return pb>0?num(dp.boxPrice)/pb:0;}
+function dUnitPrice(dp){if(!dp)return 0;var up=num(dp.unitPrice);if(up>0)return up;var pb=num(dp.perBox);return pb>0?num(dp.boxPrice)/pb:0;}
 function dtxTotal(t){var s=0;(t.items||[]).forEach(function(it){s+=it.total!=null?num(it.total):num(it.pieces||it.qty)*num(it.price);});return s;}
+function dtxComm(t){if(!t||t.kind!=='give')return 0;if(t.commission!=null)return num(t.commission);var pct=num(t.pct);return pct>0?dtxTotal(t)*pct/100:0;}
 function dealerTotals(did){
-  var given=0,recv=0;
-  bDtxs().forEach(function(t){if(t.did!==did)return;if(t.kind==='give')given+=dtxTotal(t);else recv+=num(t.amount);});
-  return{given:given,recv:recv,due:given-recv};
+  var given=0,recv=0,comm=0;
+  bDtxs().forEach(function(t){if(t.did!==did)return;if(t.kind==='give'){given+=dtxTotal(t);comm+=dtxComm(t);}else recv+=num(t.amount);});
+  return{given:given,recv:recv,comm:comm,due:given-comm-recv};
 }
 function dealerProds(did){return bDprods().filter(function(p){return p.did===did;});}
 /* ----- dealer add / edit ----- */
@@ -5666,14 +5676,22 @@ window.openDealer=function(id,focus){
   if(focus==='recv')setTimeout(function(){var el=$('drFormTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},260);
 };
 /* ----- dealer products (box pricing) ----- */
-var editDprodId=null;
+var editDprodId=null,dpUnitTouched=false;
+function dpAutoUnit(){var bp=num($('dpBoxPrice').value),pb=num($('dpPerBox').value);return pb>0?bp/pb:0;}
 function dpUnitUpdate(){
-  var bp=num($('dpBoxPrice').value),pb=num($('dpPerBox').value);
-  $('dpUnitBox').textContent=pb>0?('এক পিসের দাম: '+money(bp/pb)+'  (বক্স '+money(bp)+' ÷ '+fmt(pb)+' পিস)'):'এক পিসের দাম: ৳ 0 — বক্সের দাম আর পিসের সংখ্যা লিখলেই হিসাব হবে';
+  var bp=num($('dpBoxPrice').value),pb=num($('dpPerBox').value),auto=dpAutoUnit();
+  if(!dpUnitTouched)$('dpUnit').value=auto>0?String(Math.round(auto*100)/100):'';
+  var up=num($('dpUnit').value);
+  if(!(pb>0)){$('dpUnitBox').textContent='এক পিসের দাম: ৳ 0 — বক্সের দাম আর পিসের সংখ্যা লিখলেই হিসাব হবে';return;}
+  var txt='অটো হিসাব: '+money(auto)+'  (বক্স '+money(bp)+' ÷ '+fmt(pb)+' পিস)';
+  if(up>0&&Math.abs(up-auto)>0.001)txt+=' — আপনি নিজের দাম দিয়েছেন '+money(up)+', সেটাই সেভ হবে';
+  else if(up>0)txt='এক পিসের দাম: '+money(up)+'  (বক্স '+money(bp)+' ÷ '+fmt(pb)+' পিস)';
+  $('dpUnitBox').textContent=txt;
 }
 ['dpBoxPrice','dpPerBox'].forEach(function(id){$(id).addEventListener('input',dpUnitUpdate);});
+$('dpUnit').addEventListener('input',function(){dpUnitTouched=true;dpUnitUpdate();});
 function resetDprodForm(){
-  editDprodId=null;$('dpName').value='';$('dpBoxPrice').value='';$('dpPerBox').value='';
+  editDprodId=null;dpUnitTouched=false;$('dpName').value='';$('dpBoxPrice').value='';$('dpPerBox').value='';$('dpUnit').value='';
   $('dpSave').textContent='✅ প্রোডাক্ট সেভ করুন';$('dpCancel').style.display='none';dpUnitUpdate();
 }
 $('dpCancel').addEventListener('click',resetDprodForm);
@@ -5681,6 +5699,7 @@ window.editDprod=function(id){
   var p=findDprod(id);if(!p)return;
   editDprodId=id;
   $('dpName').value=p.name;$('dpBoxPrice').value=num(p.boxPrice)||'';$('dpPerBox').value=num(p.perBox)||'';
+  dpUnitTouched=num(p.unitPrice)>0;$('dpUnit').value=dUnitPrice(p)>0?String(Math.round(dUnitPrice(p)*100)/100):'';
   $('dpSave').textContent='✅ আপডেট করুন';$('dpCancel').style.display='';dpUnitUpdate();
   var el=$('dpName');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}
 };
@@ -5690,13 +5709,14 @@ $('dpSave').addEventListener('click',function(){
   if(!name){toast('⚠️ প্রোডাক্টের নাম লিখুন');$('dpName').focus();return;}
   if(!(bp>0)){toast('⚠️ এক বক্সের দাম লিখুন');$('dpBoxPrice').focus();return;}
   if(!(pb>0)){toast('⚠️ এক বক্সে কয়টা পিস থাকে লিখুন');$('dpPerBox').focus();return;}
+  var up=num($('dpUnit').value);if(!(up>0))up=bp/pb;
   if(editDprodId){
     var p=findDprod(editDprodId);
-    if(p){p.name=name;p.boxPrice=bp;p.perBox=pb;p.u=Date.now();}
-    resetDprodForm();saveLocal();toast('✅ প্রোডাক্ট ঠিক হয়েছে — এক পিসের দাম '+money(bp/pb));return;
+    if(p){p.name=name;p.boxPrice=bp;p.perBox=pb;p.unitPrice=up;p.u=Date.now();}
+    resetDprodForm();saveLocal();toast('✅ প্রোডাক্ট ঠিক হয়েছে — এক পিসের দাম '+money(up)+' সেভ থাকল');return;
   }
-  DB.dprods.push({id:uid(),did:d.id,name:name,boxPrice:bp,perBox:pb,book:bookOf(d),u:Date.now()});
-  resetDprodForm();saveLocal();toast('✅ প্রোডাক্ট সেভ হয়েছে — এক পিসের দাম '+money(bp/pb));
+  DB.dprods.push({id:uid(),did:d.id,name:name,boxPrice:bp,perBox:pb,unitPrice:up,book:bookOf(d),u:Date.now()});
+  resetDprodForm();saveLocal();toast('✅ প্রোডাক্ট সেভ হয়েছে — এক পিসের দাম '+money(up)+' সেভ থাকল, পরের বার আর লিখতে হবে না');
 });
 window.delDprod=function(id){
   var p=findDprod(id);
@@ -5742,17 +5762,20 @@ function dgCollect(){
 function dgCalc(){
   var items=dgCollect(),s=0;
   items.forEach(function(it){s+=it.total;});
-  $('dgTotalBox').textContent='মোট = '+money(s);
-  return{items:items,total:s};
+  var pct=num($('dgPct').value),comm=s*pct/100,net=s-comm;
+  $('dgTotalBox').textContent='মোট = '+money(s)+(pct>0?(' • কমিশন '+fmt(pct)+'% = '+money(comm)+' বাদ • বাকিতে যোগ হবে '+money(net)):'');
+  var nb=$('dgNetBox');if(nb)nb.textContent=money(net)+(pct>0?(' (কমিশন '+money(comm)+' বাদে)'):'');
+  return{items:items,total:s,pct:pct,commission:comm};
 }
 $('dgItems').addEventListener('input',dgCalc);
 $('dgItems').addEventListener('change',dgCalc);
+$('dgPct').addEventListener('change',dgCalc);
 $('dgItems').addEventListener('click',function(e){
   if(e.target.classList.contains('dg-rm')){var r=e.target.closest('.dgrow');if(r)r.remove();dgCalc();}
 });
 function resetGiveForm(){
   editDtxGiveId=null;
-  $('dgDate').value=todayStr();$('dgNote').value='';
+  $('dgDate').value=todayStr();$('dgNote').value='';$('dgPct').value='0';
   $('dgItems').innerHTML='';addDgRow();dgCalc();
   $('dgSave').textContent='✅ মাল দেওয়া সেভ করুন';$('dgCancel').style.display='none';
   dgForDealer=dlSelId;
@@ -5765,11 +5788,11 @@ $('dgSave').addEventListener('click',function(){
   var date=$('dgDate').value||todayStr(),note=$('dgNote').value.trim();
   if(editDtxGiveId){
     var t=findDtx(editDtxGiveId);
-    if(t){t.date=date;t.items=c.items;t.note=note;t.u=Date.now();}
+    if(t){t.date=date;t.items=c.items;t.note=note;t.pct=c.pct;t.commission=c.commission;t.u=Date.now();}
     resetGiveForm();saveLocal();toast('✅ মাল দেওয়ার হিসাব ঠিক হয়েছে');return;
   }
-  DB.dtxs.push({id:uid(),did:d.id,kind:'give',date:date,items:c.items,amount:0,method:'',note:note,book:bookOf(d),u:Date.now()});
-  resetGiveForm();saveLocal();toast('✅ মাল দেওয়া সেভ হয়েছে — মোট '+money(c.total)+', বাকিতে যোগ হয়েছে');
+  DB.dtxs.push({id:uid(),did:d.id,kind:'give',date:date,items:c.items,amount:0,method:'',note:note,pct:c.pct,commission:c.commission,book:bookOf(d),u:Date.now()});
+  resetGiveForm();saveLocal();toast('✅ মাল দেওয়া সেভ হয়েছে — মোট '+money(c.total)+(c.commission>0?(', কমিশন '+money(c.commission)+' বাদে বাকিতে যোগ '+money(c.total-c.commission)):''));
 });
 /* ----- receive payment ----- */
 var editDtxRecvId=null;
@@ -5800,7 +5823,7 @@ window.editDtx=function(id){
   renderDealers();
   if(t.kind==='give'){
     editDtxGiveId=id;
-    $('dgDate').value=t.date;$('dgNote').value=t.note||'';
+    $('dgDate').value=t.date;$('dgNote').value=t.note||'';$('dgPct').value=String(num(t.pct)||0);
     $('dgItems').innerHTML='';
     (t.items||[]).forEach(function(it){
       addDgRow();
@@ -5839,16 +5862,17 @@ window.delDtx=function(id){
 $('dlSearch').addEventListener('input',renderDealers);
 function renderDealers(){
   detachFormFromList('dealerList','dlFormTitle');
-  var all=bDealers(),totG=0,totR=0;
-  all.forEach(function(d){var t=dealerTotals(d.id);totG+=t.given;totR+=t.recv;});
+  var all=bDealers(),totG=0,totR=0,totC=0;
+  all.forEach(function(d){var t=dealerTotals(d.id);totG+=t.given;totR+=t.recv;totC+=t.comm;});
   $('dlCards').innerHTML=
     '<div class="card"><div class="k">📦 মোট মাল দিয়েছি (সব ডিলার)</div><div class="v">'+money(totG)+'</div></div>'+
+    '<div class="card"><div class="k">🏷️ মোট কমিশন বাদ</div><div class="v">'+money(totC)+'</div></div>'+
     '<div class="card"><div class="k">💵 মোট টাকা পেয়েছি</div><div class="v pos">'+money(totR)+'</div></div>'+
-    '<div class="card"><div class="k">💰 মোট বাকি পাবো (ক্যাশ পাওনা)</div><div class="v" style="color:'+((totG-totR)>0?'var(--out)':'var(--in)')+'">'+money(totG-totR)+'</div></div>'+
+    '<div class="card"><div class="k">💰 মোট বাকি পাবো (ক্যাশ পাওনা)</div><div class="v" style="color:'+((totG-totC-totR)>0?'var(--out)':'var(--in)')+'">'+money(totG-totC-totR)+'</div></div>'+
     '<div class="card"><div class="k">🏪 মোট ডিলার</div><div class="v">'+fmt(all.length)+' জন</div></div>';
   var owing=all.map(function(d){return{d:d,t:dealerTotals(d.id)};}).filter(function(x){return x.t.due>0.005;}).sort(function(a,b){return b.t.due-a.t.due;});
   $('dlOweList').innerHTML=owing.length?owing.map(function(x){
-    return '<div class="kv"><span><b>'+esc(x.d.name)+'</b>'+(x.d.company?' • '+esc(x.d.company):'')+'<br><span style="color:var(--muted);font-size:.85rem">মাল দিয়েছি '+money(x.t.given)+' • পেয়েছি '+money(x.t.recv)+'</span></span><b style="color:var(--out)">বাকি '+money(x.t.due)+' <button class="btn small noprint" type="button" onclick="openDealer(\''+x.d.id+'\')">📖 হিসাব</button></b></div>';
+    return '<div class="kv"><span><b>'+esc(x.d.name)+'</b>'+(x.d.company?' • '+esc(x.d.company):'')+'<br><span style="color:var(--muted);font-size:.85rem">মাল দিয়েছি '+money(x.t.given)+(x.t.comm>0?' • কমিশন বাদ '+money(x.t.comm):'')+' • পেয়েছি '+money(x.t.recv)+'</span></span><b style="color:var(--out)">বাকি '+money(x.t.due)+' <button class="btn small noprint" type="button" onclick="openDealer(\''+x.d.id+'\')">📖 হিসাব</button></b></div>';
   }).join(''):'<div class="empty">কারো কাছে কোনো বাকি নেই ✅</div>';
   var q=($('dlSearch').value||'').toLowerCase();
   var list=all.filter(function(d){return !q||d.name.toLowerCase().indexOf(q)>=0||(d.company||'').toLowerCase().indexOf(q)>=0||(d.phone||'').indexOf(q)>=0;});
@@ -5858,7 +5882,7 @@ function renderDealers(){
     var dueHtml=t.due>0.005?'<span class="badge out">বাকি পাবো '+money(t.due)+'</span>':(t.due<-0.005?'<span class="badge warn">বেশি দিয়েছে '+money(-t.due)+'</span>':'<span class="badge in">✅ হিসাব শোধ</span>');
     return '<div class="rowitem" data-rowid="'+d.id+'"><div class="r1"><div><b style="font-size:1.1rem">'+esc(d.name)+'</b> '+dueHtml+
     '<div class="meta">'+(d.company?'🏢 '+esc(d.company):'কোম্পানি দেওয়া নেই')+(d.phone?' • 📱 '+esc(d.phone):'')+'</div>'+
-    '<div class="meta">মাল দিয়েছি মোট '+money(t.given)+' • টাকা পেয়েছি '+money(t.recv)+' • প্রোডাক্ট '+fmt(dealerProds(d.id).length)+' টা</div>'+
+    '<div class="meta">মাল দিয়েছি মোট '+money(t.given)+(t.comm>0?' • কমিশন বাদ '+money(t.comm):'')+' • টাকা পেয়েছি '+money(t.recv)+' • প্রোডাক্ট '+fmt(dealerProds(d.id).length)+' টা</div>'+
     '</div></div>'+
     '<div class="iconbtns noprint"><button class="btn small gold" type="button" onclick="openDealer(\''+d.id+'\')">📖 হিসাব খুলুন</button><button class="btn small" type="button" onclick="openDealer(\''+d.id+'\',\'give\')">📦 মাল দিন</button><button class="btn small" type="button" onclick="openDealer(\''+d.id+'\',\'recv\')">💵 টাকা নিন</button><button class="btn small ghost" type="button" onclick="editDealer(\''+d.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delDealer(\''+d.id+'\')">🗑️</button></div></div>';
   }).join('');
@@ -5872,11 +5896,13 @@ function renderDealers(){
     $('dlDetailTitle').textContent='🏪 '+d.name+(d.company?' — '+d.company:'');
     $('dlDetailTotals').innerHTML=
       '<div class="kv"><span>📦 মোট মাল দিয়েছি</span><b>'+money(t.given)+'</b></div>'+
+      (t.comm>0?'<div class="kv"><span>🏷️ মোট কমিশন বাদ</span><b>− '+money(t.comm)+'</b></div>':'')+
       '<div class="kv"><span>💵 মোট টাকা পেয়েছি</span><b style="color:var(--in)">'+money(t.recv)+'</b></div>'+
       '<div class="kv"><span><b>💰 বাকি পাবো (ক্যাশ পাওনা)</b></span><b style="color:'+(t.due>0.005?'var(--out)':'var(--in)')+'">'+(t.due<-0.005?'বেশি দিয়েছে '+money(-t.due):money(t.due))+'</b></div>';
     var prods=dealerProds(d.id);
     $('dpList').innerHTML=prods.length?prods.map(function(p){
-      return '<div class="kv"><span><b>'+esc(p.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">১ বক্স = '+money(p.boxPrice)+' • বক্সে '+fmt(p.perBox)+' পিস</span></span><b>১ পিস = '+money(dUnitPrice(p))+' <button class="btn small ghost noprint" type="button" onclick="editDprod(\''+p.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDprod(\''+p.id+'\')">মুছুন</button></b></div>';
+      var auto=num(p.perBox)>0?num(p.boxPrice)/num(p.perBox):0,own=num(p.unitPrice)>0&&Math.abs(num(p.unitPrice)-auto)>0.001;
+      return '<div class="kv"><span><b>'+esc(p.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">১ বক্স = '+money(p.boxPrice)+' • বক্সে '+fmt(p.perBox)+' পিস'+(own?' • ✏️ নিজে ঠিক করা দাম':'')+'</span></span><b>১ পিস = '+money(dUnitPrice(p))+' <button class="btn small ghost noprint" type="button" onclick="editDprod(\''+p.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDprod(\''+p.id+'\')">মুছুন</button></b></div>';
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো প্রোডাক্ট নেই — ওপরে বক্সের দাম দিয়ে প্রোডাক্ট যোগ করুন।</p>';
     /* give form rows belong to the selected dealer — rebuild only when the selection changes */
     if(dgForDealer!==d.id&&editDtxGiveId===null){$('dgItems').innerHTML='';addDgRow();dgForDealer=d.id;dgCalc();}
@@ -5884,19 +5910,22 @@ function renderDealers(){
     var txs=bDtxs().filter(function(x){return x.did===d.id;});
     var asc=txs.slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.id.localeCompare(b.id);});
     var run=0,runMap={};
-    asc.forEach(function(x){run+=x.kind==='give'?dtxTotal(x):-num(x.amount);runMap[x.id]=run;});
+    asc.forEach(function(x){run+=x.kind==='give'?(dtxTotal(x)-dtxComm(x)):-num(x.amount);runMap[x.id]=run;});
     var desc=txs.slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
     $('dlHist').innerHTML=desc.length?desc.map(function(x){
       var bal=runMap[x.id];
       var balTxt='এরপর বাকি: '+(bal<-0.005?'বেশি দিয়েছে '+money(-bal):money(Math.max(0,bal)));
       if(x.kind==='give'){
         var lines=(x.items||[]).map(function(it){return esc(it.name)+' — '+(it.byBox?fmt(it.qty)+' বক্স ('+fmt(it.pieces)+' পিস)':fmt(it.pieces)+' পিস')+' × '+money(it.price)+' = '+money(it.total!=null?it.total:num(it.pieces)*num(it.price));}).join('<br>');
-        return '<div class="kv"><span>'+esc(x.date)+' • 📦 <b>মাল দিলাম</b>'+(x.note?' • '+esc(x.note):'')+'<br><span style="font-size:.9rem">'+lines+'</span><br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b>+ '+money(dtxTotal(x))+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
+        var comm=dtxComm(x);
+        var commTxt=comm>0?('<br><span style="font-size:.88rem">🏷️ কমিশন '+fmt(num(x.pct))+'% = '+money(comm)+' বাদ → বাকিতে যোগ '+money(dtxTotal(x)-comm)+'</span>'):'';
+        return '<div class="kv"><span>'+esc(x.date)+' • 📦 <b>মাল দিলাম</b>'+(x.note?' • '+esc(x.note):'')+'<br><span style="font-size:.9rem">'+lines+'</span>'+commTxt+'<br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b>+ '+money(dtxTotal(x)-comm)+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
       }
       return '<div class="kv"><span>'+esc(x.date)+' • 💵 <b>টাকা পেলাম</b>'+(x.method?' • '+esc(x.method):'')+(x.note?' • '+esc(x.note):'')+'<br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b style="color:var(--in)">− '+money(x.amount)+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো লেনদেন নেই — ওপরে প্রোডাক্ট যোগ করে মাল দিন বা টাকা নিন।</p>';
   }
 }
+(function(){var s=$('dgPct');if(s){var h='<option value="0">কমিশন নেই (0%)</option>';for(var i=1;i<=20;i++)h+='<option value="'+i+'">'+i+'%</option>';s.innerHTML=h;}})();
 $('dgDate').value=todayStr();
 $('drDate').value=todayStr();
 
