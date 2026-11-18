@@ -656,13 +656,13 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       </div>
       <div id="dpList" style="margin-top:10px"></div>
       <h3 style="margin:20px 0 4px" id="dgFormTitle">📦 মাল দিন</h3>
-      <p class="hint">একসাথে কয়েকটা প্রোডাক্ট দিতে পারবেন — কাপ, কোন, চকবার যাই হোক। পরিমাণ পিসেও লিখতে পারবেন, বক্সেও — মোট টাকা অটোমেটিক হিসাব হবে। প্রোডাক্ট বাছলেই তার <b>সেভ করা এক পিসের দাম</b> নিজে থেকে আসবে। সেদিনের হিসাবে <b>কমিশন (পার্সেন্টেজ)</b> থাকলে নিচে ১%–২০% থেকে বেছে দিন — কমিশনের টাকা অটোমেটিক কেটে বাকি হিসাব হবে।</p>
+      <p class="hint">একসাথে কয়েকটা প্রোডাক্ট দিতে পারবেন — কাপ, কোন, চকবার যাই হোক। পরিমাণ পিসেও লিখতে পারবেন, বক্সেও — মোট টাকা অটোমেটিক হিসাব হবে। প্রোডাক্ট বাছলেই তার <b>সেভ করা এক পিসের দাম</b> নিজে থেকে আসবে। <b>কমিশন (পার্সেন্টেজ)</b> দুইভাবে দেওয়া যায়: চাইলে <b>প্রতিটা প্রোডাক্টের নিজের %</b> ওই লাইনেই বেছে দিন, অথবা নিচে <b>সামগ্রিক %</b> দিলে যেসব লাইনে আলাদা % নেই সেগুলোতে ওটাই লাগবে — দুটো একসাথেও চলবে। কমিশনের টাকা অটোমেটিক কেটে বাকি হিসাব হবে।</p>
       <div class="grid2">
         <div class="field"><label for="dgDate">তারিখ</label><input type="date" id="dgDate" /></div>
         <div class="field"><label for="dgNote">নোট (ঐচ্ছিক)</label><input type="text" id="dgNote" placeholder="যেমন: সাপ্তাহিক ডেলিভারি" /></div>
       </div>
       <div class="grid2">
-        <div class="field"><label for="dgPct">কমিশন / পার্সেন্টেজ (%)</label><select id="dgPct"></select></div>
+        <div class="field"><label for="dgPct">সামগ্রিক কমিশন / পার্সেন্টেজ (%) — যেসব লাইনে আলাদা % নেই</label><select id="dgPct"></select></div>
         <div class="field"><label>কমিশন বাদে বাকিতে যোগ হবে</label><div class="live-total" id="dgNetBox" style="margin:0">৳ 0</div></div>
       </div>
       <div id="dgItems"></div>
@@ -1002,7 +1002,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 13 (v13)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 14 (v14)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -5608,15 +5608,26 @@ function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();
    dealers: {id,name,phone,company,book,u}
    dprods:  {id,did,name,boxPrice,perBox,unitPrice,book,u} — unitPrice = সেভ করা এক পিসের দাম (একবার লিখলেই থাকে;
             অটো হিসাব boxPrice ÷ perBox, মালিক চাইলে বদলে নিজের দাম দিতে পারেন — যেমন ৪৫৫ → ৪৫০; unitPrice না থাকলে অটো হিসাব)
-   dtxs:    {id,did,kind:'give'|'recv',date,items:[{pid,name,qty,byBox,pieces,price,total}],amount,method,note,pct,commission,book,u}
-            pct = সেদিনের কমিশন % (0–20); commission = মোট × pct%
+   dtxs:    {id,did,kind:'give'|'recv',date,items:[{pid,name,qty,byBox,pieces,price,total,pct,lpct,commission}],amount,method,note,pct,commission,book,u}
+            pct = সেদিনের সামগ্রিক কমিশন % (0–20); commission = সব লাইনের কমিশনের যোগফল।
+            প্রতি লাইন: lpct = ওই প্রোডাক্টের নিজের % (না দিলে null → সামগ্রিক % লাগে); pct = কার্যকর %; commission = লাইনের মোট × pct%।
+            পুরনো এন্ট্রিতে লাইনে pct/commission নেই — তখন এন্ট্রির stored commission/pct-ই চলে।
    সব হিসাব অটোমেটিক: মাল দেওয়ার মোট = Σ(pieces × price); বাকি = মোট দিয়েছি − মোট কমিশন − মোট পেয়েছি। */
 function findDealer(id){for(var i=0;i<DB.dealers.length;i++)if(DB.dealers[i].id===id)return DB.dealers[i];return null;}
 function findDprod(id){for(var i=0;i<DB.dprods.length;i++)if(DB.dprods[i].id===id)return DB.dprods[i];return null;}
 function findDtx(id){for(var i=0;i<DB.dtxs.length;i++)if(DB.dtxs[i].id===id)return DB.dtxs[i];return null;}
 function dUnitPrice(dp){if(!dp)return 0;var up=num(dp.unitPrice);if(up>0)return up;var pb=num(dp.perBox);return pb>0?num(dp.boxPrice)/pb:0;}
 function dtxTotal(t){var s=0;(t.items||[]).forEach(function(it){s+=it.total!=null?num(it.total):num(it.pieces||it.qty)*num(it.price);});return s;}
-function dtxComm(t){if(!t||t.kind!=='give')return 0;if(t.commission!=null)return num(t.commission);var pct=num(t.pct);return pct>0?dtxTotal(t)*pct/100:0;}
+function dtxLinePct(t,it){if(it.lpct!=null&&num(it.lpct)>0)return num(it.lpct);if(it.pct!=null)return num(it.pct);return num(t?t.pct:0);}
+function dtxLineComm(t,it){if(it.commission!=null)return num(it.commission);var p=dtxLinePct(t,it);var tot=it.total!=null?num(it.total):num(it.pieces||it.qty)*num(it.price);return p>0?tot*p/100:0;}
+function dtxComm(t){
+  if(!t||t.kind!=='give')return 0;
+  var items=t.items||[],has=false,s=0;
+  items.forEach(function(it){if(it.commission!=null){has=true;s+=num(it.commission);}});
+  if(has)return s;
+  if(t.commission!=null)return num(t.commission);
+  var pct=num(t.pct);return pct>0?dtxTotal(t)*pct/100:0;
+}
 function dealerTotals(did){
   var given=0,recv=0,comm=0;
   bDtxs().forEach(function(t){if(t.did!==did)return;if(t.kind==='give'){given+=dtxTotal(t);comm+=dtxComm(t);}else recv+=num(t.amount);});
@@ -5728,6 +5739,11 @@ window.delDprod=function(id){
 };
 /* ----- give goods (multi-product, pieces or boxes) ----- */
 var editDtxGiveId=null;
+function dgLinePctOpts(){
+  var h='<option value="">সামগ্রিক % অনুযায়ী (আলাদা নেই)</option>';
+  for(var i=1;i<=20;i++)h+='<option value="'+i+'">'+i+'%</option>';
+  return h;
+}
 function dgRowHtml(){
   var opts='<option value="">— প্রোডাক্ট বাছুন —</option>'+dealerProds(dlSelId).map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' (১ পিস '+money(dUnitPrice(p))+')</option>';}).join('');
   return '<div class="dgrow" style="border:1.5px solid var(--line);border-radius:12px;padding:10px;margin-bottom:9px">'+
@@ -5737,12 +5753,14 @@ function dgRowHtml(){
   '<div class="grid3" style="margin-top:8px"><div class="field" style="margin:0"><label>পরিমাণ</label><input type="number" class="dg-qty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>'+
   '<div class="field" style="margin:0"><label>এক পিসের দাম</label><div class="live-total dg-unitprice" style="margin:0">৳ 0</div></div>'+
   '<div class="field" style="margin:0"><label>মোট</label><div class="live-total dg-line" style="margin:0">৳ 0</div></div></div>'+
+  '<div class="field" style="margin:8px 0 0"><label>🏷️ এই প্রোডাক্টের নিজের কমিশন % (ঐচ্ছিক) — না দিলে নিচের সামগ্রিক % লাগবে</label><select class="dg-linepct">'+dgLinePctOpts()+'</select></div>'+
   '<button class="btn small danger dg-rm noprint" type="button" style="margin-top:8px">✖ আইটেম সরান</button></div>';
 }
 function addDgRow(){$('dgItems').insertAdjacentHTML('beforeend',dgRowHtml());}
 $('dgAddRow').addEventListener('click',function(){addDgRow();dgCalc();});
 function dgCollect(){
   var items=[];
+  var overall=num($('dgPct').value);
   document.querySelectorAll('#dgItems .dgrow').forEach(function(row){
     var pid=row.querySelector('.dg-pid').value;
     var p=pid?findDprod(pid):null;
@@ -5752,19 +5770,23 @@ function dgCollect(){
     var qty=num(row.querySelector('.dg-qty').value);
     var pieces=byBox?qty*(perBox>0?perBox:1):qty;
     var total=pieces*price;
+    var lpEl=row.querySelector('.dg-linepct');
+    var lpct=(lpEl&&lpEl.value!=='')?num(lpEl.value):null;
+    var effPct=(lpct!=null&&lpct>0)?lpct:overall;
+    var comm=total*effPct/100;
     var upEl=row.querySelector('.dg-unitprice');if(upEl)upEl.textContent=money(price);
-    var lnEl=row.querySelector('.dg-line');if(lnEl)lnEl.textContent=money(total);
-    if(p&&qty>0)items.push({pid:pid,name:p.name,qty:qty,byBox:byBox,pieces:pieces,price:price,total:total});
-    else if(!p&&pid&&qty>0)items.push({pid:pid,name:'প্রোডাক্ট',qty:qty,byBox:byBox,pieces:pieces,price:price,total:total});
+    var lnEl=row.querySelector('.dg-line');if(lnEl)lnEl.innerHTML=money(total)+(comm>0?('<br><span style="font-size:.8rem;font-weight:600">🏷️ কমিশন '+fmt(effPct)+'% = −'+money(comm)+'</span>'):'');
+    if(p&&qty>0)items.push({pid:pid,name:p.name,qty:qty,byBox:byBox,pieces:pieces,price:price,total:total,pct:effPct,lpct:lpct,commission:comm});
+    else if(!p&&pid&&qty>0)items.push({pid:pid,name:'প্রোডাক্ট',qty:qty,byBox:byBox,pieces:pieces,price:price,total:total,pct:effPct,lpct:lpct,commission:comm});
   });
   return items;
 }
 function dgCalc(){
-  var items=dgCollect(),s=0;
-  items.forEach(function(it){s+=it.total;});
-  var pct=num($('dgPct').value),comm=s*pct/100,net=s-comm;
-  $('dgTotalBox').textContent='মোট = '+money(s)+(pct>0?(' • কমিশন '+fmt(pct)+'% = '+money(comm)+' বাদ • বাকিতে যোগ হবে '+money(net)):'');
-  var nb=$('dgNetBox');if(nb)nb.textContent=money(net)+(pct>0?(' (কমিশন '+money(comm)+' বাদে)'):'');
+  var items=dgCollect(),s=0,comm=0;
+  items.forEach(function(it){s+=it.total;comm+=num(it.commission);});
+  var pct=num($('dgPct').value),net=s-comm;
+  $('dgTotalBox').textContent='মোট = '+money(s)+(comm>0?(' • কমিশন '+money(comm)+' বাদ • বাকিতে যোগ হবে '+money(net)):'');
+  var nb=$('dgNetBox');if(nb)nb.textContent=money(net)+(comm>0?(' (কমিশন '+money(comm)+' বাদে)'):'');
   return{items:items,total:s,pct:pct,commission:comm};
 }
 $('dgItems').addEventListener('input',dgCalc);
@@ -5835,6 +5857,7 @@ window.editDtx=function(id){
       var pp=findDprod(it.pid);row.querySelector('.dg-snapbox').value=pp?num(pp.perBox):(it.byBox&&num(it.qty)>0?num(it.pieces)/num(it.qty):'');
       row.querySelector('.dg-unit').value=it.byBox?'box':'pc';
       row.querySelector('.dg-qty').value=num(it.qty)||'';
+      var lpSel=row.querySelector('.dg-linepct');if(lpSel)lpSel.value=(it.lpct!=null&&num(it.lpct)>0)?String(num(it.lpct)):'';
     });
     if(!document.querySelectorAll('#dgItems .dgrow').length)addDgRow();
     dgCalc();
@@ -5916,9 +5939,11 @@ function renderDealers(){
       var bal=runMap[x.id];
       var balTxt='এরপর বাকি: '+(bal<-0.005?'বেশি দিয়েছে '+money(-bal):money(Math.max(0,bal)));
       if(x.kind==='give'){
-        var lines=(x.items||[]).map(function(it){return esc(it.name)+' — '+(it.byBox?fmt(it.qty)+' বক্স ('+fmt(it.pieces)+' পিস)':fmt(it.pieces)+' পিস')+' × '+money(it.price)+' = '+money(it.total!=null?it.total:num(it.pieces)*num(it.price));}).join('<br>');
+        var lines=(x.items||[]).map(function(it){var lc=dtxLineComm(x,it);return esc(it.name)+' — '+(it.byBox?fmt(it.qty)+' বক্স ('+fmt(it.pieces)+' পিস)':fmt(it.pieces)+' পিস')+' × '+money(it.price)+' = '+money(it.total!=null?it.total:num(it.pieces)*num(it.price))+(lc>0?(' <span style="color:var(--muted)">(কমিশন '+fmt(dtxLinePct(x,it))+'% = −'+money(lc)+')</span>'):'');}).join('<br>');
         var comm=dtxComm(x);
-        var commTxt=comm>0?('<br><span style="font-size:.88rem">🏷️ কমিশন '+fmt(num(x.pct))+'% = '+money(comm)+' বাদ → বাকিতে যোগ '+money(dtxTotal(x)-comm)+'</span>'):'';
+        var pctSet={};(x.items||[]).forEach(function(it){var pp=dtxLinePct(x,it);if(pp>0)pctSet[pp]=1;});
+        var pctKeys=Object.keys(pctSet);
+        var commTxt=comm>0?('<br><span style="font-size:.88rem">🏷️ কমিশন '+(pctKeys.length===1?fmt(num(pctKeys[0]))+'% = ':'মোট = ')+money(comm)+' বাদ → বাকিতে যোগ '+money(dtxTotal(x)-comm)+'</span>'):'';
         return '<div class="kv"><span>'+esc(x.date)+' • 📦 <b>মাল দিলাম</b>'+(x.note?' • '+esc(x.note):'')+'<br><span style="font-size:.9rem">'+lines+'</span>'+commTxt+'<br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b>+ '+money(dtxTotal(x)-comm)+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
       }
       return '<div class="kv"><span>'+esc(x.date)+' • 💵 <b>টাকা পেলাম</b>'+(x.method?' • '+esc(x.method):'')+(x.note?' • '+esc(x.note):'')+'<br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b style="color:var(--in)">− '+money(x.amount)+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
