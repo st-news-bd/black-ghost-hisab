@@ -677,6 +677,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <div class="panel">
       <h2 id="dlFormTitle">🏪 নতুন ডিলার যোগ করুন</h2>
       <p class="hint">যে ডিলারের সাথে মালের লেনদেন হয় (আইসক্রিম ডিলার, কোম্পানির ডিলার — যে কেউ) তার নাম একবার যোগ করুন। তারপর তার নিজের খাতায় মাল দেওয়া, টাকা পাওয়া আর বাকির হিসাব — সব অটোমেটিক চলবে, খাতা-কলম ধরতে হবে না।</p>
+      <p class="hint" style="border:1.5px solid var(--gold);border-radius:10px;padding:8px 10px;background:var(--goldbg)">ℹ️ <b>ডিলারের টাকা টাকার খাতায় যায় না</b> — ডিলারের হিসাব এই আলাদা খাতাতেই থাকে (মেমোর জমা আর “টাকা নিন”-এর টাকাও শুধু ডিলারের হিসাবেই থাকে)।</p>
       <div class="grid2">
         <div class="field"><label for="dlName">ডিলারের নাম</label><input type="text" id="dlName" placeholder="যেমন: রফিক উদ্দিন" /></div>
         <div class="field"><label for="dlPhone">মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" id="dlPhone" placeholder="01XXXXXXXXX" /></div>
@@ -699,6 +700,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel" id="dlDetail" style="display:none">
       <h2 id="dlDetailTitle">ডিলারের হিসাব</h2>
+      <p class="hint" style="margin:0 0 8px">ℹ️ ডিলারের টাকা টাকার খাতায় যায় না — এই হিসাব আলাদাই থাকে।</p>
       <div id="dlDetailTotals"></div>
       <h3 style="margin:18px 0 4px">🧺 এই ডিলারের প্রোডাক্ট — কার্টন / বক্সের দাম</h3>
       <p class="hint">প্রোডাক্টের <b>নাম, কার্টনে পিস সংখ্যা আর এক কার্টন / এক বক্সের দাম</b> একবার লিখলেই <b>সেভ হয়ে থাকবে</b> — পরের বার মাল দেওয়ার সময় আর লিখতে হবে না। হিসাব শুধু কার্টন দিয়ে হবে: যেমন ১ বক্স কাপ ৳৪৫০ হলে ২ বক্স = ৳৯০০। নিচের লিস্টে <b>যেকোনো প্রোডাক্টের নামে চাপ দিলেই ঠিক ওই জায়গায়</b> তার নাম, পিস সংখ্যা আর দাম ঠিক করার ও মোছার অপশন খুলবে — পেজ একটুও নড়বে না (যেমন ৳৪৫৫ না ধরে ৳৪৫০ ধরা)। দাম এখনো ঠিক না হলে ফাঁকা রাখতে পারেন, মেমোতে নামটা থাকবে।</p>
@@ -1082,7 +1084,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 23 (v23)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 24 (v24)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -1569,6 +1571,10 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </div>
 </div>
 
+<div id="salePendingBar" class="noprint" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;background:#7a4d00;color:#fff;padding:10px 12px;box-shadow:0 -2px 10px rgba(0,0,0,.3);align-items:center;gap:10px;flex-wrap:wrap">
+  <span id="salePendingTxt" style="flex:1 1 200px;font-weight:700;font-size:.95rem"></span>
+  <button class="btn small" id="salePendingBtn" type="button" style="background:#fff;color:#7a4d00;font-weight:800">✅ হিসাব শেষ করুন</button>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1836,6 +1842,18 @@ function syncNow(){
     }
     var payload={txs:DB.txs,products:DB.products,logs:DB.logs,parties:DB.parties,dues:DB.dues,bills:DB.bills,staff:DB.staff,pays:DB.pays,cats:DB.cats,cashdays:DB.cashdays,partners:DB.partners,orders:DB.orders,loans:DB.loans,insts:DB.insts,budgets:DB.budgets,goals:DB.goals,rbills:DB.rbills,rpays:DB.rpays,atts:DB.atts,purchases:DB.purchases,olist:DB.olist,dealers:DB.dealers,dprods:DB.dprods,dtxs:DB.dtxs,books:DB.books,targetAmt:DB.targetAmt,targetU:DB.targetU,profilePhoto:DB.profilePhoto||'',profilePhotoU:DB.profilePhotoU||0,bizName:DB.bizName||'',bizNameU:DB.bizNameU||0,memoSeq:DB.memoSeq||0,memoSeeded:DB.memoSeeded||0,tombs:DB.tombs,updatedAt:DB.updatedAt,rev:DB.rev,ownerUid:currentUser.uid,account:currentUser.label,displayName:currentUser.name||'',app:APP_NAME,
       sub:subPayload(),plans:PLANS,planCfgU:CFG.u||0,payNum:CFG.payNumber||'',planReqs:PLANREQS,planReqsU:PLANREQS_U,devices:DEVICES};
+    /* v24: Firestore documents cap at ~1 MiB — check the payload size
+       BEFORE writing, and say plainly what to do (reduce photos) instead
+       of failing silently with only 'সিঙ্ক হয়নি'. Nothing is written and
+       nothing is lost: the hisab stays saved on this phone. */
+    var payloadBytes=0;
+    try{payloadBytes=new Blob([JSON.stringify(payload)]).size;}catch(e){payloadBytes=0;}
+    if(payloadBytes>1000000){
+      toast('⚠️ আপনার হিসাবের ডাটা অনেক বড় হয়ে গেছে — সার্ভারের ১ মেগাবাইট সীমার কাছে। সিঙ্ক হচ্ছে না। কিছু ছবি (প্রোফাইল ছবি / রসিদের ছবি) মুছে বা কমিয়ে আবার চেষ্টা করুন। হিসাব ফোনে সেভ আছে — কিছুই হারায়নি।');
+      finish(false);
+      setSync('⚠️ হিসাব অনেক বড় হয়ে গেছে — সিঙ্ক হয়নি। কিছু ছবি (প্রোফাইল / রসিদের ছবি) মুছে বা কমিয়ে আবার চেষ্টা করুন — হিসাব ফোনে সেভ আছে, কিছুই হারায়নি');
+      return;
+    }
     userDoc().set(payload).then(function(){finish(true);},function(){finish(false);});
   }).catch(function(){finish(false);});
 }
@@ -2444,8 +2462,11 @@ $('mvClose').addEventListener('click',function(){$('moveModal').classList.remove
 $('moveModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 /* Edit an existing stock entry in place: the log's qty/price/date/type are
    updated and stock + profit recalculate automatically (they are derived
-   from the logs). A money-ledger entry created alongside the original is
-   NOT auto-adjusted — the toast says so, so nothing silently mismatches. */
+   from the logs). v24: when the entry was saved with the cash toggle on,
+   its money-ledger entry is linked (txId on the log) and is auto-adjusted
+   to the new figures — the same link pattern dueTxSync uses for dues.
+   Logs saved before the link existed have no txId; nothing is guessed
+   for them, so no unrelated ledger entry is ever touched. */
 window.editLog=function(logId){
   var l=null;DB.logs.forEach(function(x){if(x.id===logId)l=x;});if(!l)return;
   var p=findProd(l.pid);if(!p)return;
@@ -2470,20 +2491,39 @@ $('mvSave').addEventListener('click',function(){
      only the inline warning). 'in' entries can never over-draw stock. */
   var doMvSave=function(){
   if(mvEditLogId){
+    var editLinked=false;
     for(var ei=0;ei<DB.logs.length;ei++)if(DB.logs[ei].id===mvEditLogId){
-      DB.logs[ei].date=date;DB.logs[ei].type=mvType;DB.logs[ei].qty=q;DB.logs[ei].price=pr;DB.logs[ei].party=party;DB.logs[ei].u=Date.now();
-      if(mvType==='sale'&&DB.logs[ei].cost==null)DB.logs[ei].cost=num(p.buy);
+      var el=DB.logs[ei];
+      el.date=date;el.type=mvType;el.qty=q;el.price=pr;el.party=party;el.u=Date.now();
+      if(mvType==='sale'&&el.cost==null)el.cost=num(p.buy);
+      /* v24: auto-adjust the linked money-ledger entry to the new
+         figures (or remove it if the entry is no longer a cash sale /
+         purchase — e.g. changed to নষ্ট/ফেরত). */
+      if(el.txId){
+        editLinked=true;
+        if(mvType==='sale'||mvType==='in'){
+          DB.txs.forEach(function(t){if(t.id===el.txId){t.date=date;t.type=mvType==='sale'?'in':'out';t.amount=q*pr;t.cat=mvType==='sale'?'পণ্য বিক্রি':'পণ্য কেনা';t.note=p.name+(mvType==='sale'?' বিক্রি ':' কেনা ')+fmt(q)+' '+p.unit+(party?' — '+party:'');t.u=Date.now();}});
+        }else{
+          addTomb('t',el.txId);DB.txs=DB.txs.filter(function(t){return t.id!==el.txId;});el.txId='';
+        }
+      }
     }
     mvEditLogId=null;$('mvSave').textContent='✅ সেভ করুন';
     $('moveModal').classList.remove('open');
     saveLocal();
-    toast('✅ স্টক এন্ট্রি ঠিক হয়েছে — স্টক ও লাভ আপডেট হয়েছে (আলাদা টাকার এন্ট্রি থাকলে সেটা টাকার খাতা থেকে ঠিক করুন)');
+    toast(editLinked?'✅ স্টক এন্ট্রি ঠিক হয়েছে — স্টক, লাভ ও টাকার খাতার এন্ট্রি অটোমেটিক ঠিক হয়ে গেছে':'✅ স্টক এন্ট্রি ঠিক হয়েছে — স্টক ও লাভ আপডেট হয়েছে');
     return;
   }
-  DB.logs.push({id:uid(),pid:p.id,date:date,type:mvType,qty:q,price:pr,party:party,book:bookOf(p),u:Date.now(),cost:(mvType==='sale'?num(p.buy):pr)});
+  /* v24: the log keeps the id of the money-ledger entry created with it
+     (txId), so editing or deleting this entry later keeps the ledger in
+     step automatically — the same link pattern as dues / bills / orders. */
+  var nlog={id:uid(),pid:p.id,date:date,type:mvType,qty:q,price:pr,party:party,book:bookOf(p),u:Date.now(),cost:(mvType==='sale'?num(p.buy):pr)};
+  DB.logs.push(nlog);
   if($('mvCash').checked&&total>0){
-    if(mvType==='sale')DB.txs.push({id:uid(),date:date,type:'in',amount:total,cat:'পণ্য বিক্রি',method:$('mvMethod').value,note:p.name+' বিক্রি '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()});
-    else if(mvType==='in')DB.txs.push({id:uid(),date:date,type:'out',amount:total,cat:'পণ্য কেনা',method:$('mvMethod').value,note:p.name+' কেনা '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()});
+    var ntx=null;
+    if(mvType==='sale')ntx={id:uid(),date:date,type:'in',amount:total,cat:'পণ্য বিক্রি',method:$('mvMethod').value,note:p.name+' বিক্রি '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()};
+    else if(mvType==='in')ntx={id:uid(),date:date,type:'out',amount:total,cat:'পণ্য কেনা',method:$('mvMethod').value,note:p.name+' কেনা '+fmt(q)+' '+p.unit+(party?' — '+party:''),book:bookOf(p),u:Date.now()};
+    if(ntx){DB.txs.push(ntx);nlog.txId=ntx.id;}
   }
   $('moveModal').classList.remove('open');
   toast('✅ সেভ হয়েছে — স্টক, টাকা ও লাভ অটোমেটিক আপডেট হয়েছে');
@@ -2497,7 +2537,11 @@ $('mvSave').addEventListener('click',function(){
   doMvSave();
 });
 window.delLog=function(id){
-  askSure('এই স্টক এন্ট্রিটা মুছবে? স্টক অটোমেটিক ঠিক হয়ে যাবে। (টাকার খাতার এন্ট্রি আলাদাভাবে মুছতে হবে)',function(){
+  var lrec=null;DB.logs.forEach(function(x){if(x.id===id)lrec=x;});
+  askSure('এই স্টক এন্ট্রিটা মুছবে? স্টক অটোমেটিক ঠিক হয়ে যাবে।'+(lrec&&lrec.txId?' এর সাথে তৈরি টাকার খাতার এন্ট্রিটাও একসাথে মুছে যাবে।':''),function(){
+    /* v24: remove the linked money-ledger entry too (with tombstone),
+       the same link-reversal delDue / delBill use. */
+    if(lrec&&lrec.txId){addTomb('t',lrec.txId);DB.txs=DB.txs.filter(function(t){return t.id!==lrec.txId;});}
     DB.logs=DB.logs.filter(function(x){return x.id!==id;});addTomb('l',id);saveLocal();toast('🗑️ স্টক এন্ট্রি মোছা হয়েছে');
   });
 };
@@ -2822,8 +2866,20 @@ $('pwChangeBtn').addEventListener('click',function(){
   if(!u){say('⚠️ আবার লগইন করে চেষ্টা করুন');return;}
   var btn=this;btn.disabled=true;say('⏳ যাচাই হচ্ছে…',true);
   var cred=firebase.auth.EmailAuthProvider.credential(u.email,cur);
+  /* v24: EVERY signed-in user can change their own password here — Gmail
+     accounts and phone accounts alike (a phone number is a synthetic
+     email/password account, so the same flow works, no SMS, no admin).
+     Re-authenticating with the current password FIRST both verifies it
+     and refreshes the session, so updatePassword does not fail with
+     requires-recent-login on an old session; if it still does, re-auth
+     once more and retry the update. */
   u.reauthenticateWithCredential(cred).then(function(){
-    return u.updatePassword(nw);
+    return u.updatePassword(nw).catch(function(e){
+      if(e&&e.code==='auth/requires-recent-login'){
+        return u.reauthenticateWithCredential(cred).then(function(){return u.updatePassword(nw);});
+      }
+      throw e;
+    });
   }).then(function(){
     btn.disabled=false;$('pwCur').value='';$('pwNew').value='';$('pwNew2').value='';
     say('✅ পাসওয়ার্ড বদলে গেছে — এবার থেকে নতুন পাসওয়ার্ডে লগইন হবে',true);
@@ -3185,20 +3241,26 @@ function renderAdminUsers(){
 }
 $('admUserSearch').addEventListener('input',renderAdminUsers);
 /* Direct plan grant: adds N days on top of the user's current expiry
-   (or from today), recorded in their history like an approval. */
+   (or from today), recorded in their history like an approval.
+   v24: the user's document is re-read FRESH right before writing — the
+   panel's snapshot can be minutes old, and writing from it would drop a
+   voucher redeemed or a request sent after the panel opened. */
 window.admGrantDays=function(uid){
-  var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(!rec)return;
   var inp=document.getElementById('grantDays_'+uid),days=num(inp&&inp.value);
   if(!(days>0)){toast('⚠️ কত দিনের প্ল্যান দেবেন লিখুন');return;}
-  var sub=rec.data.sub?JSON.parse(JSON.stringify(rec.data.sub)):blankSub();
-  sub.expiresAt=Math.max(Date.now(),num(sub.expiresAt))+days*DAYMS;
-  sub.status='active';sub.planName='Admin সরাসরি দিয়েছেন ('+fmt(days)+' দিন)';sub.u=Date.now();
-  if(!Array.isArray(sub.history))sub.history=[];
-  sub.history.push({date:todayStr(),what:'Admin সরাসরি প্ল্যান দিয়েছেন',days:days,amount:0,planName:sub.planName});
-  fsDb.collection(HISABI_COLLECTION).doc(uid).update({sub:sub}).then(function(){
-    rec.data.sub=sub;
-    if(currentUser&&currentUser.uid===uid){SUB=sub;saveSubLocal();schedulePush();}
-    renderAdminAll();renderAccess();toast('💎 '+fmt(days)+' দিনের প্ল্যান দেওয়া হয়েছে');
+  var docRef=fsDb.collection(HISABI_COLLECTION).doc(uid);
+  docRef.get().then(function(snap){
+    var fresh=snap.exists?(snap.data()||{}):{};
+    var sub=fresh.sub?JSON.parse(JSON.stringify(fresh.sub)):blankSub();
+    sub.expiresAt=Math.max(Date.now(),num(sub.expiresAt))+days*DAYMS;
+    sub.status='active';sub.planName='Admin সরাসরি দিয়েছেন ('+fmt(days)+' দিন)';sub.u=Date.now();
+    if(!Array.isArray(sub.history))sub.history=[];
+    sub.history.push({date:todayStr(),what:'Admin সরাসরি প্ল্যান দিয়েছেন',days:days,amount:0,planName:sub.planName});
+    docRef.update({sub:sub}).then(function(){
+      var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(rec)rec.data.sub=sub;
+      if(currentUser&&currentUser.uid===uid){SUB=sub;saveSubLocal();schedulePush();}
+      renderAdminAll();renderAccess();toast('💎 '+fmt(days)+' দিনের প্ল্যান দেওয়া হয়েছে');
+    }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
   }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
 };
 /* Delete a user: removes their cloud document (their hisab + plan state).
@@ -3221,21 +3283,28 @@ function renderAdminFree(){
   box.innerHTML=admIndex.freeList.map(function(f){return '<div class="kv"><span>🎁 '+esc(f)+'</span><b><button class="btn small danger" type="button" onclick="admFreeRemove(\''+jsq(f)+'\')">সরান</button></b></div>';}).join('');
 }
 window.admApprove=function(uid,rid){
-  var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(!rec)return;
-  var req=null;(rec.data.planReqs||[]).forEach(function(r){if(r.id===rid)req=r;});if(!req)return;
   var inp=document.getElementById('apprDays_'+rid),days=num(inp&&inp.value);
-  if(!(days>0))days=num(req.planDays)||30;
-  var sub=rec.data.sub?JSON.parse(JSON.stringify(rec.data.sub)):blankSub();
-  sub.expiresAt=Math.max(Date.now(),num(sub.expiresAt))+days*DAYMS;
-  sub.status='active';sub.planName=req.planName||(fmt(days)+' দিনের প্ল্যান');sub.u=Date.now();
-  if(!Array.isArray(sub.history))sub.history=[];
-  sub.history.push({date:todayStr(),what:'প্ল্যান অনুমোদন: '+(req.planName||''),days:days,amount:num(req.amount),planName:req.planName||''});
-  var reqs=(rec.data.planReqs||[]).filter(function(r){return r.id!==rid;});
-  var upd={sub:sub,planReqs:reqs,planReqsU:Date.now()};
-  fsDb.collection(HISABI_COLLECTION).doc(uid).update(upd).then(function(){
-    rec.data.sub=sub;rec.data.planReqs=reqs;
-    if(currentUser&&currentUser.uid===uid){SUB=sub;saveSubLocal();PLANREQS=reqs;PLANREQS_U=upd.planReqsU;saveReqs();schedulePush();}
-    renderAdminAll();renderAccess();toast('✅ অনুমোদন হয়েছে — '+fmt(days)+' দিনের প্ল্যান চালু');
+  /* v24: re-read the user's document fresh before writing (see
+     admGrantDays) — approving from the panel's stale snapshot could
+     erase a newer request or a voucher redeemed in the meantime. */
+  var docRef=fsDb.collection(HISABI_COLLECTION).doc(uid);
+  docRef.get().then(function(snap){
+    var fresh=snap.exists?(snap.data()||{}):{};
+    var req=null;(fresh.planReqs||[]).forEach(function(r){if(r.id===rid)req=r;});
+    if(!req){toast('⚠️ এই রিকোয়েস্টটা আর নেই — তালিকা আবার লোড হচ্ছে');admLoadAll();return;}
+    if(!(days>0))days=num(req.planDays)||30;
+    var sub=fresh.sub?JSON.parse(JSON.stringify(fresh.sub)):blankSub();
+    sub.expiresAt=Math.max(Date.now(),num(sub.expiresAt))+days*DAYMS;
+    sub.status='active';sub.planName=req.planName||(fmt(days)+' দিনের প্ল্যান');sub.u=Date.now();
+    if(!Array.isArray(sub.history))sub.history=[];
+    sub.history.push({date:todayStr(),what:'প্ল্যান অনুমোদন: '+(req.planName||''),days:days,amount:num(req.amount),planName:req.planName||''});
+    var reqs=(fresh.planReqs||[]).filter(function(r){return r.id!==rid;});
+    var upd={sub:sub,planReqs:reqs,planReqsU:Date.now()};
+    docRef.update(upd).then(function(){
+      var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(rec){rec.data.sub=sub;rec.data.planReqs=reqs;}
+      if(currentUser&&currentUser.uid===uid){SUB=sub;saveSubLocal();PLANREQS=reqs;PLANREQS_U=upd.planReqsU;saveReqs();schedulePush();}
+      renderAdminAll();renderAccess();toast('✅ অনুমোদন হয়েছে — '+fmt(days)+' দিনের প্ল্যান চালু');
+    }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
   }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
 };
 window.admReject=function(uid,rid){
@@ -3250,13 +3319,17 @@ window.admReject=function(uid,rid){
   });
 };
 window.admSetFree=function(uid,val){
-  var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(!rec)return;
-  var sub=rec.data.sub?JSON.parse(JSON.stringify(rec.data.sub)):blankSub();
-  sub.free=!!val;sub.u=Date.now();
-  fsDb.collection(HISABI_COLLECTION).doc(uid).update({sub:sub}).then(function(){
-    rec.data.sub=sub;
-    if(currentUser&&currentUser.uid===uid){SUB=sub;saveSubLocal();schedulePush();}
-    renderAdminAll();renderAccess();toast(val?'🎁 ফ্রি অ্যাক্সেস দেওয়া হয়েছে':'ফ্রি অ্যাক্সেস বন্ধ হয়েছে');
+  /* v24: re-read fresh before writing (see admGrantDays). */
+  var docRef=fsDb.collection(HISABI_COLLECTION).doc(uid);
+  docRef.get().then(function(snap){
+    var fresh=snap.exists?(snap.data()||{}):{};
+    var sub=fresh.sub?JSON.parse(JSON.stringify(fresh.sub)):blankSub();
+    sub.free=!!val;sub.u=Date.now();
+    docRef.update({sub:sub}).then(function(){
+      var rec=null;admUsers.forEach(function(x){if(x.uid===uid)rec=x;});if(rec)rec.data.sub=sub;
+      if(currentUser&&currentUser.uid===uid){SUB=sub;saveSubLocal();schedulePush();}
+      renderAdminAll();renderAccess();toast(val?'🎁 ফ্রি অ্যাক্সেস দেওয়া হয়েছে':'ফ্রি অ্যাক্সেস বন্ধ হয়েছে');
+    }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
   }).catch(function(e){toast('⚠️ হয়নি ('+((e&&e.code)||'error')+')');});
 };
 $('freeAdd').addEventListener('click',function(){
@@ -3518,8 +3591,12 @@ window.editParty=function(id){
 };
 window.delParty=function(id){
   var p=findParty(id);
-  askSure('“'+(p?p.name:'')+'” ও তার সব বাকি এন্ট্রি মুছে ফেলবেন?',function(){
-    DB.dues.forEach(function(d){if(d.pid===id)addTomb('d',d.id);});
+  askSure('“'+(p?p.name:'')+'” ও তার সব বাকি এন্ট্রি মুছে ফেলবেন? (বাকি শোধের টাকাগুলোর টাকার-খাতার এন্ট্রিও একসাথে মুছে যাবে — হাতে লেখা খাতার এন্ট্রি ছোঁয়া হবে না)',function(){
+    /* v24: the party's due PAYMENTS created linked money-ledger entries
+       (dueTxSync, txId on the due) — remove exactly those, with
+       tombstones, the same link-reversal delDue uses. Hand-written
+       ledger entries are never touched. */
+    DB.dues.forEach(function(d){if(d.pid===id){addTomb('d',d.id);if(d.txId){addTomb('t',d.txId);DB.txs=DB.txs.filter(function(t){return t.id!==d.txId;});}}});
     addTomb('y',id);
     DB.parties=DB.parties.filter(function(x){return x.id!==id;});
     DB.dues=DB.dues.filter(function(d){return d.pid!==id;});
@@ -3685,10 +3762,13 @@ function dealerStmtText(d){
   var txs=bDtxs().filter(function(x){return x.did===d.id;}).slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.id.localeCompare(b.id);});
   var run=0;
   txs.forEach(function(x){
-    if(x.kind==='give'){var tot=dtxTotal(x),adj=dtxAdj(x),due=tot+adj-num(x.paidNow);run+=due;lines.push(x.date+' • 📦 মাল দিলাম — '+money(tot)+(Math.abs(adj)>0.004?' (পার্সেন্টেজ '+signedMoney(adj)+')':'')+(num(x.paidNow)>0?' • জমা '+money(x.paidNow):'')+' → বাকি: '+money(Math.max(0,run)));}
-    else{run-=num(x.amount);lines.push(x.date+' • 💵 টাকা পেলাম — '+money(x.amount)+' → বাকি: '+money(Math.max(0,run)));}
+    /* v24: the WhatsApp text shows overpayment exactly like the on-screen
+       statement ('বেশি দিয়েছে ৳X') — the running balance is no longer
+       clamped to 0, which contradicted the screen. */
+    if(x.kind==='give'){var tot=dtxTotal(x),adj=dtxAdj(x),due=tot+adj-num(x.paidNow);run+=due;lines.push(x.date+' • 📦 মাল দিলাম — '+money(tot)+(Math.abs(adj)>0.004?' (পার্সেন্টেজ '+signedMoney(adj)+')':'')+(num(x.paidNow)>0?' • জমা '+money(x.paidNow):'')+' → '+(run>=0?('বাকি: '+money(run)):('বেশি দিয়েছে '+money(-run))));}
+    else{run-=num(x.amount);lines.push(x.date+' • 💵 টাকা পেলাম — '+money(x.amount)+' → '+(run>=0?('বাকি: '+money(run)):('বেশি দিয়েছে '+money(-run))));}
   });
-  lines.push('——————————','মোট মাল: '+money(t.given),'মোট পেয়েছি: '+money(t.recv),t.due>0.005?('বাকি: '+money(t.due)):('বাকি নেই ✅'));
+  lines.push('——————————','মোট মাল: '+money(t.given),'মোট পেয়েছি: '+money(t.recv),t.due>0.005?('বাকি: '+money(t.due)):(t.due<-0.005?('বেশি দিয়েছে '+money(-t.due)):('বাকি নেই ✅')));
   return lines.join('\n');
 }
 window.openDealerStmt=function(){
@@ -4648,8 +4728,22 @@ window.cancelOrder=function(id){
   });
 };
 window.delOrder=function(id){
-  askSure('এই অর্ডারের রেকর্ড মুছে ফেলবেন? (এর টাকার এন্ট্রি থেকে যাবে)',function(){
-    DB.orders=DB.orders.filter(function(x){return x.id!==id;});addTomb('o',id);saveLocal();toast('🗑️ মোছা হয়েছে');
+  var o=findOrder(id);if(!o)return;
+  /* v24: deleting an order reverses everything the order created — the
+     advance money entry, the delivery money entry and the stock cut on
+     delivery — the same all-links-together pattern delBill uses. (A
+     cancelled order's advance is already offset by its refund entry, so
+     that pair is left exactly as recorded.) */
+  var links=o.status==='delivered'?orderDeliveryLinks(o):{logs:[],tx:null};
+  var parts=[];
+  if(o.status!=='cancelled'&&o.txId&&num(o.advance)>0)parts.push('অগ্রিম '+money(num(o.advance))+'-এর খাতার এন্ট্রি মুছে যাবে');
+  if(links.tx)parts.push('ডেলিভারির '+money(num(links.tx.amount))+' আয়ের এন্ট্রি মুছে যাবে');
+  if(links.logs.length)parts.push('ডেলিভারিতে কাটা স্টক ফেরত আসবে');
+  askSure('এই অর্ডারের রেকর্ড মুছে ফেলবেন?'+(parts.length?' '+parts.join(' • ')+'।':''),function(){
+    if(o.status!=='cancelled'&&o.txId){addTomb('t',o.txId);DB.txs=DB.txs.filter(function(t){return t.id!==o.txId;});}
+    if(links.tx){addTomb('t',links.tx.id);DB.txs=DB.txs.filter(function(t){return t.id!==links.tx.id;});}
+    if(links.logs.length){var lids=links.logs.map(function(l){return l.id;});lids.forEach(function(x){addTomb('l',x);});DB.logs=DB.logs.filter(function(l){return lids.indexOf(l.id)<0;});}
+    DB.orders=DB.orders.filter(function(x){return x.id!==id;});addTomb('o',id);saveLocal();toast('🗑️ অর্ডার ও তার সব হিসাব মোছা হয়েছে');
   });
 };
 /* ---------- v22: ORDER BOOK — one person, UNLIMITED orders ----------
@@ -4899,6 +4993,11 @@ $('imSave').addEventListener('click',function(){
   var l=findLoan(imLid);if(!l)return;
   var amt=num($('imAmt').value),date=$('imDate').value||todayStr();
   if(!(amt>0)){toast('⚠️ টাকার পরিমাণ লিখুন');return;}
+  /* v24: an installment can never exceed what is still owed (সুদসহ) —
+     overpaying used to push the remaining balance negative with no
+     warning at all. */
+  var rem=Math.round((loanOwed(l)-loanPaid(l.id))*100)/100;
+  if(amt>rem+0.004){toast('⚠️ বাকি আছে মাত্র '+money(Math.max(0,rem))+' — কিস্তি এর বেশি হতে পারবে না');$('imAmt').focus();return;}
   var tx={id:uid(),date:date,type:l.dir==='taken'?'out':'in',amount:amt,cat:l.dir==='taken'?'ধার শোধ':'ধার ফেরত পাওয়া',method:$('imMethod').value,note:'কিস্তি — '+l.party,book:bookOf(l),u:Date.now()};
   DB.txs.push(tx);
   DB.insts.push({id:uid(),lid:l.id,date:date,amount:amt,txId:tx.id,book:bookOf(l),u:Date.now()});
@@ -5687,14 +5786,36 @@ function orderListRows(){
   });
   return rows;
 }
+/* v24: hidden (বাদ দেওয়া) suggestions can be brought back — olRemove used
+   to hide them forever with no way back. A hidden item is an olist entry
+   with a pid and off=true in the current book. */
+function olHiddenItems(){
+  var out=[];
+  (DB.olist||[]).forEach(function(o){
+    if(!o.pid||!o.off||!inBook(o))return;
+    var p=findProd(o.pid);
+    out.push({oid:o.id,pid:o.pid,name:p?p.name:(o.name||'প্রোডাক্ট')});
+  });
+  return out;
+}
+window.olUnhide=function(oid){
+  (DB.olist||[]).forEach(function(o){if(o.id===oid){o.off=false;o.u=Date.now();}});
+  saveLocal();toast('↩️ আবার লিস্টে দেখানো হচ্ছে');
+};
+function olHiddenHtml(){
+  var hid=olHiddenItems();
+  if(!hid.length)return '';
+  return '<div style="margin-top:10px;border-top:1.5px dashed var(--line);padding-top:8px"><p class="hint" style="margin:0 0 6px">🙈 বাদ দেওয়া আইটেম — আবার দেখাতে চাইলে “আবার দেখান” চাপুন:</p>'+
+  hid.map(function(h){return '<div class="kv"><span>'+esc(h.name)+'</span><b><button class="btn small ghost" type="button" onclick="olUnhide(\''+h.oid+'\')">↩️ আবার দেখান</button></b></div>';}).join('')+'</div>';
+}
 function renderOrderList(){
   var box=$('olList');if(!box)return;
   var rows=orderListRows();
-  if(!rows.length){box.innerHTML='<div class="empty">সব প্রোডাক্টের স্টক ঠিক আছে — কেনার কিছু নেই ✅</div>';return;}
+  if(!rows.length){box.innerHTML='<div class="empty">সব প্রোডাক্টের স্টক ঠিক আছে — কেনার কিছু নেই ✅</div>'+olHiddenHtml();return;}
   box.innerHTML=rows.map(function(r){
     return '<div class="kv"><span><b>'+esc(r.name)+'</b><br><span style="color:var(--muted);font-size:.87rem">'+(r.auto?('স্টকে আছে মাত্র '+fmt(r.stock)+' '+esc(r.unit)):('নিজে যোগ করা'))+'</span></span>'+
     '<b style="display:flex;gap:6px;align-items:center"><input type="number" value="'+esc(String(r.qty))+'" min="0" step="any" style="width:84px" onchange="olSetQty(\''+r.pid+'\',\''+r.oid+'\',this.value)" aria-label="কেনার পরিমাণ" /><button class="btn small danger" type="button" onclick="olRemove(\''+r.pid+'\',\''+r.oid+'\')">✖ বাদ</button></b></div>';
-  }).join('');
+  }).join('')+olHiddenHtml();
 }
 window.olSetQty=function(pid,oid,val){
   var q=num(val);if(!(q>0))q=1;
@@ -6074,7 +6195,7 @@ window.quickSell=function(id){
   qsQty[p.id]=1;
   saveSaleSession();
   saveLocal();
-  toast('✅ '+p.name+' '+fmt(q)+' '+p.unit+' বিক্রি হয়েছে — '+money(total)+' (নিচের হিসাবে জমা হয়েছে)');
+  toast('✅ '+p.name+' '+fmt(q)+' '+p.unit+' বিক্রি হয়েছে — '+money(total)+' (স্টক কমে গেছে, নিচের হিসাবে জমা হয়েছে — সব বিক্রি শেষে “✅ হিসাব শেষ করুন” চাপলেই টাকা খাতায় যাবে)');
 };
 /* Settle the session: the books are made to match the bottom summary
    exactly — paid part (after %) to the money ledger with the chosen
@@ -6129,12 +6250,35 @@ function renderSaleSummary(){
   (c.pct>0?'<div class="kv"><span>পার্সেন্টেজ ('+(c.sign>0?'＋':'−')+fmt(c.pct)+'%)</span><b>'+(c.adj<0?'−':'+')+' '+money(Math.abs(c.adj))+'</b></div><div class="kv"><span><b>পার্সেন্টেজসহ মোট</b></span><b>'+money(c.fin)+'</b></div>':'')+
   '<div class="kv"><span>জমা</span><b>'+money(c.paid)+'</b></div>';
   due.textContent=c.due>0?('বাকি গেল: '+money(c.due)):(c.due<0?('বাকি নেই — বেশি জমা হয়েছে '+money(-c.due)):('বাকি: '+money(0)+' — পুরো টাকা জমা হয়েছে'));
+  /* v24: while a sale session is still unsettled, an unmissable bar stays
+     fixed at the bottom of the screen showing the pending amount — the
+     owner reported selling from the stock page and the money never
+     reaching the accounts, because the settle panel sits far below the
+     product list and the tap was easy to miss. The settle button itself
+     also carries the pending amount now. Stock and the summary already
+     update on every sell tap; only the money waits for this one tap. */
+  var pbar=$('salePendingBar'),ptxt=$('salePendingTxt');
+  if(pbar){
+    if(saleSession.order.length&&c.amt>0){
+      pbar.style.display='flex';
+      if(ptxt)ptxt.textContent='⚠️ বিক্রির হিসাব শেষ হয়নি — মোট '+money(c.fin)+(c.paid>0?(' • জমা '+money(c.paid)):'')+(c.due>0?(' • বাকি '+money(c.due)):'')+' — “হিসাব শেষ করুন” না চাপলে এই টাকা টাকার খাতায় যাবে না';
+    }else pbar.style.display='none';
+  }
+  var stb=$('saleSettle');
+  if(stb)stb.textContent=(saleSession.order.length&&c.amt>0)?('✅ হিসাব শেষ করুন — '+money(c.fin)+' খাতায় নিন'):'✅ হিসাব শেষ করুন — জমা খাতায় নিন';
 }
 ['salePct','salePaid'].forEach(function(id){var el=$(id);if(el)el.addEventListener('input',function(){renderSaleSummary();saveSaleSession();});});
 var sps=$('salePctSign');if(sps)sps.addEventListener('change',function(){renderSaleSummary();saveSaleSession();});
 var scs=$('saleCust');if(scs)scs.addEventListener('input',saveSaleSession);
 var sms=$('saleMethod');if(sms)sms.addEventListener('change',saveSaleSession);
 var sst=$('saleSettle');if(sst)sst.addEventListener('click',settleSale);
+/* v24: the pending bar's button jumps straight to the settle panel and
+   puts the cursor in the জমা box, so finishing the accounts is one tap. */
+var spb=$('salePendingBtn');if(spb)spb.addEventListener('click',function(){
+  showPageNoScroll('stock');
+  var stb2=$('saleSettle');if(stb2)stb2.scrollIntoView({behavior:'smooth',block:'center'});
+  var pin=$('salePaid');if(pin)setTimeout(function(){try{pin.focus({preventScroll:true});}catch(e){pin.focus();}},450);
+});
 var srs=$('saleReset');if(srs)srs.addEventListener('click',function(){
   var doReset=function(){
     saleSession={items:{},order:[]};
@@ -6834,28 +6978,28 @@ function csvCell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}
 $('dlCsvTx').addEventListener('click',function(){
   var rows=[['Date','Type','Category','Method','Note','Amount (BDT)'].join(',')];
   var lbl={in:'Income',out:'Expense',save:'Savings Deposit',unsave:'Savings Withdrawal'};
-  DB.txs.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(x){rows.push([x.date,lbl[x.type]||x.type,csvCell(x.cat),csvCell(x.method),csvCell(x.note||''),num(x.amount)].join(','));});
+  bTxs().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(x){rows.push([x.date,lbl[x.type]||x.type,csvCell(x.cat),csvCell(x.method),csvCell(x.note||''),num(x.amount)].join(','));});
   download('money-ledger-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ CSV ডাউনলোড হয়েছে');
 });
 $('dlCsvBills').addEventListener('click',function(){
   var rows=[['Bill No','Date','Customer','Phone','Items','Subtotal','Discount','Total','Paid','Due','Method'].join(',')];
-  DB.bills.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(b){rows.push([num(b.no)||'',b.date,csvCell(b.customer),csvCell(b.phone||''),csvCell((b.items||[]).map(function(it){return it.name+' x'+it.qty;}).join('; ')),num(b.subtotal),num(b.discAmt),num(b.total),num(b.paid),num(b.due),csvCell(b.method||'')].join(','));});
+  bBills().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(b){rows.push([num(b.no)||'',b.date,csvCell(b.customer),csvCell(b.phone||''),csvCell((b.items||[]).map(function(it){return it.name+' x'+it.qty;}).join('; ')),num(b.subtotal),num(b.discAmt),num(b.total),num(b.paid),num(b.due),csvCell(b.method||'')].join(','));});
   download('bills-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ বিল CSV ডাউনলোড হয়েছে');
 });
 $('dlCsvDues').addEventListener('click',function(){
   var rows=[['Date','Person','Type','Amount (BDT)','Due Date','Note'].join(',')];
   var lbl={give:'Given (receivable)',take:'Taken (payable)',recv:'Payment received',sent:'Payment made'};
-  DB.dues.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(d){var p=findParty(d.pid);rows.push([d.date,csvCell(p?p.name:''),lbl[d.type]||d.type,num(d.amount),d.dueDate||'',csvCell(d.note||'')].join(','));});
+  bDues().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(d){var p=findParty(d.pid);rows.push([d.date,csvCell(p?p.name:''),lbl[d.type]||d.type,num(d.amount),d.dueDate||'',csvCell(d.note||'')].join(','));});
   download('dues-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ বাকি CSV ডাউনলোড হয়েছে');
 });
 $('dlCsvPurchases').addEventListener('click',function(){
   var rows=[['Date','Product','Supplier','Qty','Unit Cost','Total','Method'].join(',')];
-  (DB.purchases||[]).slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(pu){rows.push([pu.date,csvCell(pu.pname||''),csvCell(pu.supplier||''),num(pu.qty),num(pu.cost),num(pu.qty)*num(pu.cost),csvCell(pu.method||'')].join(','));});
+  bPurchases().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(pu){rows.push([pu.date,csvCell(pu.pname||''),csvCell(pu.supplier||''),num(pu.qty),num(pu.cost),num(pu.qty)*num(pu.cost),csvCell(pu.method||'')].join(','));});
   download('purchases-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ কেনার CSV ডাউনলোড হয়েছে');
 });
 $('dlCsvStock').addEventListener('click',function(){
   var rows=[['Date','Product','Type','Qty','Unit Price','Total','Party'].join(',')];
-  DB.logs.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(l){var p=findProd(l.pid);rows.push([l.date,csvCell(p?p.name:'?'),l.type,num(l.qty),num(l.price),num(l.qty)*num(l.price),csvCell(l.party||'')].join(','));});
+  bLogs().sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(l){var p=findProd(l.pid);rows.push([l.date,csvCell(p?p.name:'?'),l.type,num(l.qty),num(l.price),num(l.qty)*num(l.price),csvCell(l.party||'')].join(','));});
   download('stock-ledger-'+todayStr()+'.csv','\ufeff'+rows.join('\n'),'text/csv;charset=utf-8');toast('⬇️ CSV ডাউনলোড হয়েছে');
 });
 $('repMonth').addEventListener('change',renderReport);
@@ -7468,7 +7612,7 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 23 (v23)":"Version 23 (v23)",
+"ভার্সন 24 (v24)":"Version 24 (v24)",
 "পেমেন্ট মাধ্যম (টাকা শোধ হলে টাকার খাতায় এই মাধ্যমে যাবে)":"Payment method (a due payment lands in the money ledger with this method)",
 "কাস্টমারের নাম (বাকি থাকলে যার নামে যাবে)":"Customer name (any leftover due goes under this name)",
 "জমার মাধ্যম":"Method the payment was received by",
@@ -7586,7 +7730,10 @@ var I18N_EN={
 "পাওয়া গেছে (অগ্রিম + ডেলিভারি)":"Received (advance + delivery)",
 "বাকি পাবো":"Due to receive",
 "এখনো কোনো অর্ডার নেই — ওপরের ফর্মে প্রথম অর্ডার নিন।":"No orders yet — take the first order in the form above.",
-"খুঁজে পাওয়া যায়নি।":"Not found."
+"খুঁজে পাওয়া যায়নি।":"Not found.",
+"ডিলারের টাকা টাকার খাতায় যায় না":"Dealer money does not go to the money ledger",
+"— ডিলারের হিসাব এই আলাদা খাতাতেই থাকে (মেমোর জমা আর “টাকা নিন”-এর টাকাও শুধু ডিলারের হিসাবেই থাকে)।":"— the dealer account stays in this separate book (the memo deposit and the “Take money” amounts also stay only in the dealer's account).",
+"ℹ️ ডিলারের টাকা টাকার খাতায় যায় না — এই হিসাব আলাদাই থাকে।":"ℹ️ Dealer money does not go to the money ledger — this account stays separate."
 };
 var _i18nOrig=new WeakMap();
 function i18nKey(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
