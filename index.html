@@ -470,61 +470,31 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
 
   <!-- STOCK -->
   <section class="page" id="page-stock">
-    <div class="panel">
-      <h2 id="prodFormTitle">নতুন প্রোডাক্ট যোগ করুন</h2>
-      <p class="hint">শুরুর স্টক লিখলেই হবে — এরপর বিক্রি / নতুন মাল এলে শুধু সংখ্যা লিখবে, বাকি হিসাব অটোমেটিক।</p>
-      <div class="grid2">
-        <div class="field"><label for="pName">প্রোডাক্টের নাম</label><input type="text" id="pName" placeholder="যেমন: মিনিকেট চাল" /></div>
-        <div class="field"><label for="pUnit">একক</label>
-          <select id="pUnit"><option>পিস</option><option>কেজি</option><option>বস্তা</option><option>লিটার</option><option>প্যাকেট</option><option>কার্টন</option><option>ডজন</option><option>মণ</option></select></div>
-      </div>
-      <div class="field"><label for="pBarcode">বারকোড (ঐচ্ছিক)</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="text" id="pBarcode" placeholder="বারকোড নম্বর লিখুন বা স্ক্যান করুন" style="flex:1 1 180px" />
-          <button class="btn small gold" id="pScanBtn" type="button">📷 বারকোড স্ক্যান করুন</button>
-        </div>
-        <p class="hint" style="margin:4px 0 0">বারকোড থাকলে বিল করার সময় স্ক্যান করলেই এই প্রোডাক্টটা সাথে সাথে চলে আসবে।</p>
-      </div>
-      <div class="grid3">
-        <div class="field"><label for="pBuy">কেনা দাম (প্রতি একক ৳)</label><input type="number" id="pBuy" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-        <div class="field"><label for="pSell">খুচরা বিক্রি দাম (৳)</label><input type="number" id="pSell" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-        <div class="field"><label for="pWsell">পাইকারি বিক্রি দাম (৳)</label><input type="number" id="pWsell" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-      </div>
-      <div class="grid2">
-        <div class="field"><label for="pOpen">শুরুর স্টক (পরিমাণ)</label><input type="number" id="pOpen" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-        <div class="field"><label>প্রতি এককে লাভ (অটোমেটিক)</label><div class="live-total" id="pProfitBox" style="margin:0">খুচরা ৳ 0 • পাইকারি ৳ 0</div></div>
-      </div>
-      <div class="grid3">
-        <div class="field"><label for="pLow">কম স্টকের সতর্ক সংখ্যা</label><input type="number" id="pLow" inputmode="decimal" min="0" step="any" value="5" /></div>
-        <div class="field"><label for="pExpiry">মেয়াদ শেষের তারিখ (ঐচ্ছিক)</label><input type="date" id="pExpiry" /></div>
-        <div class="field"><label>শুরুর স্টকের মোট কেনা মূল্য (অটোমেটিক)</label><div class="live-total" id="pOpenTotal" style="margin:0">৳ 0</div></div>
-      </div>
-      <div class="field"><label>প্রোডাক্টের ছবি (ঐচ্ছিক)</label>
-        <input type="file" id="pPhoto" accept="image/*" style="display:none" />
-        <input type="file" id="pPhotoCam" accept="image/*" capture="environment" style="display:none" />
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn small" id="pPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
-          <button class="btn small ghost" id="pPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
-          <img id="pPhotoPrev" alt="প্রোডাক্টের ছবি" style="display:none;width:74px;height:74px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line)" />
-          <button class="btn small danger" id="pPhotoRm" type="button" style="display:none">ছবি সরান</button>
-        </div>
-        <p class="hint" style="margin:4px 0 0">ছবি ফোনেই ছোট করে (সর্বোচ্চ ৬০০px) সেভ হয় — স্টক লিস্টে আর বিলে দেখা যাবে।</p>
-      </div>
-      <div class="field"><label for="pBook">কোন খাতায় থাকবে</label><select id="pBook"></select>
-        <p class="hint" style="margin:4px 0 0">প্রোডাক্ট ঠিক করার সময় এখান থেকে অন্য খাতায় সরানো যায় — স্টক ইতিহাসও সাথে যাবে।</p></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-        <button class="btn" id="pSave" type="button">✅ প্রোডাক্ট সেভ করুন</button>
-        <button class="btn ghost" id="pCancel" type="button" style="display:none">বাতিল</button>
-      </div>
+    <div class="panel" style="margin-top:0">
+      <h2>📦 স্টকে মোট কত টাকার মাল আছে</h2>
+      <div id="stockValueBox"></div>
     </div>
-    <div class="panel">
+            <div class="panel">
       <h2>সব প্রোডাক্ট ও স্টক</h2>
       <div style="margin-bottom:8px" class="noprint"><button class="btn small ghost" id="stockPrint" type="button">🖨️ স্টক তালিকা প্রিন্ট</button></div>
       <div id="stockSummary"></div>
       <div class="searchrow noprint"><input type="search" id="pSearch" placeholder="🔍 প্রোডাক্ট খুঁজুন…" /><select id="pStockFilter"><option value="all">সব প্রোডাক্ট</option><option value="low">⚠️ শুধু কম স্টক</option><option value="expiry">⏰ মেয়াদ শেষ হতে চলেছে</option></select></div>
       <div id="prodList"></div>
+    </div>
+    <div class="panel">
+      <h2>🧾 বিক্রির হিসাব</h2>
+      <p class="hint">ওপরের তালিকায় প্রতিটা প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপলেই এখানে হিসাব জমা হবে — স্টক অটোমেটিক কমবে, টাকার খাতায় আয় যোগ হবে। এই হিসাব শুধু এইবারের বিক্রির।</p>
+      <div id="saleItems"></div>
+      <div id="saleTotals"></div>
+      <div class="grid3" style="margin-top:8px">
+        <div class="field"><label for="salePctSign">পার্সেন্টেজ — যোগ নাকি বিয়োগ</label>
+          <select id="salePctSign"><option value="1">＋ যোগ হবে</option><option value="-1">− বিয়োগ হবে</option></select></div>
+        <div class="field"><label for="salePct">পার্সেন্টেজ (%)</label><input type="number" id="salePct" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="salePaid">জমা (৳)</label><input type="number" id="salePaid" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+      </div>
+      <div class="live-total" id="saleDueBox">বাকি: ৳ 0</div>
+      <button class="btn ghost noprint" id="saleReset" type="button" style="margin-top:10px">🔄 নতুন বিক্রির হিসাব শুরু করুন</button>
+      <p class="hint" style="margin:6px 0 0">এই বোতামে চাপলে শুধু এই হিসাবটা খালি হবে — হয়ে যাওয়া বিক্রি স্টক ও টাকার খাতায় সেভ হয়েই থাকবে।</p>
     </div>
     <div class="panel">
       <h2 id="puFormTitle">🛒 কেনা মালের হিসাব</h2>
@@ -582,6 +552,55 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="grid2">
         <div class="field"><label for="olPhone">সাপ্লায়ারের WhatsApp নম্বর (ঐচ্ছিক)</label><input type="tel" id="olPhone" placeholder="01XXXXXXXXX" /></div>
         <div class="field"><label>&nbsp;</label><button class="btn" id="olShare" type="button" style="width:100%;background:#1faa55;color:#fff">🟢 WhatsApp-এ সাপ্লায়ারকে পাঠান</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 id="prodFormTitle">নতুন প্রোডাক্ট যোগ করুন</h2>
+      <p class="hint">শুরুর স্টক লিখলেই হবে — এরপর বিক্রি / নতুন মাল এলে শুধু সংখ্যা লিখবে, বাকি হিসাব অটোমেটিক।</p>
+      <div class="grid2">
+        <div class="field"><label for="pName">প্রোডাক্টের নাম</label><input type="text" id="pName" placeholder="যেমন: মিনিকেট চাল" /></div>
+        <div class="field"><label for="pUnit">একক</label>
+          <select id="pUnit"><option>পিস</option><option>কেজি</option><option>বস্তা</option><option>লিটার</option><option>প্যাকেট</option><option>কার্টন</option><option>ডজন</option><option>মণ</option></select></div>
+      </div>
+      <div class="field"><label for="pBarcode">বারকোড (ঐচ্ছিক)</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="pBarcode" placeholder="বারকোড নম্বর লিখুন বা স্ক্যান করুন" style="flex:1 1 180px" />
+          <button class="btn small gold" id="pScanBtn" type="button">📷 বারকোড স্ক্যান করুন</button>
+        </div>
+        <p class="hint" style="margin:4px 0 0">বারকোড থাকলে বিল করার সময় স্ক্যান করলেই এই প্রোডাক্টটা সাথে সাথে চলে আসবে।</p>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="pBuy">কেনা দাম (প্রতি একক ৳)</label><input type="number" id="pBuy" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="pSell">খুচরা বিক্রি দাম (৳)</label><input type="number" id="pSell" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="pWsell">পাইকারি বিক্রি দাম (৳)</label><input type="number" id="pWsell" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="pOpen">শুরুর স্টক (পরিমাণ)</label><input type="number" id="pOpen" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label>প্রতি এককে লাভ (অটোমেটিক)</label><div class="live-total" id="pProfitBox" style="margin:0">খুচরা ৳ 0 • পাইকারি ৳ 0</div></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="pLow">কম স্টকের সতর্ক সংখ্যা</label><input type="number" id="pLow" inputmode="decimal" min="0" step="any" value="5" /></div>
+        <div class="field"><label for="pExpiry">মেয়াদ শেষের তারিখ (ঐচ্ছিক)</label><input type="date" id="pExpiry" /></div>
+        <div class="field"><label>শুরুর স্টকের মোট কেনা মূল্য (অটোমেটিক)</label><div class="live-total" id="pOpenTotal" style="margin:0">৳ 0</div></div>
+      </div>
+      <div class="field"><label>প্রোডাক্টের ছবি (ঐচ্ছিক)</label>
+        <input type="file" id="pPhoto" accept="image/*" style="display:none" />
+        <input type="file" id="pPhotoCam" accept="image/*" capture="environment" style="display:none" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small" id="pPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
+          <button class="btn small ghost" id="pPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <img id="pPhotoPrev" alt="প্রোডাক্টের ছবি" style="display:none;width:74px;height:74px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line)" />
+          <button class="btn small danger" id="pPhotoRm" type="button" style="display:none">ছবি সরান</button>
+        </div>
+        <p class="hint" style="margin:4px 0 0">ছবি ফোনেই ছোট করে (সর্বোচ্চ ৬০০px) সেভ হয় — স্টক লিস্টে আর বিলে দেখা যাবে।</p>
+      </div>
+      <div class="field"><label for="pBook">কোন খাতায় থাকবে</label><select id="pBook"></select>
+        <p class="hint" style="margin:4px 0 0">প্রোডাক্ট ঠিক করার সময় এখান থেকে অন্য খাতায় সরানো যায় — স্টক ইতিহাসও সাথে যাবে।</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <button class="btn" id="pSave" type="button">✅ প্রোডাক্ট সেভ করুন</button>
+        <button class="btn ghost" id="pCancel" type="button" style="display:none">বাতিল</button>
       </div>
     </div>
   </section>
@@ -1049,7 +1068,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 20 (v20)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 21 (v21)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -5535,6 +5554,16 @@ function renderProducts(){
   var tv=0,ts=0,tp=0;
   bProducts().forEach(function(p){var s=prodStats(p);tv+=s.stockValue;ts+=s.sellValue;tp+=s.profit;});
   $('stockSummary').innerHTML='<div class="kv"><span>স্টকের মোট কেনা মূল্য</span><b>'+money(tv)+'</b></div><div class="kv"><span>সব বিক্রি হলে পাওয়া যাবে</span><b>'+money(ts)+'</b></div><div class="kv"><span>এ পর্যন্ত মোট লাভ</span><b style="color:'+(tp>=0?'var(--in)':'var(--out)')+'">'+money(tp)+'</b></div>';
+  /* v21: TOP stock-value panel — total money value of the goods in stock
+     right now = Σ (remaining stock × purchase/cost price). prodStats'
+     stockValue is exactly remaining × p.buy, and a product with no cost
+     price has buy = 0, so it contributes ৳ 0 and never breaks the total.
+     Recomputed on every render, so it tracks every stock change. */
+  var svb=$('stockValueBox');
+  if(svb){
+    var tq=0;bProducts().forEach(function(p){tq+=prodStats(p).remaining;});
+    svb.innerHTML='<div class="live-total" style="font-size:1.35rem;text-align:center;padding:14px 10px">স্টকে মোট '+money(tv)+' টাকার মাল আছে</div><div class="kv"><span>মোট প্রোডাক্ট</span><b>'+fmt(bProducts().length)+' টি</b></div><div class="kv"><span>মোট পরিমাণ (সব প্রোডাক্ট মিলিয়ে)</span><b>'+fmt(tq)+'</b></div><p class="hint" style="margin:6px 0 0">হিসাবটা প্রতিটা প্রোডাক্টের স্টক × কেনা দাম — স্টক বদলালেই অটোমেটিক বদলে যায়। যার কেনা দাম দেওয়া নেই, তার হিসাব ৳ ০ ধরা হয়।</p>';
+  }
   var list=bProducts().filter(function(p){
     if(q&&p.name.toLowerCase().indexOf(q)<0&&(p.barcode||'').toLowerCase().indexOf(q)<0)return false;
     var s=prodStats(p),ei=expiryInfo(p);
@@ -5542,7 +5571,7 @@ function renderProducts(){
     if(f==='expiry'&&!(ei&&(ei.expired||ei.soon)))return false;
     return true;
   });
-  if(!list.length){$('prodList').innerHTML='<div class="empty">'+(f==='low'?'কম স্টকের কোনো প্রোডাক্ট নেই ✅':(f==='expiry'?'মেয়াদ শেষ হতে চলেছে এমন প্রোডাক্ট নেই ✅':'কোনো প্রোডাক্ট নেই — ওপরে নতুন প্রোডাক্ট যোগ করো।'))+'</div>';placeFormAfterRender('prodFormTitle','prodList',editProdId);return;}
+  if(!list.length){$('prodList').innerHTML='<div class="empty">'+(f==='low'?'কম স্টকের কোনো প্রোডাক্ট নেই ✅':(f==='expiry'?'মেয়াদ শেষ হতে চলেছে এমন প্রোডাক্ট নেই ✅':'কোনো প্রোডাক্ট নেই — সবার নিচে নতুন প্রোডাক্ট যোগ করো।'))+'</div>';placeFormAfterRender('prodFormTitle','prodList',editProdId);renderSaleSummary();return;}
   $('prodList').innerHTML=list.map(function(p){
     var s=prodStats(p);
     var ei=expiryInfo(p);
@@ -5560,11 +5589,85 @@ function renderProducts(){
     '<div class="meta">শুরুতে ছিল '+fmt(s.opening)+' + এলো '+fmt(s.pin)+' − বিক্রি '+fmt(s.sold)+(s.outQty?' − বের হলো '+fmt(s.outQty):'')+' = বাকি '+fmt(s.remaining)+' '+esc(p.unit)+'</div>'+
     '<div class="meta">কেনা '+money(p.buy)+' • খুচরা '+money(p.sell)+(num(p.wsell)?' • পাইকারি '+money(p.wsell):'')+(p.barcode?' • 🏷️ বারকোড: '+esc(p.barcode):'')+' • স্টকের মূল্য '+money(s.stockValue)+'</div>'+
     '<div class="meta">মোট বিক্রি: '+money(s.soldAmt)+' • মোট লাভ: <b style="color:'+(s.profit>=0?'var(--in)':'var(--out)')+'">'+money(s.profit)+'</b></div></div></div>'+
-    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openMove(\''+p.id+'\',\'sale\')">🛒 বিক্রি</button><button class="btn small gold" type="button" onclick="openMove(\''+p.id+'\',\'in\')">📥 মাল এলো</button><button class="btn small ghost" type="button" onclick="openMove(\''+p.id+'\',\'out\')">📤 নষ্ট/ফেরত</button><button class="btn small ghost" type="button" onclick="editProd(\''+p.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delProd(\''+p.id+'\')">🗑️</button></div>'+prodOptsHtml(p)+
+    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openMove(\''+p.id+'\',\'sale\')">🛒 বিক্রি</button><button class="btn small gold" type="button" onclick="openMove(\''+p.id+'\',\'in\')">📥 মাল এলো</button><button class="btn small ghost" type="button" onclick="openMove(\''+p.id+'\',\'out\')">📤 নষ্ট/ফেরত</button><button class="btn small ghost" type="button" onclick="editProd(\''+p.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delProd(\''+p.id+'\')">🗑️</button></div>'+prodSellHtml(p)+prodOptsHtml(p)+
     '<details class="logbox"><summary>📜 পুরো ইতিহাস ('+logs.length+' টি এন্ট্রি)</summary>'+logHtml+'</details></div>';
   }).join('');
   placeFormAfterRender('prodFormTitle','prodList',editProdId);
+  renderSaleSummary();
 }
+/* ---------- v21: STOCK-PAGE QUICK SELL + BOTTOM SALES SUMMARY ----------
+   Each product row carries a quantity box (default 1) and a "বিক্রি করুন"
+   button. One tap sells that many at the retail price, one by one, exactly
+   like the move modal's sale: a 'sale' stock log (stock drops automatically
+   because stock is derived from logs) plus a 'পণ্য বিক্রি' income entry in
+   the money ledger. Selling more than the stock on hand is BLOCKED.
+   The bottom summary is ONLY this sale session's accounts, all automatic:
+   total items, total amount, one percentage adjustment at the end
+   (adj = sign × total × pct ÷ 100 — the dealer-memo rule: +2% on ৳100 =
+   ৳102, −2% = ৳98), জমা (paid), বাকি = (total + adj) − paid.
+   The session itself is in-memory only; every sale is already saved in the
+   logs/ledger, so a reload loses nothing but the running subtotal. */
+var saleSession={items:{},order:[]};
+var qsQty={};
+function prodSellHtml(p){
+  var v=qsQty[p.id];if(v==null||v==='')v=1;
+  return '<div class="qsell noprint" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1.5px dashed var(--line)"><label for="qs-'+p.id+'" style="font-weight:700">বিক্রির পরিমাণ</label><input type="number" id="qs-'+p.id+'" value="'+esc(v)+'" min="0" step="any" inputmode="decimal" style="width:92px" oninput="qsSetQty(\''+p.id+'\',this.value)" /><button class="btn small" type="button" onclick="quickSell(\''+p.id+'\')">🛒 বিক্রি করুন</button><span class="meta">খুচরা দাম '+money(p.sell)+' / '+esc(p.unit)+'</span></div>';
+}
+window.qsSetQty=function(id,v){qsQty[id]=v;};
+window.quickSell=function(id){
+  var p=findProd(id);if(!p)return;
+  var inp=document.getElementById('qs-'+id);
+  var q=num(inp?inp.value:1);
+  if(!(q>0)){toast('⚠️ কতগুলো বিক্রি করবেন, পরিমাণ লিখুন');if(inp)inp.focus();return;}
+  var st=prodStats(p);
+  if(q>st.remaining){toast('⚠️ স্টকে এত নেই! “'+p.name+'” আছে মাত্র '+fmt(st.remaining)+' '+p.unit);return;}
+  var price=num(p.sell), total=q*price, d=todayStr();
+  DB.logs.push({id:uid(),pid:p.id,date:d,type:'sale',qty:q,price:price,party:'',book:bookOf(p),u:Date.now(),cost:num(p.buy)});
+  if(total>0)DB.txs.push({id:uid(),date:d,type:'in',amount:total,cat:'পণ্য বিক্রি',method:'নগদ',note:p.name+' বিক্রি '+fmt(q)+' '+p.unit,book:bookOf(p),u:Date.now()});
+  var it=saleSession.items[p.id];
+  if(!it){it=saleSession.items[p.id]={qty:0,amt:0};saleSession.order.push(p.id);}
+  it.qty+=q;it.amt+=total;
+  qsQty[p.id]=1;
+  saveLocal();
+  toast('✅ '+p.name+' '+fmt(q)+' '+p.unit+' বিক্রি হয়েছে — '+money(total));
+};
+function saleCalc(){
+  var items=0,amt=0;
+  saleSession.order.forEach(function(pid){var it=saleSession.items[pid];if(it){items+=num(it.qty);amt+=num(it.amt);}});
+  var pct=num($('salePct')?$('salePct').value:0);
+  var sign=($('salePctSign')&&$('salePctSign').value==='-1')?-1:1;
+  var adj=sign*amt*pct/100, fin=amt+adj;
+  var paid=num($('salePaid')?$('salePaid').value:0);
+  return{items:items,amt:amt,pct:pct,sign:sign,adj:adj,fin:fin,paid:paid,due:fin-paid};
+}
+function renderSaleSummary(){
+  var box=$('saleItems'),tot=$('saleTotals'),due=$('saleDueBox');
+  if(!box||!tot||!due)return;
+  if(!saleSession.order.length){
+    box.innerHTML='<p class="hint" style="margin:0">এখনো কিছু বিক্রি হয়নি — প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপুন।</p>';
+  }else{
+    box.innerHTML=saleSession.order.map(function(pid){
+      var p=findProd(pid),it=saleSession.items[pid];
+      return '<div class="kv"><span>'+esc(p?p.name:'প্রোডাক্ট')+' × '+fmt(it.qty)+(p?' '+esc(p.unit):'')+'</span><b>'+money(it.amt)+'</b></div>';
+    }).join('');
+  }
+  var c=saleCalc();
+  tot.innerHTML='<div class="kv"><span>মোট বিক্রি হয়েছে</span><b>'+fmt(c.items)+' টি প্রোডাক্ট</b></div>'+
+  '<div class="kv"><span>মোট বিক্রির টাকা</span><b>'+money(c.amt)+'</b></div>'+
+  (c.pct>0?'<div class="kv"><span>পার্সেন্টেজ ('+(c.sign>0?'＋':'−')+fmt(c.pct)+'%)</span><b>'+(c.adj<0?'−':'+')+' '+money(Math.abs(c.adj))+'</b></div><div class="kv"><span><b>পার্সেন্টেজসহ মোট</b></span><b>'+money(c.fin)+'</b></div>':'')+
+  '<div class="kv"><span>জমা</span><b>'+money(c.paid)+'</b></div>';
+  due.textContent=c.due>0?('বাকি গেল: '+money(c.due)):(c.due<0?('বাকি নেই — বেশি জমা হয়েছে '+money(-c.due)):('বাকি: '+money(0)+' — পুরো টাকা জমা হয়েছে'));
+}
+['salePct','salePaid'].forEach(function(id){var el=$(id);if(el)el.addEventListener('input',renderSaleSummary);});
+var sps=$('salePctSign');if(sps)sps.addEventListener('change',renderSaleSummary);
+var srs=$('saleReset');if(srs)srs.addEventListener('click',function(){
+  saleSession={items:{},order:[]};
+  if($('salePct'))$('salePct').value='';
+  if($('salePaid'))$('salePaid').value='';
+  if($('salePctSign'))$('salePctSign').value='1';
+  renderSaleSummary();
+  toast('🔄 নতুন বিক্রির হিসাব শুরু হয়েছে');
+});
 /* Per-product stats for ONE month (sales columns follow the report's
    selected month; remaining stock is always the current figure). */
 function prodStatsMonth(p,ym){
@@ -6879,7 +6982,7 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 20 (v20)":"Version 20 (v20)",
+"ভার্সন 21 (v21)":"Version 21 (v21)",
 "💰 হাতে আছে (মোট ব্যালেন্স)":"💰 In hand (total balance)",
 "মোট আয় (সব সময়)":"Total income (all time)",
 "মোট খরচ (সব সময়)":"Total expense (all time)",
@@ -6956,7 +7059,25 @@ var I18N_EN={
 "অ্যাপ কোন ভাষায় দেখাবে — বাংলা নাকি English। বদলালেই পুরো অ্যাপ সেই ভাষায় হয়ে যাবে, আর এই ফোনে সেভ থাকবে।":"Which language the app shows — Bengali or English. Change it and the whole app switches to that language, and it stays saved on this phone.",
 "✓ সেভ করুন":"✓ Save",
 "✕ বন্ধ করুন":"✕ Close",
-"⚠️ ফোনের স্টোরেজ প্রায় ভরে গেছে — নতুন এন্ট্রি এই ফোনে সেভ থাকছে না। কিছু ছবি বা ফাইল মুছে জায়গা করে আবার চেষ্টা করুন।":"⚠️ Phone storage is almost full — new entries are not being saved on this phone. Delete some photos or files to free space and try again."
+"⚠️ ফোনের স্টোরেজ প্রায় ভরে গেছে — নতুন এন্ট্রি এই ফোনে সেভ থাকছে না। কিছু ছবি বা ফাইল মুছে জায়গা করে আবার চেষ্টা করুন।":"⚠️ Phone storage is almost full — new entries are not being saved on this phone. Delete some photos or files to free space and try again.",
+"📦 স্টকে মোট কত টাকার মাল আছে":"📦 Total money value of goods in stock",
+"🧾 বিক্রির হিসাব":"🧾 Sales summary",
+"ওপরের তালিকায় প্রতিটা প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপলেই এখানে হিসাব জমা হবে — স্টক অটোমেটিক কমবে, টাকার খাতায় আয় যোগ হবে। এই হিসাব শুধু এইবারের বিক্রির।":"Write a quantity beside any product in the list above and tap “🛒 Sell” — the sale is added here, stock drops automatically and the income goes into the money ledger. This summary is only for this one sale.",
+"পার্সেন্টেজ — যোগ নাকি বিয়োগ":"Percentage — add or subtract",
+"পার্সেন্টেজ (%)":"Percentage (%)",
+"জমা (৳)":"Paid (৳)",
+"জমা":"Paid",
+"🔄 নতুন বিক্রির হিসাব শুরু করুন":"🔄 Start a new sale",
+"এই বোতামে চাপলে শুধু এই হিসাবটা খালি হবে — হয়ে যাওয়া বিক্রি স্টক ও টাকার খাতায় সেভ হয়েই থাকবে।":"Tapping this only clears this summary — sales already made stay saved in the stock and the money ledger.",
+"বিক্রির পরিমাণ":"Quantity to sell",
+"🛒 বিক্রি করুন":"🛒 Sell",
+"মোট বিক্রি হয়েছে":"Total sold",
+"মোট বিক্রির টাকা":"Total sale amount",
+"পার্সেন্টেজসহ মোট":"Total with percentage",
+"মোট প্রোডাক্ট":"Total products",
+"এখনো কিছু বিক্রি হয়নি — প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপুন।":"Nothing sold yet — write a quantity beside a product and tap “🛒 Sell”.",
+"⚠️ কতগুলো বিক্রি করবেন, পরিমাণ লিখুন":"⚠️ Write how many you want to sell",
+"🔄 নতুন বিক্রির হিসাব শুরু হয়েছে":"🔄 A new sale summary has started"
 };
 var _i18nOrig=new WeakMap();
 function i18nKey(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
