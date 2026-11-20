@@ -107,6 +107,10 @@ section.page.active{display:block}
 /* Dealer product in-place options: name tap opens THIS product's edit panel right under its row — the view never moves */
 .dp-namebtn{min-height:0;background:none;border:none;padding:0;font:inherit;font-weight:800;color:var(--ink);cursor:pointer;text-align:left}
 .dp-opts{border:1.5px solid var(--gold);border-radius:12px;padding:10px;margin:2px 0 10px;background:var(--goldbg)}
+.prod-opts{border:1.5px solid var(--gold);border-radius:12px;padding:10px;margin:8px 0 4px;background:var(--goldbg)}
+.langbtn{border:0;background:transparent;color:#0f4d2e;font:inherit;font-weight:800;padding:.4rem .55rem;min-height:2.4rem;cursor:pointer}
+.langbtn.on{background:#0f4d2e;color:#fff}
+.langpick.on{background:var(--green);color:#fff;border-color:var(--green)}
 @media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr 1fr}.grid3 .full{grid-column:1/-1}}
 .field{margin-bottom:10px}
 .seg{display:flex;gap:8px}
@@ -177,19 +181,6 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   .card,.panel,.rowitem{box-shadow:none;border-color:#bbb}
   .printonly{display:block}
 }
-
-/* v19: প্রতিটা অপশন নিজের আলাদা স্ক্রিনে — ড্যাশবোর্ডই মূল মেনু */
-nav.tabs{display:none}
-.menugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
-.menutile{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 12px;font-weight:800;font-size:1rem;color:var(--ink);text-align:left;box-shadow:var(--shadow);min-height:3.6rem;width:100%}
-.menutile .mi{font-size:1.45rem;line-height:1;flex:0 0 auto}
-.menutile:active{transform:scale(.98);background:var(--goldbg)}
-.screenbar{position:sticky;top:0;z-index:24;background:var(--bg);display:flex;align-items:center;gap:12px;padding:8px 0}
-.backbtn{border:1.5px solid var(--green);background:var(--green);color:#fff;border-radius:999px;padding:.5rem 1.05rem;font-weight:800;min-height:2.6rem;flex:0 0 auto;font-size:.98rem}
-.backbtn:active{transform:scale(.97)}
-.screentitle{font-weight:800;font-size:1.18rem}
-.subbar{margin-bottom:10px}
-#page-dealer.detail-open>.cards,#page-dealer.detail-open>.panel:not(#dlDetail){display:none!important}
 </style>
 </head>
 <body>
@@ -204,6 +195,7 @@ nav.tabs{display:none}
       <span class="pill off" id="netPill"><span class="dot"></span><span id="netTxt">চেক হচ্ছে…</span></span>
       <button class="pill" id="acctBtn" type="button" style="background:#ffffff;color:#0f4d2e;border-color:#ffffff"><img id="acctAvatar" alt="" style="display:none;width:24px;height:24px;border-radius:50%;object-fit:cover" /><span id="acctIcon">👤</span> <span id="acctBtnTxt">লগইন / সাইন আপ</span></button>
       <button class="pill" id="installBtn" type="button" style="background:#ffcd5a;color:#0f4d2e;border-color:#ffcd5a">📲 ফোনে ইনস্টল করুন</button>
+      <span class="pill" style="background:#ffffff;border-color:#ffffff;padding:0;overflow:hidden;display:inline-flex" role="group" aria-label="ভাষা / Language"><button type="button" class="langbtn" data-lang="bn" onclick="setLang('bn')">বাংলা</button><button type="button" class="langbtn" data-lang="en" onclick="setLang('en')">EN</button></span>
       <button class="pill" id="themeBtn" type="button" title="ডার্ক / লাইট মোড">🌙</button>
     </div>
   </div>
@@ -239,47 +231,168 @@ nav.tabs{display:none}
     </div>
     <div class="cards" id="dashCards"></div>
     <div class="panel noprint">
-      <h2>📋 সব অপশন</h2>
-      <p class="hint">যে কাজটা দরকার সেই অপশনে চাপ দিন — সেটা নিজের আলাদা পেজে খুলবে। ওপরে “← ফিরে যান” চাপলেই আবার এই মেনুতে ফিরে আসবেন।</p>
-      <div class="menugrid">
-        <button type="button" class="menutile" data-go="ledger"><span class="mi">💰</span>টাকার হিসাব</button>
-        <button type="button" class="menutile" data-go="stock"><span class="mi">📦</span>প্রোডাক্ট স্টক</button>
-        <button type="button" class="menutile" data-go="purchase"><span class="mi">🛒</span>কেনা মাল</button>
-        <button type="button" class="menutile" data-go="dues"><span class="mi">🤝</span>বাকি হিসাব</button>
-        <button type="button" class="menutile" data-go="dealer"><span class="mi">🧮</span>হিসাব করুন</button>
-        <button type="button" class="menutile" data-go="bill"><span class="mi">🧾</span>বিল বানান</button>
-        <button type="button" class="menutile" data-go="pos"><span class="mi">⚡</span>দ্রুত বিক্রি</button>
-        <button type="button" class="menutile" data-go="order"><span class="mi">📋</span>অর্ডার বুক</button>
-        <button type="button" class="menutile" data-go="loan"><span class="mi">🏦</span>লোন / কিস্তি</button>
-        <button type="button" class="menutile" data-go="staff"><span class="mi">👥</span>বেতন ও হাজিরা</button>
-        <button type="button" class="menutile" data-go="report"><span class="mi">📊</span>রিপোর্ট</button>
-        <button type="button" class="menutile" data-go="partner"><span class="mi">🤝</span>পার্টনারের হিসাব</button>
-        <button type="button" class="menutile" data-go="budget"><span class="mi">💵</span>মাসের বাজেট</button>
-        <button type="button" class="menutile" data-go="goal"><span class="mi">🐷</span>সঞ্চয় লক্ষ্য</button>
-        <button type="button" class="menutile" data-go="monthlybill"><span class="mi">🗓️</span>মাসিক বিল</button>
-        <button type="button" class="menutile" data-go="categories"><span class="mi">🏷️</span>ক্যাটাগরি</button>
-        <button type="button" class="menutile" data-go="cashrecon"><span class="mi">🔎</span>দিনের ক্যাশ মিলানো</button>
-        <button type="button" class="menutile" data-go="transfer"><span class="mi">🔁</span>খাতা স্থানান্তর</button>
-        <button type="button" class="menutile" data-go="target"><span class="mi">🎯</span>বিক্রির লক্ষ্য</button>
-        <button type="button" class="menutile" data-go="lowstock"><span class="mi">⚠️</span>কম স্টক / অর্ডার লিস্ট</button>
-        <button type="button" class="menutile" data-go="backup"><span class="mi">💾</span>ব্যাকআপ</button>
-        <button type="button" class="menutile" data-go="profile"><span class="mi">👤</span>প্রোফাইল</button>
-        <button type="button" class="menutile" data-go="support"><span class="mi">🆘</span>সাপোর্ট</button>
-        <button type="button" class="menutile" data-go="admin"><span class="mi">🔐</span>Admin Panel</button>
+      <h2>🔁 খাতার মধ্যে টাকা স্থানান্তর</h2>
+      <p class="hint">এক খাতা থেকে আরেক খাতায় টাকা সরান — দুই খাতাতেই এন্ট্রি হবে (যে খাতা থেকে গেল সেখানে খরচ, যেখানে এলো সেখানে আয়), মোট ব্যালেন্স একই থাকবে।</p>
+      <div class="grid2">
+        <div class="field"><label for="tfFrom">কোন খাতা থেকে</label><select id="tfFrom"></select></div>
+        <div class="field"><label for="tfTo">কোন খাতায়</label><select id="tfTo"></select></div>
       </div>
+      <div class="grid2">
+        <div class="field"><label for="tfAmt">টাকার পরিমাণ (৳)</label><input type="number" id="tfAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="tfDate">তারিখ</label><input type="date" id="tfDate" /></div>
+      </div>
+      <button class="btn" id="tfGo" type="button">🔁 স্থানান্তর করুন</button>
     </div>
     <div class="panel">
-      <h2>🏷️ পাইকারি বিক্রি রেট</h2>
-      <p class="hint">প্রতিটা প্রোডাক্টের সেভ করা পাইকারি দাম — যেকোনো প্রোডাক্টে চাপ দিলে তার স্টক পেজ খুলবে।</p>
-      <div id="wsellList"></div>
-    </div>
-        <div class="panel">
       <h2>আজকের হিসাব — <span id="todayLabel"></span></h2>
       <p class="hint">আজকের সব এন্ট্রি থেকে অটোমেটিক হিসাব করা। তোমাকে কিছু যোগ-বিয়োগ করতে হবে না।</p>
       <div id="todayBox"></div>
       <button class="btn gold noprint" id="shareToday" type="button" style="margin-top:12px">📤 আজকের রিপোর্ট শেয়ার করুন (WhatsApp)</button>
     </div>
-                            <div class="panel">
+    <div class="panel">
+      <h2>🧮 দিনের ক্যাশ মিলানো</h2>
+      <p class="hint">দিনের শুরুতে হাতে কত ছিল আর শেষে গুনে কত পেলেন — লিখলেই অ্যাপ বলে দেবে হিসাব মিললো, কম হলো নাকি বেশি হলো।</p>
+      <div class="grid3">
+        <div class="field"><label for="cdDate">তারিখ</label><input type="date" id="cdDate" /></div>
+        <div class="field"><label for="cdOpen">সকালে হাতে ছিল (৳)</label><input type="number" id="cdOpen" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="cdCounted">শেষে গুনে পেলাম (৳)</label><input type="number" id="cdCounted" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+      </div>
+      <div class="live-total" id="cdResult">তারিখ বাছুন — হিসাব এখানে দেখা যাবে</div>
+      <div id="cdMethods"></div>
+      <button class="btn" id="cdSave" type="button">✅ ক্যাশ হিসাব সেভ করুন</button>
+      <div id="cdHistory" style="margin-top:10px"></div>
+    </div>
+    <div class="panel">
+      <h2>🎯 এই মাসের বিক্রির লক্ষ্য</h2>
+      <div id="targetBox"></div>
+      <div class="grid2" style="margin-top:8px">
+        <div class="field"><label for="targetInput">মাসের লক্ষ্য (৳)</label><input type="number" id="targetInput" inputmode="decimal" min="0" step="any" placeholder="যেমন: 200000" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn gold" id="targetSave" type="button" style="width:100%">লক্ষ্য সেভ করুন</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>👤 প্রোফাইল</h2>
+      <div style="text-align:center;padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:6px">
+        <button id="pfPhotoBtn" type="button" aria-label="প্রোফাইল ছবি দিন বা বদলান" style="width:104px;height:104px;border-radius:50%;border:3px solid var(--gold);background:var(--goldbg);padding:0;overflow:hidden;display:inline-flex;align-items:center;justify-content:center">
+          <img id="pfPhotoImg" alt="প্রোফাইল ছবি" style="display:none;width:100%;height:100%;object-fit:cover" />
+          <span id="pfPhotoIcon" style="font-size:3rem;line-height:1">👤</span>
+        </button>
+        <div class="noprint" id="pfPhotoHint" style="margin-top:6px;font-weight:700;font-size:.92rem">📷 প্রোফাইল ছবি দিতে ছবিতে চাপ দিন</div>
+        <input type="file" id="pfPhoto" accept="image/*" style="display:none" />
+        <input type="file" id="pfPhotoCam" accept="image/*" capture="environment" style="display:none" />
+        <div id="pfPhotoPicker" class="noprint" style="display:none;margin-top:8px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+            <button class="btn small" id="pfPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
+            <button class="btn small ghost" id="pfPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
+            <button class="btn small danger" id="pfPhotoRm" type="button" style="display:none">ছবি সরান</button>
+          </div>
+        </div>
+      </div>
+      <div class="kv"><span>নাম</span><b id="profileName">The Black Ghost</b></div>
+      <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <input type="text" id="pfNameInput" placeholder="তোমার নাম লিখুন" style="flex:1 1 180px" />
+        <button class="btn small gold" id="pfNameSave" type="button">নাম সেভ করুন</button>
+      </div>
+      <p class="hint" style="margin:4px 0 0">সাইন আপের সময় দেওয়া নামটাই এখানে দেখায় — চাইলে বদলে সেভ করুন।</p>
+      <div class="kv"><span>অ্যাকাউন্ট</span><b id="profileAcct">লগইন করা নেই</b></div>
+      <div class="kv"><span>আমার প্ল্যান</span><b id="profilePlan">—</b></div>
+      <div class="kv" id="profileTrial" style="display:none"><span>🎁 ফ্রি ট্রায়াল</span><b id="profileTrialTxt"></b></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" class="noprint">
+        <button class="btn small" id="loginOpenBtn" type="button">👤 লগইন / সাইন আপ</button>
+        <button class="btn small gold" id="planOpenBtn" type="button">💎 প্রিমিয়াম কিনুন</button>
+        <button class="btn small" id="shareAppBtn2" type="button">📤 অ্যাপ শেয়ার করুন</button>
+        <button class="btn small danger" id="logoutBtn" type="button" style="display:none">লগআউট</button>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">🌐 ভাষা / Language</h3>
+        <p class="hint" style="margin:0 0 8px">অ্যাপ কোন ভাষায় দেখাবে — বাংলা নাকি English। বদলালেই পুরো অ্যাপ সেই ভাষায় হয়ে যাবে, আর এই ফোনে সেভ থাকবে।</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small langpick" type="button" data-lang="bn" onclick="setLang('bn')">বাংলা</button>
+          <button class="btn small langpick" type="button" data-lang="en" onclick="setLang('en')">English</button>
+        </div>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">🔒 অ্যাপ লক</h3>
+        <p class="hint" style="margin:0 0 8px" id="lockStatusTxt">অ্যাপ লক বন্ধ আছে — চালু করলে অ্যাপ খুললেই ৪ সংখ্যার PIN চাইবে, PIN না দিলে হিসাব দেখা যাবে না।</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small gold" id="lockSetBtn" type="button">🔒 PIN সেট করে চালু করুন</button>
+          <button class="btn small ghost" id="lockChangeBtn" type="button" style="display:none">PIN বদলান</button>
+          <button class="btn small danger" id="lockOffBtn" type="button" style="display:none">লক বন্ধ করুন</button>
+        </div>
+        <p class="hint" style="margin:6px 0 0">এই PIN শুধু এই ফোনে তোমার হিসাব লুকিয়ে রাখে — Admin PIN থেকে আলাদা। PIN ভুলে গেলে লগইনের পাসওয়ার্ড দিয়ে লক খোলা যাবে।</p>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">🔑 পাসওয়ার্ড বদলান</h3>
+        <p class="hint" style="margin:0 0 8px">লগইনের পাসওয়ার্ড বদলাতে বর্তমান পাসওয়ার্ডটা লাগবে। বদলানোর পর এই ফোনে লগইন থাকবেই — অন্য ডিভাইসে এরপর থেকে নতুন পাসওয়ার্ডে লগইন করতে হবে।</p>
+        <div class="grid3">
+          <div class="field" style="margin:0"><label for="pwCur">বর্তমান পাসওয়ার্ড</label><input type="password" id="pwCur" placeholder="বর্তমান পাসওয়ার্ড" autocomplete="current-password" /></div>
+          <div class="field" style="margin:0"><label for="pwNew">নতুন পাসওয়ার্ড</label><input type="password" id="pwNew" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="new-password" /></div>
+          <div class="field" style="margin:0"><label for="pwNew2">নতুন পাসওয়ার্ড আবার লিখুন</label><input type="password" id="pwNew2" placeholder="আবার একই পাসওয়ার্ড" autocomplete="new-password" /></div>
+        </div>
+        <p id="pwChangeMsg" style="margin:8px 0 0;font-weight:700"></p>
+        <button class="btn small gold" id="pwChangeBtn" type="button" style="margin-top:8px">🔑 পাসওয়ার্ড বদলান</button>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">📧 লগইন আইডি বদলান (জিমেইল / ফোন নম্বর)</h3>
+        <p class="hint" style="margin:0 0 8px">নতুন জিমেইল বা ফোন নম্বর দিলে এরপর থেকে সেটা দিয়েই লগইন হবে — আপনার সব হিসাব আগের মতোই থাকবে, কিছুই বদলাবে না। যাচাইয়ের জন্য বর্তমান পাসওয়ার্ড লাগবে, আর ইন্টারনেট লাগবে।</p>
+        <div class="grid2">
+          <div class="field" style="margin:0"><label for="chIdNew">নতুন জিমেইল অথবা ফোন নম্বর</label><input type="text" id="chIdNew" placeholder="example@gmail.com অথবা 01XXXXXXXXX" autocomplete="username" /></div>
+          <div class="field" style="margin:0"><label for="chIdPass">বর্তমান পাসওয়ার্ড</label><input type="password" id="chIdPass" placeholder="বর্তমান পাসওয়ার্ড" autocomplete="current-password" /></div>
+        </div>
+        <p id="chIdMsg" style="margin:8px 0 0;font-weight:700"></p>
+        <button class="btn small gold" id="chIdBtn" type="button" style="margin-top:8px">📧 লগইন আইডি বদলান</button>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px;color:var(--out)">🗑️ অ্যাকাউন্ট মুছে ফেলুন</h3>
+        <p class="hint" style="margin:0 0 8px">সাবধান: অ্যাকাউন্ট মুছলে সার্ভারে থাকা আপনার সব হিসাব চিরতরে মুছে যাবে — ফেরত আনা যাবে না। এই ফোনে থাকা কপিটাও লগআউট হয়ে যাবে। যাচাইয়ের জন্য পাসওয়ার্ড লাগবে।</p>
+        <div class="grid2">
+          <div class="field" style="margin:0"><label for="delAcctPass">পাসওয়ার্ড (নিশ্চিত করতে)</label><input type="password" id="delAcctPass" placeholder="আপনার পাসওয়ার্ড" autocomplete="current-password" /></div>
+          <div class="field" style="margin:0"><label>&nbsp;</label><button class="btn small danger" id="delAcctBtn" type="button" style="width:100%">🗑️ অ্যাকাউন্ট মুছুন</button></div>
+        </div>
+        <p id="delAcctMsg" style="margin:8px 0 0;font-weight:700"></p>
+      </div>
+      <div class="noprint" id="profileDevicesWrap" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <h3 style="margin:0 0 4px">📱 আমার লগইন করা ডিভাইস</h3>
+        <p class="hint" style="margin:0 0 8px">একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। অন্য ডিভাইস থেকে লগআউট করতে চাইলে পাশের বোতাম চাপুন — ওই ডিভাইসে অ্যাপ খুললেই লগআউট হয়ে যাবে।</p>
+        <div id="profileDevices"></div>
+      </div>
+      <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+        <label for="pfCode">🎟️ ভাউচার / রিডিম কোড</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="pfCode" placeholder="কোড লিখুন" style="flex:1 1 160px;text-transform:uppercase" />
+          <button class="btn small gold" id="pfRedeem" type="button">🎟️ রিডিম করুন</button>
+        </div>
+        <p id="pfCodeMsg" style="margin:6px 0 0;font-weight:700"></p>
+      </div>
+      <p class="hint" style="margin:8px 0 0">লগইন করলে তোমার হিসাব তোমার অ্যাকাউন্টে সেভ থাকবে — যেকোনো ফোনে লগইন করলেই নিজের হিসাব পেয়ে যাবে। অন্য কারো হিসাব এখানে আসবে না।</p>
+    </div>
+    <div class="panel">
+      <h2>🆘 সাপোর্ট / যোগাযোগ</h2>
+      <p class="hint">কোনো সমস্যা, পেমেন্ট নিয়ে প্রশ্ন বা সাহায্য লাগলে সরাসরি যোগাযোগ করুন।</p>
+      <a href="https://t.me/STVideoWorld1" target="_blank" rel="noopener" style="display:flex;gap:12px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:var(--ink);margin-bottom:9px">
+        <span style="font-size:1.6rem" aria-hidden="true">✈️</span>
+        <span><b>Telegram-এ মেসেজ করুন</b><br><span style="color:var(--muted);font-size:.9rem">@STVideoWorld1 — চাপ দিলেই Telegram খুলবে</span></span>
+      </a>
+      <a href="mailto:torikul20250@gmail.com" style="display:flex;gap:12px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:var(--ink);margin-bottom:12px">
+        <span style="font-size:1.6rem" aria-hidden="true">✉️</span>
+        <span><b>ইমেইল করুন</b><br><span style="color:var(--muted);font-size:.9rem">torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে</span></span>
+      </a>
+      <h3 style="margin:4px 0 6px">অ্যাপ থেকেই মেসেজ পাঠান</h3>
+      <div class="field"><label for="supName">আপনার নাম</label><input type="text" id="supName" placeholder="নাম লিখুন" /></div>
+      <div class="field"><label for="supMsg">মেসেজ</label><textarea id="supMsg" rows="3" placeholder="আপনার সমস্যা বা প্রশ্ন লিখুন…" style="resize:vertical"></textarea></div>
+      <p id="supMsgStatus" style="margin:0 0 8px;font-weight:700"></p>
+      <button class="btn" id="supSend" type="button">📩 মেসেজ পাঠান</button>
+      <p class="hint" style="margin:8px 0 0">ইন্টারনেট না থাকলে মেসেজটা এই ফোনে সেভ থাকবে — নেট এলেই অটোমেটিক পাঠিয়ে দেওয়া হবে।</p>
+    </div>
+    <div class="panel" id="rbillAlertPanel" style="display:none">
+      <h2>🧾 মাসিক বিলের রিমাইন্ডার</h2>
+      <div id="rbillAlertBox"></div>
+    </div>
+    <div class="panel" id="lowStockPanel">
+      <h2 id="lowStockTitle">📦 স্টক অবস্থা</h2>
+      <div id="lowStockBox"></div>
+    </div>
+    <div class="panel">
       <h2>সর্বশেষ এন্ট্রি</h2>
       <div id="recentBox"></div>
     </div>
@@ -413,7 +526,65 @@ nav.tabs{display:none}
       <div class="searchrow noprint"><input type="search" id="pSearch" placeholder="🔍 প্রোডাক্ট খুঁজুন…" /><select id="pStockFilter"><option value="all">সব প্রোডাক্ট</option><option value="low">⚠️ শুধু কম স্টক</option><option value="expiry">⏰ মেয়াদ শেষ হতে চলেছে</option></select></div>
       <div id="prodList"></div>
     </div>
-          </section>
+    <div class="panel">
+      <h2 id="puFormTitle">🛒 কেনা মালের হিসাব</h2>
+      <p class="hint">কোন সাপ্লায়ারের কাছ থেকে, কত দামে মাল কিনলেন — এখানে লিখলেই স্টকে যোগ হবে, কেনার ইতিহাস থেকে যাবে, আর লাভের হিসাব এই কেনা দাম দিয়েই হবে।</p>
+      <div class="grid2">
+        <div class="field"><label for="puProd">প্রোডাক্ট</label><select id="puProd"></select></div>
+        <div class="field"><label for="puSupplier">সাপ্লায়ারের নাম</label><input type="text" id="puSupplier" placeholder="যেমন: আলম ট্রেডার্স" /></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="puQty">পরিমাণ</label><input type="number" id="puQty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="puCost">কেনা দাম (প্রতি একক ৳)</label><input type="number" id="puCost" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="puDate">তারিখ</label><input type="date" id="puDate" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="puMethod">পেমেন্ট মাধ্যম</label>
+          <select id="puMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
+        <div class="field"><label>মোট কেনা মূল্য (অটোমেটিক)</label><div class="live-total" id="puTotal" style="margin:0">৳ 0</div></div>
+      </div>
+      <div class="field">
+        <label style="display:flex;gap:8px;align-items:center;min-height:2.25rem"><input type="checkbox" id="puCash" checked style="width:22px;height:22px;flex:0 0 auto" /> টাকার খাতায় খরচ হিসেবে যোগ করুন</label>
+      </div>
+      <div class="field"><label>কেনার রসিদের ছবি (ঐচ্ছিক)</label>
+        <input type="file" id="puPhoto" accept="image/*" style="display:none" />
+        <input type="file" id="puPhotoCam" accept="image/*" capture="environment" style="display:none" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small" id="puPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
+          <button class="btn small ghost" id="puPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
+          <button class="btn small gold" id="puVoiceBtn" type="button">🎤 ভয়েসে বলুন</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <img id="puPhotoPrev" alt="কেনার রসিদের ছবি" style="display:none;width:74px;height:74px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line)" />
+          <button class="btn small danger" id="puPhotoRm" type="button" style="display:none">ছবি সরান</button>
+        </div>
+        <p class="hint" style="margin:4px 0 0">ভয়েসে বললে ফর্মে বসে যাবে — সেভ করার আগে যাচাই করুন, অটোমেটিক সেভ হয় না। ভয়েস চিনতে ইন্টারনেট লাগে।</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="puSave" type="button">✅ কেনা সেভ করুন (স্টকে যোগ হবে)</button>
+        <button class="btn ghost" id="puCancel" type="button" style="display:none">বাতিল</button>
+      </div>
+      <h3 style="margin:16px 0 6px">কেনার ইতিহাস</h3>
+      <div class="searchrow noprint"><input type="search" id="puSearch" placeholder="🔍 প্রোডাক্ট, সাপ্লায়ার বা তারিখ দিয়ে খুঁজুন…" /></div>
+      <div id="puList"></div>
+      <h3 style="margin:16px 0 6px">সাপ্লায়ার অনুযায়ী মোট কেনা</h3>
+      <div id="puSuppliers"></div>
+    </div>
+    <div class="panel">
+      <h2>🛒 কী কিনতে হবে (অর্ডার লিস্ট)</h2>
+      <p class="hint">স্টক কমে গেলেই এই লিস্ট নিজে নিজে তৈরি হয় — কোনটা কতটুকু কিনতে হবে তাও সাজেস্ট করে। চাইলে পরিমাণ বদলানো, নিজে আইটেম যোগ করা বা বাদ দেওয়া যায়।</p>
+      <div id="olList"></div>
+      <div class="grid3" style="margin-top:10px">
+        <div class="field"><label for="olName">নিজে আইটেম যোগ করুন</label><input type="text" id="olName" placeholder="আইটেমের নাম" /></div>
+        <div class="field"><label for="olQty">পরিমাণ</label><input type="number" id="olQty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn gold" id="olAdd" type="button" style="width:100%">➕ যোগ করুন</button></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="olPhone">সাপ্লায়ারের WhatsApp নম্বর (ঐচ্ছিক)</label><input type="tel" id="olPhone" placeholder="01XXXXXXXXX" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn" id="olShare" type="button" style="width:100%;background:#1faa55;color:#fff">🟢 WhatsApp-এ সাপ্লায়ারকে পাঠান</button></div>
+      </div>
+    </div>
+  </section>
 
   <!-- DUES / BAKI -->
   <section class="page" id="page-dues">
@@ -500,7 +671,6 @@ nav.tabs{display:none}
       <div id="dealerList"></div>
     </div>
     <div class="panel" id="dlDetail" style="display:none">
-      <div class="subbar noprint"><button class="btn ghost" id="dlBackBtn" type="button">← ফিরে যান — সব ডিলার</button></div>
       <h2 id="dlDetailTitle">ডিলারের হিসাব</h2>
       <div id="dlDetailTotals"></div>
       <h3 style="margin:18px 0 4px">🧺 এই ডিলারের প্রোডাক্ট — কার্টন / বক্সের দাম</h3>
@@ -780,7 +950,27 @@ nav.tabs{display:none}
       <p class="hint">সবুজ = আয়, লাল = খরচ — মাস অনুযায়ী পাশাপাশি।</p>
       <canvas id="ieChart" style="width:100%;display:block"></canvas>
     </div>
-            <div class="panel">
+    <div class="panel">
+      <h2>🏷️ ক্যাটাগরি ম্যানেজার</h2>
+      <p class="hint">ক্যাটাগরির নাম বদলালে পুরনো সব এন্ট্রিতেও নতুন নাম বসে যাবে। নিজের বানানো ক্যাটাগরি মুছলে এন্ট্রিগুলোর নাম থেকে যাবে — শুধু লিস্ট থেকে সরে যাবে।</p>
+      <div id="catMgr"></div>
+    </div>
+    <div class="panel">
+      <h2>🤝 পার্টনারের হিসাব</h2>
+      <p class="hint">পার্টনারের বিনিয়োগ আর লাভের ভাগ (%) লিখুন — রিপোর্টের মাসের মোট লাভ থেকে প্রত্যেকের ভাগ অটোমেটিক হিসাব হবে।</p>
+      <div class="grid3">
+        <div class="field"><label for="pnName">পার্টনারের নাম</label><input type="text" id="pnName" placeholder="নাম লিখুন" /></div>
+        <div class="field"><label for="pnInvest">বিনিয়োগ (৳)</label><input type="number" id="pnInvest" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="pnShare">লাভের ভাগ (%)</label><input type="number" id="pnShare" inputmode="decimal" min="0" max="100" step="any" placeholder="যেমন: 50" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="pnDate">বিনিয়োগের তারিখ</label><input type="date" id="pnDate" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn" id="pnSave" type="button" style="width:100%">✅ পার্টনার সেভ করুন</button></div>
+      </div>
+      <button class="btn ghost" id="pnCancel" type="button" style="display:none">বাতিল</button>
+      <div id="partnerList"></div>
+    </div>
+    <div class="panel">
       <h2>📈 লাভের চার্ট</h2>
       <p class="hint">দিন অনুযায়ী পণ্য-বিক্রির লাভ — অটোমেটিক হিসাব থেকে বানানো।</p>
       <div class="seg" id="chartSeg" style="max-width:320px;margin-bottom:10px">
@@ -796,349 +986,70 @@ nav.tabs{display:none}
       <p class="hint">লাভ = (বিক্রি দাম − কেনা দাম) × বিক্রির পরিমাণ — অটোমেটিক।</p>
       <div id="profitTable"></div>
     </div>
-                  </section>
-
-
-  <!-- PURCHASES / কেনা মাল -->
-  <section class="page" id="page-purchase">
     <div class="panel">
-          <h2 id="puFormTitle">🛒 কেনা মালের হিসাব</h2>
-          <p class="hint">কোন সাপ্লায়ারের কাছ থেকে, কত দামে মাল কিনলেন — এখানে লিখলেই স্টকে যোগ হবে, কেনার ইতিহাস থেকে যাবে, আর লাভের হিসাব এই কেনা দাম দিয়েই হবে।</p>
-          <div class="grid2">
-            <div class="field"><label for="puProd">প্রোডাক্ট</label><select id="puProd"></select></div>
-            <div class="field"><label for="puSupplier">সাপ্লায়ারের নাম</label><input type="text" id="puSupplier" placeholder="যেমন: আলম ট্রেডার্স" /></div>
-          </div>
-          <div class="grid3">
-            <div class="field"><label for="puQty">পরিমাণ</label><input type="number" id="puQty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label for="puCost">কেনা দাম (প্রতি একক ৳)</label><input type="number" id="puCost" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label for="puDate">তারিখ</label><input type="date" id="puDate" /></div>
-          </div>
-          <div class="grid2">
-            <div class="field"><label for="puMethod">পেমেন্ট মাধ্যম</label>
-              <select id="puMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option><option>বাকি</option></select></div>
-            <div class="field"><label>মোট কেনা মূল্য (অটোমেটিক)</label><div class="live-total" id="puTotal" style="margin:0">৳ 0</div></div>
-          </div>
-          <div class="field">
-            <label style="display:flex;gap:8px;align-items:center;min-height:2.25rem"><input type="checkbox" id="puCash" checked style="width:22px;height:22px;flex:0 0 auto" /> টাকার খাতায় খরচ হিসেবে যোগ করুন</label>
-          </div>
-          <div class="field"><label>কেনার রসিদের ছবি (ঐচ্ছিক)</label>
-            <input type="file" id="puPhoto" accept="image/*" style="display:none" />
-            <input type="file" id="puPhotoCam" accept="image/*" capture="environment" style="display:none" />
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn small" id="puPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
-              <button class="btn small ghost" id="puPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
-              <button class="btn small gold" id="puVoiceBtn" type="button">🎤 ভয়েসে বলুন</button>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
-              <img id="puPhotoPrev" alt="কেনার রসিদের ছবি" style="display:none;width:74px;height:74px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line)" />
-              <button class="btn small danger" id="puPhotoRm" type="button" style="display:none">ছবি সরান</button>
-            </div>
-            <p class="hint" style="margin:4px 0 0">ভয়েসে বললে ফর্মে বসে যাবে — সেভ করার আগে যাচাই করুন, অটোমেটিক সেভ হয় না। ভয়েস চিনতে ইন্টারনেট লাগে।</p>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="puSave" type="button">✅ কেনা সেভ করুন (স্টকে যোগ হবে)</button>
-            <button class="btn ghost" id="puCancel" type="button" style="display:none">বাতিল</button>
-          </div>
-          <h3 style="margin:16px 0 6px">কেনার ইতিহাস</h3>
-          <div class="searchrow noprint"><input type="search" id="puSearch" placeholder="🔍 প্রোডাক্ট, সাপ্লায়ার বা তারিখ দিয়ে খুঁজুন…" /></div>
-          <div id="puList"></div>
-          <h3 style="margin:16px 0 6px">সাপ্লায়ার অনুযায়ী মোট কেনা</h3>
-          <div id="puSuppliers"></div>
-        </div>
-  </section>
-
-  <!-- PARTNERS / পার্টনার -->
-  <section class="page" id="page-partner">
+      <h2>💰 মাসের বাজেট (খরচের সীমা)</h2>
+      <p class="hint">ক্যাটাগরি অনুযায়ী মাসের বাজেট বেঁধে দিন — এই মাসে কত খরচ হলো, কত বাকি, বেশি হলে সতর্ক দেখাবে।</p>
+      <div class="grid3">
+        <div class="field"><label for="bgCat">ক্যাটাগরি</label><input type="text" id="bgCat" list="catList" placeholder="যেমন: বিদ্যুৎ / বিল" /></div>
+        <div class="field"><label for="bgAmt">মাসের বাজেট (৳)</label><input type="number" id="bgAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label>&nbsp;</label><button class="btn" id="bgSave" type="button" style="width:100%">✅ বাজেট সেভ</button></div>
+      </div>
+      <div id="budgetList"></div>
+    </div>
     <div class="panel">
-          <h2>🤝 পার্টনারের হিসাব</h2>
-          <p class="hint">পার্টনারের বিনিয়োগ আর লাভের ভাগ (%) লিখুন — রিপোর্টের মাসের মোট লাভ থেকে প্রত্যেকের ভাগ অটোমেটিক হিসাব হবে।</p>
-          <div class="grid3">
-            <div class="field"><label for="pnName">পার্টনারের নাম</label><input type="text" id="pnName" placeholder="নাম লিখুন" /></div>
-            <div class="field"><label for="pnInvest">বিনিয়োগ (৳)</label><input type="number" id="pnInvest" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label for="pnShare">লাভের ভাগ (%)</label><input type="number" id="pnShare" inputmode="decimal" min="0" max="100" step="any" placeholder="যেমন: 50" /></div>
-          </div>
-          <div class="grid2">
-            <div class="field"><label for="pnDate">বিনিয়োগের তারিখ</label><input type="date" id="pnDate" /></div>
-            <div class="field"><label>&nbsp;</label><button class="btn" id="pnSave" type="button" style="width:100%">✅ পার্টনার সেভ করুন</button></div>
-          </div>
-          <button class="btn ghost" id="pnCancel" type="button" style="display:none">বাতিল</button>
-          <div id="partnerList"></div>
-        </div>
-  </section>
-
-  <!-- BUDGET / বাজেট -->
-  <section class="page" id="page-budget">
+      <h2>🐷 সঞ্চয় লক্ষ্য</h2>
+      <p class="hint">লক্ষ্য বানিয়ে টাকা জমান — জমা দিলে টাকা হাতের ক্যাশ থেকে সঞ্চয়ে চলে যাবে (খরচ হিসেবে গোনা হবে না), তুললে আবার হাতে ফিরে আসবে।</p>
+      <div class="grid3">
+        <div class="field"><label for="glName">লক্ষ্যের নাম</label><input type="text" id="glName" placeholder="যেমন: নতুন ফ্রিজ" /></div>
+        <div class="field"><label for="glTarget">লক্ষ্য টাকা (৳)</label><input type="number" id="glTarget" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="glDate">লক্ষ্যের তারিখ (ঐচ্ছিক)</label><input type="date" id="glDate" /></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="glSave" type="button">✅ লক্ষ্য বানান</button>
+        <button class="btn ghost" id="glCancel" type="button" style="display:none">বাতিল</button>
+      </div>
+      <div id="goalList" style="margin-top:12px"></div>
+    </div>
     <div class="panel">
-          <h2>💰 মাসের বাজেট (খরচের সীমা)</h2>
-          <p class="hint">ক্যাটাগরি অনুযায়ী মাসের বাজেট বেঁধে দিন — এই মাসে কত খরচ হলো, কত বাকি, বেশি হলে সতর্ক দেখাবে।</p>
-          <div class="grid3">
-            <div class="field"><label for="bgCat">ক্যাটাগরি</label><input type="text" id="bgCat" list="catList" placeholder="যেমন: বিদ্যুৎ / বিল" /></div>
-            <div class="field"><label for="bgAmt">মাসের বাজেট (৳)</label><input type="number" id="bgAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label>&nbsp;</label><button class="btn" id="bgSave" type="button" style="width:100%">✅ বাজেট সেভ</button></div>
-          </div>
-          <div id="budgetList"></div>
-        </div>
-  </section>
-
-  <!-- SAVINGS GOALS / সঞ্চয় লক্ষ্য -->
-  <section class="page" id="page-goal">
-    <div class="panel">
-          <h2>🐷 সঞ্চয় লক্ষ্য</h2>
-          <p class="hint">লক্ষ্য বানিয়ে টাকা জমান — জমা দিলে টাকা হাতের ক্যাশ থেকে সঞ্চয়ে চলে যাবে (খরচ হিসেবে গোনা হবে না), তুললে আবার হাতে ফিরে আসবে।</p>
-          <div class="grid3">
-            <div class="field"><label for="glName">লক্ষ্যের নাম</label><input type="text" id="glName" placeholder="যেমন: নতুন ফ্রিজ" /></div>
-            <div class="field"><label for="glTarget">লক্ষ্য টাকা (৳)</label><input type="number" id="glTarget" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label for="glDate">লক্ষ্যের তারিখ (ঐচ্ছিক)</label><input type="date" id="glDate" /></div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="glSave" type="button">✅ লক্ষ্য বানান</button>
-            <button class="btn ghost" id="glCancel" type="button" style="display:none">বাতিল</button>
-          </div>
-          <div id="goalList" style="margin-top:12px"></div>
-        </div>
-  </section>
-
-  <!-- MONTHLY BILLS / মাসিক বিল -->
-  <section class="page" id="page-monthlybill">
-    <div class="panel" id="rbillAlertPanel" style="display:none">
-          <h2>🧾 মাসিক বিলের রিমাইন্ডার</h2>
-          <div id="rbillAlertBox"></div>
-        </div>
-    <div class="panel">
-          <h2>🧾 মাসিক বিল (রিমাইন্ডার)</h2>
-          <p class="hint">প্রতি মাসে যে বিল দিতে হয় (ভাড়া, বিদ্যুৎ, ইন্টারনেট…) যোগ করুন — মেয়াদের ৩ দিন আগে থেকে ড্যাশবোর্ডে রিমাইন্ডার দেখাবে, দেরি হলে লাল হবে। “পরিশোধ হয়েছে” চাপলেই খরচের এন্ট্রি অটোমেটিক হবে।</p>
-          <div class="grid3">
-            <div class="field"><label for="rbName">বিলের নাম</label><input type="text" id="rbName" placeholder="যেমন: দোকান ভাড়া" /></div>
-            <div class="field"><label for="rbAmt">টাকা (৳)</label><input type="number" id="rbAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label for="rbDay">মাসের কত তারিখে দিতে হয়</label><input type="number" id="rbDay" inputmode="numeric" min="1" max="31" step="1" placeholder="যেমন: 10" /></div>
-          </div>
-          <div class="grid3">
-            <div class="field"><label for="rbCat">খরচের ক্যাটাগরি</label><input type="text" id="rbCat" list="catList" placeholder="যেমন: দোকান ভাড়া" /></div>
-            <div class="field"><label for="rbMethod">পরিশোধের মাধ্যম (“পরিশোধ হয়েছে” চাপলে)</label>
-              <select id="rbMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
-            <div class="field"><label>&nbsp;</label><button class="btn" id="rbSave" type="button" style="width:100%">✅ বিল যোগ করুন</button></div>
-          </div>
-          <button class="btn ghost" id="rbCancel" type="button" style="display:none">বাতিল</button>
-          <div id="rbillList"></div>
-        </div>
-  </section>
-
-  <!-- CATEGORIES / ক্যাটাগরি -->
-  <section class="page" id="page-categories">
-    <div class="panel">
-          <h2>🏷️ ক্যাটাগরি ম্যানেজার</h2>
-          <p class="hint">ক্যাটাগরির নাম বদলালে পুরনো সব এন্ট্রিতেও নতুন নাম বসে যাবে। নিজের বানানো ক্যাটাগরি মুছলে এন্ট্রিগুলোর নাম থেকে যাবে — শুধু লিস্ট থেকে সরে যাবে।</p>
-          <div id="catMgr"></div>
-        </div>
-  </section>
-
-  <!-- CASH RECONCILIATION / ক্যাশ মিলানো -->
-  <section class="page" id="page-cashrecon">
-    <div class="panel">
-          <h2>🧮 দিনের ক্যাশ মিলানো</h2>
-          <p class="hint">দিনের শুরুতে হাতে কত ছিল আর শেষে গুনে কত পেলেন — লিখলেই অ্যাপ বলে দেবে হিসাব মিললো, কম হলো নাকি বেশি হলো।</p>
-          <div class="grid3">
-            <div class="field"><label for="cdDate">তারিখ</label><input type="date" id="cdDate" /></div>
-            <div class="field"><label for="cdOpen">সকালে হাতে ছিল (৳)</label><input type="number" id="cdOpen" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label for="cdCounted">শেষে গুনে পেলাম (৳)</label><input type="number" id="cdCounted" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-          </div>
-          <div class="live-total" id="cdResult">তারিখ বাছুন — হিসাব এখানে দেখা যাবে</div>
-          <div id="cdMethods"></div>
-          <button class="btn" id="cdSave" type="button">✅ ক্যাশ হিসাব সেভ করুন</button>
-          <div id="cdHistory" style="margin-top:10px"></div>
-        </div>
-  </section>
-
-  <!-- BOOK TRANSFER / খাতা স্থানান্তর -->
-  <section class="page" id="page-transfer">
+      <h2>🧾 মাসিক বিল (রিমাইন্ডার)</h2>
+      <p class="hint">প্রতি মাসে যে বিল দিতে হয় (ভাড়া, বিদ্যুৎ, ইন্টারনেট…) যোগ করুন — মেয়াদের ৩ দিন আগে থেকে ড্যাশবোর্ডে রিমাইন্ডার দেখাবে, দেরি হলে লাল হবে। “পরিশোধ হয়েছে” চাপলেই খরচের এন্ট্রি অটোমেটিক হবে।</p>
+      <div class="grid3">
+        <div class="field"><label for="rbName">বিলের নাম</label><input type="text" id="rbName" placeholder="যেমন: দোকান ভাড়া" /></div>
+        <div class="field"><label for="rbAmt">টাকা (৳)</label><input type="number" id="rbAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
+        <div class="field"><label for="rbDay">মাসের কত তারিখে দিতে হয়</label><input type="number" id="rbDay" inputmode="numeric" min="1" max="31" step="1" placeholder="যেমন: 10" /></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="rbCat">খরচের ক্যাটাগরি</label><input type="text" id="rbCat" list="catList" placeholder="যেমন: দোকান ভাড়া" /></div>
+        <div class="field"><label for="rbMethod">পরিশোধের মাধ্যম (“পরিশোধ হয়েছে” চাপলে)</label>
+          <select id="rbMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
+        <div class="field"><label>&nbsp;</label><button class="btn" id="rbSave" type="button" style="width:100%">✅ বিল যোগ করুন</button></div>
+      </div>
+      <button class="btn ghost" id="rbCancel" type="button" style="display:none">বাতিল</button>
+      <div id="rbillList"></div>
+    </div>
     <div class="panel noprint">
-          <h2>🔁 খাতার মধ্যে টাকা স্থানান্তর</h2>
-          <p class="hint">এক খাতা থেকে আরেক খাতায় টাকা সরান — দুই খাতাতেই এন্ট্রি হবে (যে খাতা থেকে গেল সেখানে খরচ, যেখানে এলো সেখানে আয়), মোট ব্যালেন্স একই থাকবে।</p>
-          <div class="grid2">
-            <div class="field"><label for="tfFrom">কোন খাতা থেকে</label><select id="tfFrom"></select></div>
-            <div class="field"><label for="tfTo">কোন খাতায়</label><select id="tfTo"></select></div>
-          </div>
-          <div class="grid2">
-            <div class="field"><label for="tfAmt">টাকার পরিমাণ (৳)</label><input type="number" id="tfAmt" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label for="tfDate">তারিখ</label><input type="date" id="tfDate" /></div>
-          </div>
-          <button class="btn" id="tfGo" type="button">🔁 স্থানান্তর করুন</button>
-        </div>
-  </section>
-
-  <!-- SALES TARGET / বিক্রির লক্ষ্য -->
-  <section class="page" id="page-target">
-    <div class="panel">
-          <h2>🎯 এই মাসের বিক্রির লক্ষ্য</h2>
-          <div id="targetBox"></div>
-          <div class="grid2" style="margin-top:8px">
-            <div class="field"><label for="targetInput">মাসের লক্ষ্য (৳)</label><input type="number" id="targetInput" inputmode="decimal" min="0" step="any" placeholder="যেমন: 200000" /></div>
-            <div class="field"><label>&nbsp;</label><button class="btn gold" id="targetSave" type="button" style="width:100%">লক্ষ্য সেভ করুন</button></div>
-          </div>
-        </div>
-  </section>
-
-  <!-- LOW STOCK + ORDER LIST / কম স্টক -->
-  <section class="page" id="page-lowstock">
-    <div class="panel" id="lowStockPanel">
-          <h2 id="lowStockTitle">📦 স্টক অবস্থা</h2>
-          <div id="lowStockBox"></div>
-        </div>
-    <div class="panel">
-          <h2>🛒 কী কিনতে হবে (অর্ডার লিস্ট)</h2>
-          <p class="hint">স্টক কমে গেলেই এই লিস্ট নিজে নিজে তৈরি হয় — কোনটা কতটুকু কিনতে হবে তাও সাজেস্ট করে। চাইলে পরিমাণ বদলানো, নিজে আইটেম যোগ করা বা বাদ দেওয়া যায়।</p>
-          <div id="olList"></div>
-          <div class="grid3" style="margin-top:10px">
-            <div class="field"><label for="olName">নিজে আইটেম যোগ করুন</label><input type="text" id="olName" placeholder="আইটেমের নাম" /></div>
-            <div class="field"><label for="olQty">পরিমাণ</label><input type="number" id="olQty" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
-            <div class="field"><label>&nbsp;</label><button class="btn gold" id="olAdd" type="button" style="width:100%">➕ যোগ করুন</button></div>
-          </div>
-          <div class="grid2">
-            <div class="field"><label for="olPhone">সাপ্লায়ারের WhatsApp নম্বর (ঐচ্ছিক)</label><input type="tel" id="olPhone" placeholder="01XXXXXXXXX" /></div>
-            <div class="field"><label>&nbsp;</label><button class="btn" id="olShare" type="button" style="width:100%;background:#1faa55;color:#fff">🟢 WhatsApp-এ সাপ্লায়ারকে পাঠান</button></div>
-          </div>
-        </div>
-  </section>
-
-  <!-- BACKUP / ব্যাকআপ -->
-  <section class="page" id="page-backup">
-    <div class="panel noprint">
-          <h2>ব্যাকআপ ও ডাউনলোড</h2>
-          <p class="hint">লগইন থাকলে সব হিসাব তোমার অ্যাকাউন্টে অটোমেটিক সিঙ্ক হয়। চাইলে ব্যাকআপ ফাইলও ডাউনলোড করে রাখতে পারো — ফাইলটা আবার “ফিরিয়ে আনুন” দিয়ে তুললে তার এন্ট্রিগুলো বর্তমান হিসাবের সাথে যোগ হয়ে যাবে — কোনো এন্ট্রি মুছবে না।</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="dlBackup" type="button">⬇️ ব্যাকআপ ডাউনলোড (সব হিসাব)</button>
-            <label class="btn gold" for="upBackup" style="display:inline-flex;align-items:center;cursor:pointer;margin:0">⬆️ ব্যাকআপ ফিরিয়ে আনুন</label>
-            <input type="file" id="upBackup" accept=".json,application/json" style="display:none" />
-            <button class="btn ghost" id="dlCsvTx" type="button">টাকার হিসাব CSV</button>
-            <button class="btn ghost" id="dlCsvStock" type="button">স্টক হিসাব CSV</button>
-            <button class="btn ghost" id="dlCsvBills" type="button">বিল CSV</button>
-            <button class="btn ghost" id="dlCsvDues" type="button">বাকি হিসাব CSV</button>
-            <button class="btn ghost" id="dlCsvPurchases" type="button">কেনার হিসাব CSV</button>
-          </div>
-          <h3>হিসাব কোথায় থাকে</h3>
-          <div id="syncBox"></div>
-          <p class="hint" style="margin-top:6px">লগইন করলে হিসাব তোমার অ্যাকাউন্টে সিঙ্ক থাকে — ফোন বদলালেও একই জিমেইল/নম্বর দিয়ে লগইন করলেই সব হিসাব ফিরে আসবে। দুই ফোনে আলাদা আলাদা হিসাব থাকলে লগইনের সময় দুটোই একসাথে যোগ হয়ে যায় — কোনো এন্ট্রিই হারায় না, একটার বদলে আরেকটা বসে না। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। ইন্টারনেট ছাড়াও সব কাজ চলে — অনলাইন হলেই সিঙ্ক হয়ে যায়।</p>
-          <h3>ফোনে ইনস্টল</h3>
-          <p class="hint" style="margin-bottom:6px">Chrome ব্রাউজারে এই পেজ খুলে ওপরের <b>“📲 ফোনে ইনস্টল করুন”</b> বোতামে চাপ দাও। বোতামে কাজ না হলে: Chrome-এর ⋮ মেনু → <b>Install app / Add to Home screen</b> — তাহলে হোম স্ক্রিনে আইকন আসবে, অন্য অ্যাপের মতো খুলবে, ইন্টারনেট ছাড়াই চলবে।</p>
-        </div>
-  </section>
-
-  <!-- PROFILE / প্রোফাইল -->
-  <section class="page" id="page-profile">
-    <div class="panel">
-          <h2>👤 প্রোফাইল</h2>
-          <div style="text-align:center;padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:6px">
-            <button id="pfPhotoBtn" type="button" aria-label="প্রোফাইল ছবি দিন বা বদলান" style="width:104px;height:104px;border-radius:50%;border:3px solid var(--gold);background:var(--goldbg);padding:0;overflow:hidden;display:inline-flex;align-items:center;justify-content:center">
-              <img id="pfPhotoImg" alt="প্রোফাইল ছবি" style="display:none;width:100%;height:100%;object-fit:cover" />
-              <span id="pfPhotoIcon" style="font-size:3rem;line-height:1">👤</span>
-            </button>
-            <div class="noprint" id="pfPhotoHint" style="margin-top:6px;font-weight:700;font-size:.92rem">📷 প্রোফাইল ছবি দিতে ছবিতে চাপ দিন</div>
-            <input type="file" id="pfPhoto" accept="image/*" style="display:none" />
-            <input type="file" id="pfPhotoCam" accept="image/*" capture="environment" style="display:none" />
-            <div id="pfPhotoPicker" class="noprint" style="display:none;margin-top:8px">
-              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-                <button class="btn small" id="pfPhotoCamBtn" type="button">📷 ছবি তুলুন</button>
-                <button class="btn small ghost" id="pfPhotoGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
-                <button class="btn small danger" id="pfPhotoRm" type="button" style="display:none">ছবি সরান</button>
-              </div>
-            </div>
-          </div>
-          <div class="kv"><span>নাম</span><b id="profileName">The Black Ghost</b></div>
-          <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-            <input type="text" id="pfNameInput" placeholder="তোমার নাম লিখুন" style="flex:1 1 180px" />
-            <button class="btn small gold" id="pfNameSave" type="button">নাম সেভ করুন</button>
-          </div>
-          <p class="hint" style="margin:4px 0 0">সাইন আপের সময় দেওয়া নামটাই এখানে দেখায় — চাইলে বদলে সেভ করুন।</p>
-          <div class="kv"><span>অ্যাকাউন্ট</span><b id="profileAcct">লগইন করা নেই</b></div>
-          <div class="kv"><span>আমার প্ল্যান</span><b id="profilePlan">—</b></div>
-          <div class="kv" id="profileTrial" style="display:none"><span>🎁 ফ্রি ট্রায়াল</span><b id="profileTrialTxt"></b></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" class="noprint">
-            <button class="btn small" id="loginOpenBtn" type="button">👤 লগইন / সাইন আপ</button>
-            <button class="btn small gold" id="planOpenBtn" type="button">💎 প্রিমিয়াম কিনুন</button>
-            <button class="btn small" id="shareAppBtn2" type="button">📤 অ্যাপ শেয়ার করুন</button>
-            <button class="btn small danger" id="logoutBtn" type="button" style="display:none">লগআউট</button>
-          </div>
-          <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
-            <h3 style="margin:0 0 4px">🔒 অ্যাপ লক</h3>
-            <p class="hint" style="margin:0 0 8px" id="lockStatusTxt">অ্যাপ লক বন্ধ আছে — চালু করলে অ্যাপ খুললেই ৪ সংখ্যার PIN চাইবে, PIN না দিলে হিসাব দেখা যাবে না।</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn small gold" id="lockSetBtn" type="button">🔒 PIN সেট করে চালু করুন</button>
-              <button class="btn small ghost" id="lockChangeBtn" type="button" style="display:none">PIN বদলান</button>
-              <button class="btn small danger" id="lockOffBtn" type="button" style="display:none">লক বন্ধ করুন</button>
-            </div>
-            <p class="hint" style="margin:6px 0 0">এই PIN শুধু এই ফোনে তোমার হিসাব লুকিয়ে রাখে — Admin PIN থেকে আলাদা। PIN ভুলে গেলে লগইনের পাসওয়ার্ড দিয়ে লক খোলা যাবে।</p>
-          </div>
-          <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
-            <h3 style="margin:0 0 4px">🔑 পাসওয়ার্ড বদলান</h3>
-            <p class="hint" style="margin:0 0 8px">লগইনের পাসওয়ার্ড বদলাতে বর্তমান পাসওয়ার্ডটা লাগবে। বদলানোর পর এই ফোনে লগইন থাকবেই — অন্য ডিভাইসে এরপর থেকে নতুন পাসওয়ার্ডে লগইন করতে হবে।</p>
-            <div class="grid3">
-              <div class="field" style="margin:0"><label for="pwCur">বর্তমান পাসওয়ার্ড</label><input type="password" id="pwCur" placeholder="বর্তমান পাসওয়ার্ড" autocomplete="current-password" /></div>
-              <div class="field" style="margin:0"><label for="pwNew">নতুন পাসওয়ার্ড</label><input type="password" id="pwNew" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="new-password" /></div>
-              <div class="field" style="margin:0"><label for="pwNew2">নতুন পাসওয়ার্ড আবার লিখুন</label><input type="password" id="pwNew2" placeholder="আবার একই পাসওয়ার্ড" autocomplete="new-password" /></div>
-            </div>
-            <p id="pwChangeMsg" style="margin:8px 0 0;font-weight:700"></p>
-            <button class="btn small gold" id="pwChangeBtn" type="button" style="margin-top:8px">🔑 পাসওয়ার্ড বদলান</button>
-          </div>
-          <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
-            <h3 style="margin:0 0 4px">📧 লগইন আইডি বদলান (জিমেইল / ফোন নম্বর)</h3>
-            <p class="hint" style="margin:0 0 8px">নতুন জিমেইল বা ফোন নম্বর দিলে এরপর থেকে সেটা দিয়েই লগইন হবে — আপনার সব হিসাব আগের মতোই থাকবে, কিছুই বদলাবে না। যাচাইয়ের জন্য বর্তমান পাসওয়ার্ড লাগবে, আর ইন্টারনেট লাগবে।</p>
-            <div class="grid2">
-              <div class="field" style="margin:0"><label for="chIdNew">নতুন জিমেইল অথবা ফোন নম্বর</label><input type="text" id="chIdNew" placeholder="example@gmail.com অথবা 01XXXXXXXXX" autocomplete="username" /></div>
-              <div class="field" style="margin:0"><label for="chIdPass">বর্তমান পাসওয়ার্ড</label><input type="password" id="chIdPass" placeholder="বর্তমান পাসওয়ার্ড" autocomplete="current-password" /></div>
-            </div>
-            <p id="chIdMsg" style="margin:8px 0 0;font-weight:700"></p>
-            <button class="btn small gold" id="chIdBtn" type="button" style="margin-top:8px">📧 লগইন আইডি বদলান</button>
-          </div>
-          <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
-            <h3 style="margin:0 0 4px;color:var(--out)">🗑️ অ্যাকাউন্ট মুছে ফেলুন</h3>
-            <p class="hint" style="margin:0 0 8px">সাবধান: অ্যাকাউন্ট মুছলে সার্ভারে থাকা আপনার সব হিসাব চিরতরে মুছে যাবে — ফেরত আনা যাবে না। এই ফোনে থাকা কপিটাও লগআউট হয়ে যাবে। যাচাইয়ের জন্য পাসওয়ার্ড লাগবে।</p>
-            <div class="grid2">
-              <div class="field" style="margin:0"><label for="delAcctPass">পাসওয়ার্ড (নিশ্চিত করতে)</label><input type="password" id="delAcctPass" placeholder="আপনার পাসওয়ার্ড" autocomplete="current-password" /></div>
-              <div class="field" style="margin:0"><label>&nbsp;</label><button class="btn small danger" id="delAcctBtn" type="button" style="width:100%">🗑️ অ্যাকাউন্ট মুছুন</button></div>
-            </div>
-            <p id="delAcctMsg" style="margin:8px 0 0;font-weight:700"></p>
-          </div>
-          <div class="noprint" id="profileDevicesWrap" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
-            <h3 style="margin:0 0 4px">📱 আমার লগইন করা ডিভাইস</h3>
-            <p class="hint" style="margin:0 0 8px">একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। অন্য ডিভাইস থেকে লগআউট করতে চাইলে পাশের বোতাম চাপুন — ওই ডিভাইসে অ্যাপ খুললেই লগআউট হয়ে যাবে।</p>
-            <div id="profileDevices"></div>
-          </div>
-          <div class="noprint" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
-            <label for="pfCode">🎟️ ভাউচার / রিডিম কোড</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <input type="text" id="pfCode" placeholder="কোড লিখুন" style="flex:1 1 160px;text-transform:uppercase" />
-              <button class="btn small gold" id="pfRedeem" type="button">🎟️ রিডিম করুন</button>
-            </div>
-            <p id="pfCodeMsg" style="margin:6px 0 0;font-weight:700"></p>
-          </div>
-          <p class="hint" style="margin:8px 0 0">লগইন করলে তোমার হিসাব তোমার অ্যাকাউন্টে সেভ থাকবে — যেকোনো ফোনে লগইন করলেই নিজের হিসাব পেয়ে যাবে। অন্য কারো হিসাব এখানে আসবে না।</p>
-        </div>
-  </section>
-
-  <!-- SUPPORT / সাপোর্ট -->
-  <section class="page" id="page-support">
-    <div class="panel">
-          <h2>🆘 সাপোর্ট / যোগাযোগ</h2>
-          <p class="hint">কোনো সমস্যা, পেমেন্ট নিয়ে প্রশ্ন বা সাহায্য লাগলে সরাসরি যোগাযোগ করুন।</p>
-          <a href="https://t.me/STVideoWorld1" target="_blank" rel="noopener" style="display:flex;gap:12px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:var(--ink);margin-bottom:9px">
-            <span style="font-size:1.6rem" aria-hidden="true">✈️</span>
-            <span><b>Telegram-এ মেসেজ করুন</b><br><span style="color:var(--muted);font-size:.9rem">@STVideoWorld1 — চাপ দিলেই Telegram খুলবে</span></span>
-          </a>
-          <a href="mailto:torikul20250@gmail.com" style="display:flex;gap:12px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:var(--ink);margin-bottom:12px">
-            <span style="font-size:1.6rem" aria-hidden="true">✉️</span>
-            <span><b>ইমেইল করুন</b><br><span style="color:var(--muted);font-size:.9rem">torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে</span></span>
-          </a>
-          <h3 style="margin:4px 0 6px">অ্যাপ থেকেই মেসেজ পাঠান</h3>
-          <div class="field"><label for="supName">আপনার নাম</label><input type="text" id="supName" placeholder="নাম লিখুন" /></div>
-          <div class="field"><label for="supMsg">মেসেজ</label><textarea id="supMsg" rows="3" placeholder="আপনার সমস্যা বা প্রশ্ন লিখুন…" style="resize:vertical"></textarea></div>
-          <p id="supMsgStatus" style="margin:0 0 8px;font-weight:700"></p>
-          <button class="btn" id="supSend" type="button">📩 মেসেজ পাঠান</button>
-          <p class="hint" style="margin:8px 0 0">ইন্টারনেট না থাকলে মেসেজটা এই ফোনে সেভ থাকবে — নেট এলেই অটোমেটিক পাঠিয়ে দেওয়া হবে।</p>
-        </div>
+      <h2>ব্যাকআপ ও ডাউনলোড</h2>
+      <p class="hint">লগইন থাকলে সব হিসাব তোমার অ্যাকাউন্টে অটোমেটিক সিঙ্ক হয়। চাইলে ব্যাকআপ ফাইলও ডাউনলোড করে রাখতে পারো — ফাইলটা আবার “ফিরিয়ে আনুন” দিয়ে তুললে তার এন্ট্রিগুলো বর্তমান হিসাবের সাথে যোগ হয়ে যাবে — কোনো এন্ট্রি মুছবে না।</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="dlBackup" type="button">⬇️ ব্যাকআপ ডাউনলোড (সব হিসাব)</button>
+        <label class="btn gold" for="upBackup" style="display:inline-flex;align-items:center;cursor:pointer;margin:0">⬆️ ব্যাকআপ ফিরিয়ে আনুন</label>
+        <input type="file" id="upBackup" accept=".json,application/json" style="display:none" />
+        <button class="btn ghost" id="dlCsvTx" type="button">টাকার হিসাব CSV</button>
+        <button class="btn ghost" id="dlCsvStock" type="button">স্টক হিসাব CSV</button>
+        <button class="btn ghost" id="dlCsvBills" type="button">বিল CSV</button>
+        <button class="btn ghost" id="dlCsvDues" type="button">বাকি হিসাব CSV</button>
+        <button class="btn ghost" id="dlCsvPurchases" type="button">কেনার হিসাব CSV</button>
+      </div>
+      <h3>হিসাব কোথায় থাকে</h3>
+      <div id="syncBox"></div>
+      <p class="hint" style="margin-top:6px">লগইন করলে হিসাব তোমার অ্যাকাউন্টে সিঙ্ক থাকে — ফোন বদলালেও একই জিমেইল/নম্বর দিয়ে লগইন করলেই সব হিসাব ফিরে আসবে। দুই ফোনে আলাদা আলাদা হিসাব থাকলে লগইনের সময় দুটোই একসাথে যোগ হয়ে যায় — কোনো এন্ট্রিই হারায় না, একটার বদলে আরেকটা বসে না। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। ইন্টারনেট ছাড়াও সব কাজ চলে — অনলাইন হলেই সিঙ্ক হয়ে যায়।</p>
+      <h3>ফোনে ইনস্টল</h3>
+      <p class="hint" style="margin-bottom:6px">Chrome ব্রাউজারে এই পেজ খুলে ওপরের <b>“📲 ফোনে ইনস্টল করুন”</b> বোতামে চাপ দাও। বোতামে কাজ না হলে: Chrome-এর ⋮ মেনু → <b>Install app / Add to Home screen</b> — তাহলে হোম স্ক্রিনে আইকন আসবে, অন্য অ্যাপের মতো খুলবে, ইন্টারনেট ছাড়াই চলবে।</p>
+    </div>
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 19 (v19)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 20 (v20)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -1738,7 +1649,8 @@ function mergeData(a,b){
   return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),dealers:mergeArr(a.dealers,b.dealers,'D',tombSet),dprods:mergeArr(a.dprods,b.dprods,'P',tombSet),dtxs:mergeArr(a.dtxs,b.dtxs,'X',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),profilePhoto:(b.profilePhotoU>a.profilePhotoU?b.profilePhoto:a.profilePhoto),profilePhotoU:Math.max(a.profilePhotoU,b.profilePhotoU),bizName:(b.bizNameU>a.bizNameU?b.bizName:a.bizName),bizNameU:Math.max(a.bizNameU,b.bizNameU),memoSeq:Math.max(a.memoSeq,b.memoSeq),memoSeeded:Math.max(a.memoSeeded,b.memoSeeded),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
 }
 function addTomb(p,id){var t=p+id;if(DB.tombs.indexOf(t)<0)DB.tombs.push(t);}
-function persistLocal(){try{localStorage.setItem(curKey,JSON.stringify(DB));}catch(e){}}
+var persistWarned=false;
+function persistLocal(){try{localStorage.setItem(curKey,JSON.stringify(DB));return true;}catch(e){return false;}}
 var syncState='লগইন করা নেই';
 var currentUser=null, fbReady=false, fsDb=null, pushTimer=null;
 /* ---------- LOGIN-FIRST FLOW STATE ---------- */
@@ -1753,7 +1665,7 @@ function deviceId(){try{var id=localStorage.getItem('bgh_device_id');if(!id){id=
 function deviceLabel(){var ua=navigator.userAgent||'';var plat=/Android/i.test(ua)?'Android ফোন':(/iPhone|iPad/i.test(ua)?'iPhone/iPad':(/Windows/i.test(ua)?'Windows কম্পিউটার':(/Macintosh|Mac OS/i.test(ua)?'Mac কম্পিউটার':'অন্য ডিভাইস')));var br=/Edg\//.test(ua)?'Edge':(/Chrome\//.test(ua)?'Chrome':(/Firefox\//.test(ua)?'Firefox':(/Safari\//.test(ua)?'Safari':'ব্রাউজার')));return plat+' • '+br;}
 function loadDevices(){DEVICES=[];try{var raw=localStorage.getItem(curKey+'_devices');if(raw){var a=JSON.parse(raw);if(Array.isArray(a))DEVICES=a;}}catch(e){}}
 function saveDevicesLocal(){try{localStorage.setItem(curKey+'_devices',JSON.stringify(DEVICES));}catch(e){}}
-function saveLocal(){DB.updatedAt=Date.now();DB.rev=num(DB.rev)+1;persistLocal();schedulePush();renderAll();}
+function saveLocal(){DB.updatedAt=Date.now();DB.rev=num(DB.rev)+1;if(!persistLocal()&&!persistWarned){persistWarned=true;setTimeout(function(){toast('⚠️ ফোনের স্টোরেজ প্রায় ভরে গেছে — নতুন এন্ট্রি এই ফোনে সেভ থাকছে না। কিছু ছবি বা ফাইল মুছে জায়গা করে আবার চেষ্টা করুন।');},350);}schedulePush();renderAll();}
 function setSync(txt){
   syncState=txt;
   var b=$('syncBox');
@@ -1765,6 +1677,7 @@ function setSync(txt){
   updateProfilePhotoUI();
   if(typeof updateProfileNameUI==='function')updateProfileNameUI();
   if(typeof renderAccess==='function')renderAccess();
+  applyLang(document.body);
 }
 
 /* ---------- FIREBASE AUTH + PER-USER FIRESTORE SYNC ---------- */
@@ -2211,7 +2124,7 @@ function findProd(id){for(var i=0;i<DB.products.length;i++)if(DB.products[i].id=
 
 /* ---------- TOAST ---------- */
 var toastTimer=null;
-function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2600);}
+function toast(msg){var t=$('toast');t.textContent=trStr(msg);t.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2600);}
 
 /* ---------- IN-PAGE CONFIRM ---------- */
 var sureCb=null;
@@ -2220,68 +2133,17 @@ $('sureYes').addEventListener('click',function(){$('sureModal').classList.remove
 $('sureNo').addEventListener('click',function(){$('sureModal').classList.remove('open');sureCb=null;});
 $('sureModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');sureCb=null;}});
 
-/* ---------- v19: SCREENS — প্রতিটা অপশন নিজের আলাদা স্ক্রিনে খোলে ----------
-   ড্যাশবোর্ড = মূল মেনু (সব অপশনের টাইল)। যেকোনো টাইলে চাপ দিলে শুধু ওই
-   ফিচারের স্ক্রিনটাই খোলে — ওপরে স্ক্রিনের নাম আর “← ফিরে যান” বোতাম থাকে,
-   যেটা মূল মেনুতে ফেরত নেয়। অন্য কোনো ফিচারের অংশ ওই স্ক্রিনে থাকে না। */
-var SCREENS={
-  ledger:'💰 টাকার হিসাব',stock:'📦 প্রোডাক্ট স্টক',purchase:'🛒 কেনা মালের হিসাব',
-  dues:'🤝 বাকি হিসাব',dealer:'🧮 হিসাব করুন',bill:'🧾 বিল',pos:'⚡ দ্রুত বিক্রি',
-  order:'📋 অর্ডার বুক',loan:'🏦 লোন / কিস্তি',staff:'👥 বেতন ও হাজিরা',
-  report:'📊 রিপোর্ট',partner:'🤝 পার্টনারের হিসাব',budget:'💵 মাসের বাজেট',
-  goal:'🐷 সঞ্চয় লক্ষ্য',monthlybill:'🗓️ মাসিক বিল',categories:'🏷️ ক্যাটাগরি ম্যানেজার',
-  cashrecon:'🔎 দিনের ক্যাশ মিলানো',transfer:'🔁 খাতা স্থানান্তর',target:'🎯 বিক্রির লক্ষ্য',
-  lowstock:'⚠️ কম স্টক ও অর্ডার লিস্ট',backup:'💾 ব্যাকআপ ও ডাউনলোড',
-  profile:'👤 প্রোফাইল',support:'🆘 সাপোর্ট / যোগাযোগ'
-};
-var curScreen='dash';
-function activateScreen(tab){
-  if(!document.getElementById('page-'+tab))tab='dash';
-  curScreen=tab;
-  document.querySelectorAll('nav.tabs button').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-tab')===tab);});
-  document.querySelectorAll('section.page').forEach(function(s){s.classList.remove('active');});
-  var pg=$('page-'+tab);if(pg)pg.classList.add('active');
-  if(tab==='report')setTimeout(renderCharts,60);
-}
-function goScreen(tab){
-  if(tab==='admin'){
-    activateScreen('dash');window.scrollTo({top:0,behavior:'smooth'});
-    setTimeout(function(){var b=$('adminOpenBtn');if(b)b.scrollIntoView({behavior:'smooth',block:'center'});var w=$('adminWord');if(w){try{w.focus({preventScroll:true});}catch(e){}}},350);
-    return;
-  }
-  activateScreen(tab);
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-/* প্রতিটা স্ক্রিনের ওপরে নাম + “← ফিরে যান” বোতাম বসানো (ড্যাশবোর্ড ছাড়া) */
-document.querySelectorAll('section.page').forEach(function(s){
-  var tab=s.id.replace('page-','');
-  if(tab==='dash'||!SCREENS[tab])return;
-  var bar=document.createElement('div');
-  bar.className='screenbar noprint';
-  var bb=document.createElement('button');
-  bb.type='button';bb.className='backbtn';bb.textContent='← ফিরে যান';
-  bb.addEventListener('click',function(){goScreen('dash');});
-  var tt=document.createElement('span');
-  tt.className='screentitle';tt.textContent=SCREENS[tab];
-  bar.appendChild(bb);bar.appendChild(tt);
-  s.insertBefore(bar,s.firstChild);
-});
-/* মেনু টাইল + (লুকানো) পুরনো ট্যাব বোতাম — সবই একই স্ক্রিন-সিস্টেমে যায় */
-document.querySelectorAll('[data-go]').forEach(function(b){
-  b.addEventListener('click',function(){goScreen(b.getAttribute('data-go'));});
-});
+/* ---------- TABS ---------- */
 document.querySelectorAll('nav.tabs button').forEach(function(b){
-  b.addEventListener('click',function(){goScreen(b.getAttribute('data-tab'));});
+  b.addEventListener('click',function(){
+    document.querySelectorAll('nav.tabs button').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    document.querySelectorAll('section.page').forEach(function(s){s.classList.remove('active');});
+    $('page-'+b.getAttribute('data-tab')).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(b.getAttribute('data-tab')==='report')setTimeout(renderCharts,60);
+  });
 });
-/* ডিলারের নিজের পেজ (সাব-স্ক্রিন): “ফিরে যান” চাপলে ডিলারের তালিকায় ফেরত */
-window.closeDealerDetail=function(){
-  dlSelId=null;
-  var pg=$('page-dealer');if(pg)pg.classList.remove('detail-open');
-  renderDealers();
-  window.scrollTo({top:0,behavior:'smooth'});
-};
-var dlBackBtnEl=$('dlBackBtn');
-if(dlBackBtnEl)dlBackBtnEl.addEventListener('click',function(){closeDealerDetail();});
 
 /* ---------- IN-PLACE EDIT (form opens under the row — page never jumps to top) ---------- */
 var FORMHOME={}, FORMPANEL={};
@@ -2332,7 +2194,9 @@ function placeFormAfterRender(titleId,listId,editId){
   formToHome(titleId);
 }
 function showPageNoScroll(tab){
-  activateScreen(tab);
+  document.querySelectorAll('nav.tabs button').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-tab')===tab);});
+  document.querySelectorAll('section.page').forEach(function(s){s.classList.remove('active');});
+  var pg=$('page-'+tab);if(pg)pg.classList.add('active');
 }
 function rowPosBefore(listId,rowId){
   var row=rowId?document.querySelector('#'+listId+' [data-rowid="'+rowId+'"]'):null;
@@ -2452,14 +2316,42 @@ $('pCancel').addEventListener('click',function(){
   resetProdForm();
   rowPosNudge(pos);
 });
-window.editProd=function(id){
-  var p=findProd(id);if(!p)return;editProdId=id;
-  $('pName').value=p.name;$('pBarcode').value=p.barcode||'';$('pUnit').value=p.unit;$('pBuy').value=p.buy;$('pSell').value=p.sell;$('pWsell').value=num(p.wsell)||'';$('pOpen').value=p.opening;$('pLow').value=p.low;$('pExpiry').value=p.expiry||'';if($('pBook'))$('pBook').value=bookOf(p);
-  pendingPhoto=null;$('pPhoto').value='';if($('pPhotoCam'))$('pPhotoCam').value='';
-  if(p.photo){$('pPhotoPrev').src=p.photo;$('pPhotoPrev').style.display='';$('pPhotoRm').style.display='';}else{$('pPhotoPrev').style.display='none';$('pPhotoRm').style.display='none';}
-  updOpenTotal();$('prodFormTitle').textContent='প্রোডাক্ট ঠিক করুন';$('pSave').textContent='✅ আপডেট করুন';$('pCancel').style.display='';
-  showPageNoScroll('stock');
-  formToRow('prodFormTitle','prodList',id);
+/* ----- প্রোডাক্ট ঠিক করা এখন ঠিক ওই প্রোডাক্টের কার্ডেই হয় — পেজ নড়ে না, স্ক্রল হয় না,
+   নিচের আলাদা ফর্মে যেতে হয় না (ডিলার প্রোডাক্টের v16 প্যাটার্নের মতোই) -----
+   নামে বা ✏️ ঠিক বোতামে চাপ দিলে ওই কার্ডের ভেতরেই লেখার ঘর খোলে; ✓ চাপলেই সেভ, ✕ চাপলে বন্ধ।
+   সেভে পেজ আবার রেন্ডার হয় বলে আগের স্ক্রল-অবস্থান ধরে রেখে ফিরিয়ে দেওয়া হয়। */
+window.toggleProdOpts=function(id){
+  var el=document.getElementById('popts-'+id);if(!el)return;
+  var willOpen=el.style.display==='none';
+  document.querySelectorAll('.prod-opts').forEach(function(x){x.style.display='none';});
+  if(willOpen){
+    el.style.display='';
+    var n=el.querySelector('.po-name');
+    if(n){try{n.focus({preventScroll:true});}catch(e){}}
+  }
+};
+window.editProd=function(id){toggleProdOpts(id);};
+window.saveProdOpts=function(id){
+  var p=findProd(id);if(!p)return;
+  var el=document.getElementById('popts-'+id);if(!el)return;
+  var name=el.querySelector('.po-name').value.trim();
+  if(!name){toast('⚠️ প্রোডাক্টের নাম লিখুন');try{el.querySelector('.po-name').focus({preventScroll:true});}catch(e){}return;}
+  var y=window.scrollY;
+  var chosenBook=el.querySelector('.po-book').value,moved=false;
+  if(chosenBook&&findBook(chosenBook)&&bookOf(p)!==chosenBook){
+    /* Moving a product to another book: its stock history moves with it
+       (same rule as the old form edit). */
+    DB.logs.forEach(function(l){if(l.pid===id){l.book=chosenBook;l.u=Date.now();}});
+    (DB.purchases||[]).forEach(function(pu){if(pu.pid===id){pu.book=chosenBook;pu.u=Date.now();}});
+    p.book=chosenBook;moved=true;
+  }
+  p.name=name;p.unit=el.querySelector('.po-unit').value;p.barcode=el.querySelector('.po-barcode').value.trim();
+  p.buy=num(el.querySelector('.po-buy').value);p.sell=num(el.querySelector('.po-sell').value);p.wsell=num(el.querySelector('.po-wsell').value);
+  p.opening=num(el.querySelector('.po-open').value);p.low=num(el.querySelector('.po-low').value);p.expiry=el.querySelector('.po-expiry').value||'';
+  p.u=Date.now();
+  saveLocal();
+  window.scrollTo(0,y);
+  toast(moved?'📚 প্রোডাক্ট “'+bookName(chosenBook)+'” খাতায় সরানো হয়েছে':'✅ প্রোডাক্ট ঠিক হয়েছে — স্টক ও লাভ অটোমেটিক হিসাব হয়েছে');
 };
 window.delProd=function(id){
   var p=findProd(id);
@@ -3085,7 +2977,7 @@ function admLoadAll(){
   }).catch(function(){$('admMsgBox').innerHTML='<p class="hint">মেসেজ পড়া যায়নি — ইন্টারনেট চেক করুন।</p>';});
   admLoadVouchers();
 }
-function renderAdminAll(){renderAdminDash();renderAdminReqs();renderAdminUsers();renderAdminFree();tgMaybeSeed();}
+function renderAdminAll(){renderAdminDash();renderAdminReqs();renderAdminUsers();renderAdminFree();tgMaybeSeed();applyLang(document.body);}
 /* ---------- ADMIN INCOME DASHBOARD ----------
    Pure summary over the user docs the owner can read: how many users,
    how many are on the free trial right now, on an active paid plan, or
@@ -4243,7 +4135,7 @@ window.editPartner=function(id){
   editPartnerId=id;
   $('pnName').value=pn.name;$('pnInvest').value=num(pn.invest)||'';$('pnShare').value=num(pn.share)||'';$('pnDate').value=pn.date||todayStr();
   $('pnSave').textContent='✅ আপডেট করুন';$('pnCancel').style.display='';
-  showPageNoScroll('partner');window.scrollTo({top:0,behavior:'smooth'});
+  showPageNoScroll('report');window.scrollTo({top:0,behavior:'smooth'});
 };
 $('pnSave').addEventListener('click',function(){
   var name=$('pnName').value.trim();
@@ -4678,7 +4570,7 @@ window.editGoal=function(id){
   editGoalId=id;
   $('glName').value=g.name;$('glTarget').value=num(g.target)||'';$('glDate').value=g.date||'';
   $('glSave').textContent='✅ আপডেট করুন';$('glCancel').style.display='';
-  showPageNoScroll('goal');window.scrollTo({top:0,behavior:'smooth'});
+  showPageNoScroll('report');window.scrollTo({top:0,behavior:'smooth'});
 };
 $('glSave').addEventListener('click',function(){
   var name=$('glName').value.trim(),tgt=num($('glTarget').value);
@@ -4742,7 +4634,7 @@ window.editRbill=function(id){
   editRbillId=id;
   $('rbName').value=rb.name;$('rbAmt').value=num(rb.amount)||'';$('rbDay').value=num(rb.day)||'';$('rbCat').value=rb.cat||'';
   $('rbSave').textContent='✅ আপডেট করুন';$('rbCancel').style.display='';
-  showPageNoScroll('monthlybill');window.scrollTo({top:0,behavior:'smooth'});
+  showPageNoScroll('report');window.scrollTo({top:0,behavior:'smooth'});
 };
 $('rbSave').addEventListener('click',function(){
   var name=$('rbName').value.trim(),amt=num($('rbAmt').value),day=num($('rbDay').value);
@@ -5124,7 +5016,7 @@ window.editPurchase=function(id){
   if(pu.photo){$('puPhotoPrev').src=pu.photo;$('puPhotoPrev').style.display='';$('puPhotoRm').style.display='';}else{$('puPhotoPrev').style.display='none';$('puPhotoRm').style.display='none';}
   $('puFormTitle').textContent='🛒 কেনা ঠিক করুন';$('puSave').textContent='✅ আপডেট করুন';$('puCancel').style.display='';
   puCalc();
-  showPageNoScroll('purchase');window.scrollTo({top:0,behavior:'smooth'});
+  showPageNoScroll('stock');window.scrollTo({top:0,behavior:'smooth'});
   toast('✏️ কেনার রেকর্ডটা ফর্মে এসেছে — বদলে “আপডেট করুন” চাপুন');
 };
 $('puSave').addEventListener('click',function(){
@@ -5528,15 +5420,6 @@ function renderDash(){
     {k:'⚠️ কম স্টকের প্রোডাক্ট',v:fmt(lowCount)+' টি',cls:lowCount?'neg':''}
   ];
   $('dashCards').innerHTML=cards.map(function(c){return '<div class="card"><div class="k">'+c.k+'</div><div class="v '+(c.cls||'')+'">'+c.v+'</div></div>';}).join('');
-  /* পাইকারি বিক্রি রেট — শুধু দেখানো হয়, কোনো দাম বদলানো হয় না।
-     প্রোডাক্টে চাপ দিলে editProd ওই প্রোডাক্টের স্টক পেজ খুলে দেয়। */
-  var wl=$('wsellList');
-  if(wl){
-    var wps=bProducts();
-    wl.innerHTML=wps.length?wps.map(function(p){
-      return '<button type="button" class="kv" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);cursor:pointer;font:inherit;color:inherit;text-align:left" onclick="editProd(\''+p.id+'\')"><span>'+esc(p.name)+'</span><b>'+(num(p.wsell)>0?money(num(p.wsell)):'—')+'</b></button>';
-    }).join(''):'<p class="hint" style="margin:0">এখনো কোনো প্রোডাক্ট নেই — প্রোডাক্ট স্টক থেকে যোগ করুন</p>';
-  }
   $('todayLabel').textContent=t;
   $('todayBox').innerHTML=
     '<div class="kv"><span>আজকের আয়</span><b style="color:var(--in)">'+money(tt.inn)+'</b></div>'+
@@ -5623,6 +5506,28 @@ function expiryInfo(p){
   var days=Math.round((exp-now)/86400000);
   return{days:days,expired:days<0,soon:days>=0&&days<=30};
 }
+/* In-place product edit panel — rendered INSIDE each product's own card
+   (same pattern as the dealer products' dp-opts): tapping the product name
+   or its ✏️ ঠিক button opens the fields right there, ✓ saves, ✕ closes.
+   The page never jumps and the scroll never moves. */
+function prodOptsHtml(p){
+  var units=['পিস','কেজি','বস্তা','লিটার','প্যাকেট','কার্টন','ডজন','মণ'];
+  if(units.indexOf(p.unit)<0)units.unshift(p.unit||'পিস');
+  var uopts=units.map(function(u){return '<option value="'+esc(u)+'"'+(u===p.unit?' selected':'')+'>'+esc(u)+'</option>';}).join('');
+  var bopts=DB.books.map(function(b){return '<option value="'+b.id+'"'+(bookOf(p)===b.id?' selected':'')+'>'+esc(b.name)+'</option>';}).join('');
+  return '<div class="prod-opts" id="popts-'+p.id+'" style="display:none">'+
+  '<div class="grid3"><div class="field" style="margin:0"><label>প্রোডাক্টের নাম</label><input type="text" class="po-name" value="'+esc(p.name)+'" /></div>'+
+  '<div class="field" style="margin:0"><label>একক</label><select class="po-unit">'+uopts+'</select></div>'+
+  '<div class="field" style="margin:0"><label>বারকোড (ঐচ্ছিক)</label><input type="text" class="po-barcode" value="'+esc(p.barcode||'')+'" /></div></div>'+
+  '<div class="grid3"><div class="field" style="margin:0"><label>কেনা দাম (প্রতি একক ৳)</label><input type="number" class="po-buy" inputmode="decimal" min="0" step="any" value="'+num(p.buy)+'" /></div>'+
+  '<div class="field" style="margin:0"><label>খুচরা বিক্রি দাম (৳)</label><input type="number" class="po-sell" inputmode="decimal" min="0" step="any" value="'+num(p.sell)+'" /></div>'+
+  '<div class="field" style="margin:0"><label>পাইকারি বিক্রি দাম (৳)</label><input type="number" class="po-wsell" inputmode="decimal" min="0" step="any" value="'+num(p.wsell)+'" /></div></div>'+
+  '<div class="grid3"><div class="field" style="margin:0"><label>শুরুর স্টক (পরিমাণ)</label><input type="number" class="po-open" inputmode="decimal" min="0" step="any" value="'+num(p.opening)+'" /></div>'+
+  '<div class="field" style="margin:0"><label>কম স্টকের সতর্ক সংখ্যা</label><input type="number" class="po-low" inputmode="decimal" min="0" step="any" value="'+num(p.low)+'" /></div>'+
+  '<div class="field" style="margin:0"><label>মেয়াদ শেষের তারিখ (ঐচ্ছিক)</label><input type="date" class="po-expiry" value="'+esc(p.expiry||'')+'" /></div></div>'+
+  '<div class="field" style="margin:8px 0 0"><label>কোন খাতায় থাকবে</label><select class="po-book">'+bopts+'</select></div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn small" type="button" onclick="saveProdOpts(\''+p.id+'\')">✓ সেভ করুন</button><button class="btn small danger" type="button" onclick="delProd(\''+p.id+'\')">🗑️ মুছুন</button><button class="btn small ghost" type="button" onclick="toggleProdOpts(\''+p.id+'\')">✕ বন্ধ করুন</button></div></div>';
+}
 function renderProducts(){
   detachFormFromList('prodList','prodFormTitle');
   var q=($('pSearch').value||'').toLowerCase();
@@ -5650,12 +5555,12 @@ function renderProducts(){
       return '<div class="kv"><span>'+esc(l.date)+' • '+lbl+' '+fmt(l.qty)+' '+esc(p.unit)+' × '+money(l.price)+(l.party?' • '+esc(l.party):'')+'</span><b>'+sign+' '+money(num(l.qty)*num(l.price))+' <button class="btn small ghost noprint" type="button" onclick="editLog(\''+l.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delLog(\''+l.id+'\')">মুছুন</button></b></div>';
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো বিক্রি / মাল আসার এন্ট্রি নেই।</p>';
     return '<div class="rowitem" data-rowid="'+p.id+'"><div style="display:flex;gap:12px;align-items:flex-start">'+photoHtml+
-    '<div style="flex:1;min-width:0"><b style="font-size:1.12rem">'+esc(p.name)+'</b>'+(s.remaining<=num(p.low)?' <span class="badge warn">স্টক কম!</span>':'')+expBadge+
+    '<div style="flex:1;min-width:0"><button type="button" class="dp-namebtn" style="font-size:1.12rem" onclick="toggleProdOpts(\''+p.id+'\')">'+esc(p.name)+'</button>'+(s.remaining<=num(p.low)?' <span class="badge warn">স্টক কম!</span>':'')+expBadge+
     '<div style="margin-top:4px;font-size:.98rem">📦 আছে <b class="stockbig" style="font-size:1.25rem">'+fmt(s.remaining)+' '+esc(p.unit)+'</b> • বিক্রি হয়েছে '+fmt(s.sold)+' '+esc(p.unit)+'</div>'+
     '<div class="meta">শুরুতে ছিল '+fmt(s.opening)+' + এলো '+fmt(s.pin)+' − বিক্রি '+fmt(s.sold)+(s.outQty?' − বের হলো '+fmt(s.outQty):'')+' = বাকি '+fmt(s.remaining)+' '+esc(p.unit)+'</div>'+
     '<div class="meta">কেনা '+money(p.buy)+' • খুচরা '+money(p.sell)+(num(p.wsell)?' • পাইকারি '+money(p.wsell):'')+(p.barcode?' • 🏷️ বারকোড: '+esc(p.barcode):'')+' • স্টকের মূল্য '+money(s.stockValue)+'</div>'+
     '<div class="meta">মোট বিক্রি: '+money(s.soldAmt)+' • মোট লাভ: <b style="color:'+(s.profit>=0?'var(--in)':'var(--out)')+'">'+money(s.profit)+'</b></div></div></div>'+
-    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openMove(\''+p.id+'\',\'sale\')">🛒 বিক্রি</button><button class="btn small gold" type="button" onclick="openMove(\''+p.id+'\',\'in\')">📥 মাল এলো</button><button class="btn small ghost" type="button" onclick="openMove(\''+p.id+'\',\'out\')">📤 নষ্ট/ফেরত</button><button class="btn small ghost" type="button" onclick="editProd(\''+p.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delProd(\''+p.id+'\')">🗑️</button></div>'+
+    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openMove(\''+p.id+'\',\'sale\')">🛒 বিক্রি</button><button class="btn small gold" type="button" onclick="openMove(\''+p.id+'\',\'in\')">📥 মাল এলো</button><button class="btn small ghost" type="button" onclick="openMove(\''+p.id+'\',\'out\')">📤 নষ্ট/ফেরত</button><button class="btn small ghost" type="button" onclick="editProd(\''+p.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delProd(\''+p.id+'\')">🗑️</button></div>'+prodOptsHtml(p)+
     '<details class="logbox"><summary>📜 পুরো ইতিহাস ('+logs.length+' টি এন্ট্রি)</summary>'+logHtml+'</details></div>';
   }).join('');
   placeFormAfterRender('prodFormTitle','prodList',editProdId);
@@ -5800,7 +5705,7 @@ window.catDelete=function(name){
     saveLocal();toast('ক্যাটাগরি লিস্ট থেকে সরানো হয়েছে');
   });
 };
-function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderDealers();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();renderProfileDevices();}
+function renderAll(){renderBooks();renderDash();renderLedger();renderProducts();renderPurchases();renderOrderList();renderPos();renderReport();renderDues();renderDealers();renderBills();renderOrders();renderLoans();renderStaff();renderCash();renderTarget();renderCats();setSync(syncState);renderAccess();renderProfileDevices();applyLang(document.body);}
 
 /* ---------- হিসাব করুন (আগের ডিলার খাতা) — v16: মেমো বইয়ের ছক + শেষে একবার পার্সেন্টেজ; v18: আসল মেমোর ছক (নিচে dgBuildRows দেখুন) ----------
    dealers: {id,name,phone,company,book,u}
@@ -5953,7 +5858,8 @@ window.openDealer=function(id,focus){
   dlSelId=id;
   showPageNoScroll('dealer');
   renderDealers();
-  setTimeout(function(){window.scrollTo({top:0,behavior:'smooth'});},40);
+  var det=$('dlDetail');
+  if(det)setTimeout(function(){det.scrollIntoView({behavior:'smooth',block:'start'});},40);
   if(focus==='give')setTimeout(function(){var el=$('dgFormTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},260);
   if(focus==='recv')setTimeout(function(){var el=$('drFormTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},260);
 };
@@ -6262,9 +6168,9 @@ function renderDealers(){
   placeFormAfterRender('dlFormTitle','dealerList',editDealerId);
   /* detail panel */
   var det=$('dlDetail'),d=dlSelId?findDealer(dlSelId):null;
-  if(!d||!inBook(d)){det.style.display='none';if(dlSelId&&!d)dlSelId=null;var dpg=$('page-dealer');if(dpg)dpg.classList.remove('detail-open');}
+  if(!d||!inBook(d)){det.style.display='none';if(dlSelId&&!d)dlSelId=null;}
   else{
-    det.style.display='';var dpg2=$('page-dealer');if(dpg2)dpg2.classList.add('detail-open');
+    det.style.display='';
     var t=dealerTotals(d.id);
     $('dlDetailTitle').textContent='🏪 '+d.name+(d.company?' — '+d.company:'');
     $('dlDetailTotals').innerHTML=
@@ -6369,7 +6275,7 @@ $('repMonth').addEventListener('change',renderReport);
 function netUpdate(){
   var on=navigator.onLine,pill=$('netPill');
   pill.className='pill '+(on?'on':'off');
-  $('netTxt').textContent=on?'অনলাইন':'অফলাইন — ফোনে চলছে';
+  $('netTxt').textContent=trStr(on?'অনলাইন':'অফলাইন — ফোনে চলছে');
   if(!on)setSync(currentUser?'অফলাইন — হিসাব ফোনে সেভ আছে, অনলাইন হলেই সিঙ্ক হবে':'অফলাইন — লগইন করতে ইন্টারনেট লাগবে');
 }
 window.addEventListener('online',function(){netUpdate();initFirebase();flushOutbox();});
@@ -6406,6 +6312,706 @@ function loadDrafts(){
 $('page-bill').addEventListener('input',saveBillDraft);
 $('page-bill').addEventListener('change',saveBillDraft);
 
+
+/* ---------- LANGUAGE — বাংলা (default) / English ----------
+   The app ALWAYS opens in Bengali: with no saved choice on this phone,
+   LANG is 'bn'. The owner can switch to English from the header or from
+   Profile; the choice is kept per device in localStorage ('bgh_lang')
+   and applied to the whole UI by walking the page's text (and the
+   placeholder / aria-label attributes) through the dictionary below.
+   User data is never touched: input values and <option> texts (which
+   double as stored values) are skipped, and switching back to Bengali
+   restores every original string exactly as it was. */
+var LANG='bn';
+try{var _lv=localStorage.getItem('bgh_lang');if(_lv==='en'||_lv==='bn')LANG=_lv;}catch(e){}
+var I18N_EN={
+"－ খরচ (টাকা গেল)":"－ Expense (money out)",
+"－ বাদ":"－ Minus",
+"— তাহলে হোম স্ক্রিনে আইকন আসবে, অন্য অ্যাপের মতো খুলবে, ইন্টারনেট ছাড়াই চলবে।":"— then an icon appears on the home screen, it opens like any other app, and works without internet.",
+"— পরের বার মাল দেওয়ার সময় আর লিখতে হবে না। হিসাব শুধু কার্টন দিয়ে হবে: যেমন ১ বক্স কাপ ৳৪৫০ হলে ২ বক্স = ৳৯০০। নিচের লিস্টে":"— next time you give goods you won't have to type it again. Accounts are by carton only: e.g. if 1 box of cups is ৳450, then 2 boxes = ৳900. In the list below",
+", আগে দেখে ঠিক করে নিন। ভয়েস চিনতে ইন্টারনেট লাগে, মাঝে মাঝে ভুল শুনতে পারে — হাতে বদলে নেওয়া সবসময় যায়।":", check and fix it first. Voice recognition needs internet and may sometimes mishear — you can always edit by hand.",
+", সেভও হবে না। নতুন প্রোডাক্ট যোগ করা বা নাম/প্যাক সাইজ/দাম ঠিক করা":", and won't be saved either. Adding a new product or fixing a name/pack size/price is done from",
+"। ভয়েস চিনতে ইন্টারনেট লাগে, মাঝে মাঝে ভুল শুনতে পারে।":". Voice recognition needs internet and may sometimes mishear.",
+"“📲 ফোনে ইনস্টল করুন”":"“📲 Install on phone”",
+"“বিক্রি শেষ করুন” না চাপা পর্যন্ত কিছুই সেভ হবে না":"nothing is saved until you tap “Finish sale”",
+"@STVideoWorld1 — চাপ দিলেই Telegram খুলবে":"@STVideoWorld1 — tap to open Telegram",
+"% লিখুন বা বাছুন":"Type or pick %",
+"← ফিরে যান (পরে কিনবো)":"← Go back (I'll buy later)",
+"＋ আয় (টাকা এলো)":"＋ Income (money in)",
+"＋ যোগ":"＋ Plus",
+"⏰ আসন্ন কিস্তি ও ডেলিভারি":"⏰ Upcoming installments & deliveries",
+"⏳ লোড হচ্ছে…":"⏳ Loading…",
+"⚠️ সত্যি কথা: টোকেনটা কোথাও সেভ হয় না — শুধু এইবারের জন্য থাকে, পেজ বন্ধ করলে আবার দিতে হবে। আর নোটিফিকেশন আসে শুধু Admin Panel খোলা থাকলেই; Panel বন্ধ থাকলেও সবসময় নোটিফিকেশন পেতে হলে আলাদা সার্ভার লাগবে।":"⚠️ Honest note: the token is not saved anywhere — it lasts only for this session, close the page and you'll have to enter it again. And notifications arrive only while the Admin Panel is open; to get notifications even when the Panel is closed, a separate server is needed.",
+"⚡ দ্রুত বিক্রি":"⚡ Quick Sale",
+"⛔ মেয়াদ পার বকেয়া":"⛔ Overdue dues",
+"✅ অর্ডার সেভ করুন":"✅ Save order",
+"✅ কেনা সেভ করুন (স্টকে যোগ হবে)":"✅ Save purchase (adds to stock)",
+"✅ ক্যাশ হিসাব সেভ করুন":"✅ Save cash account",
+"✅ টাকা পাওয়া সেভ করুন":"✅ Save payment received",
+"✅ ডিলার সেভ করুন":"✅ Save dealer",
+"✅ পার্টনার সেভ করুন":"✅ Save partner",
+"✅ প্রোডাক্ট সেভ করুন":"✅ Save product",
+"✅ প্ল্যান সেভ করুন":"✅ Save plan",
+"✅ বাজেট সেভ":"✅ Save budget",
+"✅ বিক্রি শেষ করুন":"✅ Finish sale",
+"✅ বিল যোগ করুন":"✅ Add bill",
+"✅ বিল সেভ করুন":"✅ Save bill",
+"✅ বেতন দেওয়া হয়েছে":"✅ Salary paid",
+"✅ মাল দেওয়া সেভ করুন":"✅ Save goods given",
+"✅ লক্ষ্য বানান":"✅ Create goal",
+"✅ লোন সেভ করুন":"✅ Save loan",
+"✅ সেভ করুন":"✅ Save",
+"✉️ মেসেজ (সাপোর্ট ইনবক্স)":"✉️ Messages (support inbox)",
+"➕ আইটেম যোগ করুন":"➕ Add item",
+"➕ নতুন প্ল্যান":"➕ New plan",
+"➕ প্রোডাক্ট যোগ করুন":"➕ Add product",
+"➕ যোগ করুন":"➕ Add",
+"⬆️ ব্যাকআপ ফিরিয়ে আনুন":"⬆️ Restore backup",
+"⬇️ ডাউনলোড":"⬇️ Download",
+"⬇️ ব্যাকআপ ডাউনলোড (সব হিসাব)":"⬇️ Download backup (all accounts)",
+"⬇️ QR ছবি ডাউনলোড":"⬇️ Download QR image",
+"🎁 ৭ দিনের ফ্রি ট্রায়াল শুরু করুন":"🎁 Start 7-day free trial",
+"🎁 ফ্রি অ্যাক্সেস দিন":"🎁 Give free access",
+"🎁 ফ্রি অ্যাক্সেস দিন (জিমেইল / ফোন)":"🎁 Give free access (Gmail / phone)",
+"🎁 ফ্রি ট্রায়াল":"🎁 Free trial",
+"🎟️ কোড তৈরি করুন":"🎟️ Create code",
+"🎟️ ভাউচার / রিডিম কোড":"🎟️ Voucher / redeem code",
+"🎟️ ভাউচার / রিডিম কোড আছে?":"🎟️ Have a voucher / redeem code?",
+"🎟️ ভাউচার কোড":"🎟️ Voucher code",
+"🎟️ রিডিম করুন":"🎟️ Redeem",
+"🎤 ভয়েসে পরিমাণ বলুন":"🎤 Say the quantity by voice",
+"🎤 ভয়েসে বলুন":"🎤 Speak",
+"🎤 ভয়েসে হিসাব বলুন":"🎤 Say the entry by voice",
+"🎯 এই মাসের বিক্রির লক্ষ্য":"🎯 This month's sales target",
+"🏠 ড্যাশবোর্ড":"🏠 Dashboard",
+"🏦 নতুন লোন / ধার যোগ করুন":"🏦 Add new loan / borrowing",
+"🏦 লোন / কিস্তি":"🏦 Loans / Installments",
+"🏪 নতুন ডিলার যোগ করুন":"🏪 Add new dealer",
+"🏷️ ক্যাটাগরি ম্যানেজার":"🏷️ Category manager",
+"🐷 সঞ্চয় লক্ষ্য":"🐷 Savings goal",
+"👤 প্রোফাইল":"👤 Profile",
+"👤 লগইন / সাইন আপ":"👤 Log in / Sign up",
+"👥 বেতন":"👥 Salary",
+"👥 সব ব্যবহারকারী":"👥 All users",
+"💎 প্রিমিয়াম কিনুন":"💎 Buy Premium",
+"💎 প্ল্যান বেছে নিন":"💎 Choose a plan",
+"💎 প্ল্যান সেটিংস (নাম, দিন, দাম)":"💎 Plan settings (name, days, price)",
+"💰 কার কাছে কত বাকি":"💰 Who owes how much",
+"💰 টাকার হিসাব":"💰 Money Ledger",
+"💰 মাসের বাজেট (খরচের সীমা)":"💰 Monthly budget (spending limit)",
+"💰 শুরুর ক্যাশ / ওপেনিং ব্যালেন্স যোগ করুন":"💰 Add starting cash / opening balance",
+"💳 পেমেন্ট সেটিংস (বিকাশ নম্বর)":"💳 Payment settings (bKash number)",
+"💵 টাকা নিন":"💵 Receive money",
+"💵 টাকা শোধ / পেমেন্ট":"💵 Pay back / payment",
+"📈 লাভের চার্ট":"📈 Profit chart",
+"📊 আয় ও ব্যবহারকারীর সারসংক্ষেপ":"📊 Income & user summary",
+"📊 আয়-খরচের চার্ট (শেষ ৬ মাস)":"📊 Income–expense chart (last 6 months)",
+"📊 রিপোর্ট ও ব্যাকআপ":"📊 Reports & Backup",
+"📋 অর্ডার বুক":"📋 Order Book",
+"📋 কপি":"📋 Copy",
+"📋 নতুন অর্ডার নিন":"📋 Take new order",
+"📋 মেমোর প্রোডাক্ট (এই অ্যাকাউন্টে)":"📋 Memo products (in this account)",
+"📋 মেমোর প্রোডাক্ট বসাও":"📋 Load memo products",
+"📚 খাতা বাছুন":"📚 Choose a book",
+"📚 নতুন খাতা":"📚 New book",
+"📜 এই ডিলারের পুরো ইতিহাস":"📜 This dealer's full history",
+"📤 অ্যাপ শেয়ার করুন":"📤 Share app",
+"📤 আজকের রিপোর্ট শেয়ার করুন (WhatsApp)":"📤 Share today's report (WhatsApp)",
+"📤 নষ্ট / ফেরত / অন্য":"📤 Damaged / return / other",
+"📤 লোন / ধার দিলাম":"📤 Lent money",
+"📤 শেয়ার করুন (ফোনের শেয়ার মেনু)":"📤 Share (phone share menu)",
+"📤 QR ছবি শেয়ার":"📤 Share QR image",
+"📥 নতুন মাল এলো":"📥 New stock arrived",
+"📥 বাকি নিলাম":"📥 Took a due (borrowed)",
+"📥 লোন / ধার নিলাম":"📥 Took a loan",
+"📦 প্রোডাক্ট স্টক":"📦 Product Stock",
+"📦 মাল দিন — মেমো":"📦 Give goods — Memo",
+"📦 স্টক অবস্থা":"📦 Stock status",
+"📧 লগইন আইডি বদলান":"📧 Change login ID",
+"📧 লগইন আইডি বদলান (জিমেইল / ফোন নম্বর)":"📧 Change login ID (Gmail / phone number)",
+"📩 প্ল্যান রিকোয়েস্ট":"📩 Plan requests",
+"📩 মেসেজ পাঠান":"📩 Send message",
+"📩 রিকোয়েস্ট পাঠান":"📩 Send request",
+"📩 Admin-কে পাসওয়ার্ড রিসেটের অনুরোধ পাঠান":"📩 Send password reset request to Admin",
+"📱 আমার লগইন করা ডিভাইস":"📱 My logged-in devices",
+"📱 ডিভাইস সীমা পূর্ণ":"📱 Device limit reached",
+"📲 ফোনে ইনস্টল করুন":"📲 Install on phone",
+"📲 WhatsApp-এ পাঠান":"📲 Send on WhatsApp",
+"📷 ছবি তুলুন":"📷 Take photo",
+"📷 প্রোফাইল ছবি দিতে ছবিতে চাপ দিন":"📷 Tap the picture to add a profile photo",
+"📷 বারকোড স্ক্যান করুন":"📷 Scan barcode",
+"📷 বারকোড স্ক্যান করে আইটেম যোগ করুন":"📷 Add item by barcode scan",
+"📷 বারকোড স্ক্যান করে যোগ করুন":"📷 Add by barcode scan",
+"📷 QR কোড — দোকানের কাউন্টারের জন্য":"📷 QR code — for the shop counter",
+"🔁 খাতার মধ্যে টাকা স্থানান্তর":"🔁 Transfer money between books",
+"🔁 স্থানান্তর করুন":"🔁 Transfer",
+"🔄 রিফ্রেশ":"🔄 Refresh",
+"🔍 কর্মচারীর নাম বা মোবাইল খুঁজুন…":"🔍 Search staff name or mobile…",
+"🔍 কাস্টমার, প্রোডাক্ট বা মোবাইল দিয়ে খুঁজুন…":"🔍 Search by customer, product or mobile…",
+"🔍 কাস্টমারের নাম, মোবাইল বা তারিখ দিয়ে বিল খুঁজুন…":"🔍 Search bills by customer name, mobile or date…",
+"🔍 খুঁজুন — নাম, খাত, বিবরণ…":"🔍 Search — name, category, note…",
+"🔍 ডিলার বা কোম্পানি খুঁজুন…":"🔍 Search dealer or company…",
+"🔍 নাম খুঁজুন…":"🔍 Search name…",
+"🔍 নাম দিয়ে লোন খুঁজুন…":"🔍 Search loans by name…",
+"🔍 নাম, জিমেইল বা ফোন নম্বর দিয়ে ইউজার খুঁজুন…":"🔍 Search users by name, Gmail or phone…",
+"🔍 প্রোডাক্ট খুঁজুন…":"🔍 Search products…",
+"🔍 প্রোডাক্ট, সাপ্লায়ার বা তারিখ দিয়ে খুঁজুন…":"🔍 Search by product, supplier or date…",
+"🔑 পাসওয়ার্ড বদলান":"🔑 Change password",
+"🔑 Admin PIN বদলান":"🔑 Change Admin PIN",
+"🔒 অ্যাপ লক":"🔒 App lock",
+"🔒 অ্যাপ লক করা আছে":"🔒 App is locked",
+"🔒 অ্যাপ লকের PIN সেট করুন":"🔒 Set the app lock PIN",
+"🔒 PIN সেট করে চালু করুন":"🔒 Set PIN & turn on",
+"🔔 পেমেন্ট রিকোয়েস্টের নোটিফিকেশন (Telegram)":"🔔 Payment request notifications (Telegram)",
+"🔗 লিংক কপি করুন":"🔗 Copy link",
+"🖨️ তালিকা প্রিন্ট":"🖨️ Print list",
+"🖨️ প্রিন্ট":"🖨️ Print",
+"🖨️ মাসের রিপোর্ট প্রিন্ট / PDF":"🖨️ Print monthly report / PDF",
+"🖨️ স্টক তালিকা প্রিন্ট":"🖨️ Print stock list",
+"🖼️ গ্যালারি থেকে নিন":"🖼️ Pick from gallery",
+"🗑️ অ্যাকাউন্ট মুছুন":"🗑️ Delete account",
+"🗑️ অ্যাকাউন্ট মুছে ফেলুন":"🗑️ Delete account",
+"🗑️ এই খাতাটা মুছুন":"🗑️ Delete this book",
+"🗓️ বছরের রিপোর্ট ও তারিখ বাছাই":"🗓️ Yearly report & date range",
+"🤝 পার্টনারের হিসাব":"🤝 Partner accounts",
+"🤝 বাকি দিলাম":"🤝 Gave a due",
+"🤝 বাকি হিসাব":"🤝 Due Accounts",
+"🧮 দিনের ক্যাশ মিলানো":"🧮 Daily cash check",
+"🧮 হিসাব করুন":"🧮 Dealer Accounts",
+"🧺 এই ডিলারের প্রোডাক্ট — কার্টন / বক্সের দাম":"🧺 This dealer's products — carton / box price",
+"🧾 নতুন বিল বানান":"🧾 Make a new bill",
+"🧾 বর্তমান বিল":"🧾 Current bill",
+"🧾 বিল":"🧾 Bills",
+"🧾 মাসিক বিল (রিমাইন্ডার)":"🧾 Monthly bills (reminders)",
+"🧾 মাসিক বিলের রিমাইন্ডার":"🧾 Monthly bill reminders",
+"🧾 রসিদের ছবি":"🧾 Receipt photo",
+"🛒 কী কিনতে হবে (অর্ডার লিস্ট)":"🛒 What to buy (order list)",
+"🛒 কেনা মালের হিসাব":"🛒 Purchase records",
+"🛒 বিক্রি":"🛒 Sale",
+"🟢 WhatsApp-এ সাপ্লায়ারকে পাঠান":"🟢 Send to supplier on WhatsApp",
+"৳ 0":"৳ 0",
+"০":"0",
+"১":"1",
+"১ কার্টন = ৳ 0 • ২ কার্টন = ৳ 0":"1 carton = ৳ 0 • 2 cartons = ৳ 0",
+"২":"2",
+"৩":"3",
+"৪":"4",
+"৪ সংখ্যার PIN দিন। PIN-টা এই ফোনে হ্যাশ করে (SHA-256) সেভ থাকে — আসল PIN কোথাও লেখা থাকে না।":"Enter a 4-digit PIN. The PIN is saved on this phone only as a hash (SHA-256) — the real PIN is never written anywhere.",
+"৫":"5",
+"৬":"6",
+"৭":"7",
+"৭ দিনের ফ্রি ট্রায়াল শুরু":"Start 7-day free trial",
+"৮":"8",
+"৯":"9",
+"অগ্রিম টাকা নিলে তা এখনই টাকার খাতায় আয় হিসেবে যাবে। ডেলিভারির সময় বাকি টাকাটাই আয় হবে — অগ্রিম দুবার হিসাব হবে না।":"Advance money taken now goes into the money ledger as income right away. At delivery, only the remaining amount counts as income — the advance is never counted twice.",
+"অগ্রিম পেয়েছি (৳)":"Advance received (৳)",
+"অগ্রিমের পেমেন্ট মাধ্যম":"Advance payment method",
+"অথবা প্রোডাক্টের নাম হাতে লিখুন":"Or type the product name by hand",
+"অন্য অ্যাকাউন্ট দিয়ে লগইন করুন":"Log in with another account",
+"অন্য অ্যাকাউন্ট দিয়ে লগইন করুন (লগআউট)":"Log in with another account (log out)",
+"অপেক্ষমাণ অর্ডার":"Pending orders",
+"অর্ডারের তারিখ":"Order date",
+"অ্যাকাউন্ট":"Account",
+"অ্যাকাউন্টের পাসওয়ার্ড":"Account password",
+"অ্যাপ থেকেই মেসেজ পাঠান":"Send a message from the app",
+"অ্যাপ ব্যবহার করতে অ্যাকাউন্ট লাগবে। লগইনের পর চাইলে":"An account is needed to use the app. After logging in, if you want",
+"অ্যাপ লক বন্ধ আছে — চালু করলে অ্যাপ খুললেই ৪ সংখ্যার PIN চাইবে, PIN না দিলে হিসাব দেখা যাবে না।":"App lock is off — turn it on and the app will ask for a 4-digit PIN on open; without the PIN the accounts can't be seen.",
+"অ্যাপে প্রথমবার হিসাব শুরু করার সময় হাতে যা ক্যাশ ছিল — একবারই লাগে।":"The cash you had in hand when you first started accounts in the app — needed only once.",
+"আইটেম যোগ করলেই মোট অটোমেটিক হিসাব হবে। বিল সেভ করলে স্টক থেকে বিক্রি কেটে যাবে, জমা টাকা টাকার খাতায় আয় হিসেবে যাবে, আর বাকি থাকলে তা বাকি হিসাবে যোগ হবে — একই হিসাব দুবার হবে না।":"Add an item and the total is calculated automatically. Saving the bill deducts the sale from stock, the paid money goes to the money ledger as income, and any remainder goes to dues — the same account is never counted twice.",
+"আইটেমের নাম":"Item name",
+"আগের অর্ডার (ডেলিভারি / বাতিল)":"Previous orders (delivered / cancelled)",
+"আছে — নাম, প্যাক সাইজ আর এক কার্টনের দাম বসানোই থাকে। আপনি শুধু যেটা দিচ্ছেন তার":"are there — name, pack size and one-carton price already filled in. You only write, for what you're giving, in the",
+"আজকের সব এন্ট্রি থেকে অটোমেটিক হিসাব করা। তোমাকে কিছু যোগ-বিয়োগ করতে হবে না।":"Calculated automatically from today's entries. You don't have to add or subtract anything.",
+"আজকের হিসাব —":"Today's account —",
+"আপনার জিমেইল অথবা ফোন নম্বর (যেটা দিয়ে অ্যাকাউন্ট খুলেছেন)":"Your Gmail or phone number (the one you opened the account with)",
+"আপনার নাম":"Your name",
+"আপনার পাসওয়ার্ড":"Your password",
+"আপনার ফ্রি ট্রায়াল শেষ হয়ে গেছে। আবার পুরো অ্যাপ ব্যবহার করতে একটা প্ল্যান কিনুন — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।":"Your free trial has ended. Buy a plan to use the full app again — the app opens as soon as Admin approves.",
+"আপনার ব্যবসার নাম লিখুন":"Write your business name",
+"আপনার সমস্যা বা প্রশ্ন লিখুন…":"Write your problem or question…",
+"আবার একই পাসওয়ার্ড":"Same password again",
+"আমার প্ল্যান":"My plan",
+"আসল মেমো বইয়ের মতোই: এই ডিলারের":"Just like the real memo book: this dealer's",
+"ইন্টারনেট না থাকলে মেসেজটা এই ফোনে সেভ থাকবে — নেট এলেই অটোমেটিক পাঠিয়ে দেওয়া হবে।":"Without internet the message stays saved on this phone — it will be sent automatically when the net returns.",
+"ইমেইল করুন":"Send email",
+"এই অ্যাকাউন্টে ইতিমধ্যে ২টি ডিভাইসে লগইন আছে — একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসেই লগইন থাকতে পারে। নিচের যেকোনো একটা ডিভাইস থেকে লগআউট করলেই এই ডিভাইসে লগইন হয়ে যাবে।":"This account is already logged in on 2 devices — an account can stay logged in on at most 2 devices. Log out from any one device below and this device will log in.",
+"এই অ্যাকাউন্টের হিসাব করুন-এ মেমোর ২২টা প্রোডাক্ট বসবে (শুধু একবার, ফাঁকা থাকলেই)":"Loads the memo's 22 products into this account's Dealer Accounts (only once, only if empty)",
+"এই এন্ট্রির পর স্টক থাকবে: 0":"Stock after this entry: 0",
+"এই ডিলারের কোনো প্রোডাক্ট সেভ করা নেই — মেমোতে লিখতে হলে আগে প্রোডাক্ট যোগ করুন।":"This dealer has no saved products — add products first to write in the memo.",
+"এই তারিখ থেকে":"From this date",
+"এই তারিখ পর্যন্ত":"To this date",
+"এই সময়ের হিসাব দেখুন":"See accounts for this period",
+"এই PIN শুধু এই ফোনে তোমার হিসাব লুকিয়ে রাখে — Admin PIN থেকে আলাদা। PIN ভুলে গেলে লগইনের পাসওয়ার্ড দিয়ে লক খোলা যাবে।":"This PIN only hides your accounts on this phone — separate from the Admin PIN. If you forget the PIN, you can unlock with your login password.",
+"এক কার্টন / বক্সের দাম (৳)":"Price of one carton / box (৳)",
+"এক খাতা থেকে আরেক খাতায় টাকা সরান — দুই খাতাতেই এন্ট্রি হবে (যে খাতা থেকে গেল সেখানে খরচ, যেখানে এলো সেখানে আয়), মোট ব্যালেন্স একই থাকবে।":"Move money from one book to another — entries appear in both books (expense where it left, income where it arrived), total balance stays the same.",
+"একক":"Unit",
+"একক দাম (৳)":"Unit price (৳)",
+"একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। অন্য ডিভাইস থেকে লগআউট করতে চাইলে পাশের বোতাম চাপুন — ওই ডিভাইসে অ্যাপ খুললেই লগআউট হয়ে যাবে।":"An account can stay logged in on at most 2 devices. To log out another device, tap the button beside it — that device logs out next time the app opens there.",
+"একটু অপেক্ষা করুন":"Please wait a moment",
+"একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে — বারবার লগইন করতে হবে না। লগইনের সময় একবার ইন্টারনেট লাগে; এরপর হিসাবের সব কাজ অফলাইনেও চলে। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে।":"Log in once and you stay logged in until you log out — no need to log in again and again. Internet is needed once at login; after that all account work runs offline too. An account can stay logged in on at most 2 devices.",
+"একবার লিখলেই":"Write it once and",
+"এখানে বদলালে সব ব্যবহারকারীর পেওয়ালে নতুন প্ল্যান দেখাবে।":"Changing here shows the new plans on every user's paywall.",
+"ওপরের প্রোডাক্ট লিস্ট":"the product list above",
+"কত থাকলো (এই ডিলারের মোট বাকি)":"how much remains (this dealer's total due)",
+"কম টাকা দিলে বাকিটা অটোমেটিক বাকি হিসাবে চলে যাবে (কাস্টমারের নাম লিখলে তার নামে)।":"Pay less and the rest automatically goes to dues (under the customer's name, if written).",
+"কম স্টকের সতর্ক সংখ্যা":"Low-stock alert number",
+"কমপক্ষে ৬ অক্ষর":"At least 6 characters",
+"করতে পারবেন — নিজে শুরু না করলে ট্রায়াল চালু হবে না, কোনো পেমেন্টও লাগবে না।":"you can — if you don't start it yourself the trial won't start, and no payment is needed.",
+"কর্মচারী ও বেতনের হিসাব":"Staff & salary accounts",
+"কর্মচারীর নাম":"Staff name",
+"কার কাছ থেকে / কাকে":"From whom / to whom",
+"কার কাছে / কার কাছ থেকে (ঐচ্ছিক)":"To whom / from whom (optional)",
+"কার কাছে কত বাকি":"Who owes how much",
+"কার নামে":"In whose name",
+"কার্টন হিসাব (অটোমেটিক)":"Carton account (automatic)",
+"কার্টনে পিস সংখ্যা":"Pieces per carton",
+"কাস্টমার ফোনের ক্যামেরা দিয়ে স্ক্যান করলেই অ্যাপ খুলবে। ছবিটা ডাউনলোড করে প্রিন্ট করে কাউন্টারে লাগিয়ে রাখতে পারেন।":"Customers scan with their phone camera and the app opens. You can download the picture, print it and put it on the counter.",
+"কাস্টমারের নাম":"Customer name",
+"কাস্টমারের নাম (ঐচ্ছিক)":"Customer name (optional)",
+"কাস্টমারের মোবাইল (ঐচ্ছিক)":"Customer mobile (optional)",
+"কিছু লিখতে চাইলে":"If you want to write something",
+"কিস্তি":"Installment",
+"কীসের টাকা":"What the money is for",
+"কেনা দাম (প্রতি একক ৳)":"Buying price (per unit ৳)",
+"কেনার ইতিহাস":"Purchase history",
+"কেনার রসিদের ছবি (ঐচ্ছিক)":"Purchase receipt photo (optional)",
+"কেনার হিসাব CSV":"Purchase accounts CSV",
+"কোড":"Code",
+"কোড থাকলে এখানে বসান — সাথে সাথে ফ্রি প্ল্যান চালু হয়ে যাবে। কোড ব্যবহার করতে লগইন থাকতে হবে।":"Enter the code here if you have one — a free plan starts right away. You must be logged in to use a code.",
+"কোড বানান — যাকে দেবেন সে কোডটা রিডিম করলেই নির্দিষ্ট দিনের ফ্রি প্ল্যান পেয়ে যাবে।":"Create a code — whoever you give it to gets a free plan for the set days when they redeem it.",
+"কোড লিখুন":"Write the code",
+"কোন খাতা থেকে":"From which book",
+"কোন খাতায়":"To which book",
+"কোন খাতায় থাকবে":"Which book it stays in",
+"কোন খাতায় যাবে":"Which book it goes to",
+"কোন মাসের":"Which month",
+"কোন সাপ্লায়ারের কাছ থেকে, কত দামে মাল কিনলেন — এখানে লিখলেই স্টকে যোগ হবে, কেনার ইতিহাস থেকে যাবে, আর লাভের হিসাব এই কেনা দাম দিয়েই হবে।":"Which supplier you bought goods from and at what price — write it here and it adds to stock, the purchase history stays, and profit is calculated with this buying price.",
+"কোনো সমস্যা, পেমেন্ট নিয়ে প্রশ্ন বা সাহায্য লাগলে সরাসরি যোগাযোগ করুন।":"For any problem, payment question or help, contact directly.",
+"কোম্পানি / ব্র্যান্ড (ঐচ্ছিক)":"Company / brand (optional)",
+"ক্যাটাগরি":"Category",
+"ক্যাটাগরি অনুযায়ী মাসের বাজেট বেঁধে দিন — এই মাসে কত খরচ হলো, কত বাকি, বেশি হলে সতর্ক দেখাবে।":"Set a monthly budget per category — see how much was spent this month, how much is left, and get a warning if it goes over.",
+"ক্যাটাগরি বাছুন বা নতুন লিখুন":"Pick a category or write a new one",
+"ক্যাটাগরির নাম বদলালে পুরনো সব এন্ট্রিতেও নতুন নাম বসে যাবে। নিজের বানানো ক্যাটাগরি মুছলে এন্ট্রিগুলোর নাম থেকে যাবে — শুধু লিস্ট থেকে সরে যাবে।":"Renaming a category updates the name on all old entries too. Deleting your own category keeps the name on entries — it only leaves the list.",
+"ক্যামেরাটা বারকোডের দিকে ধরুন — স্ক্যান হলেই অটোমেটিক ধরা পড়বে।":"Point the camera at the barcode — it will be detected automatically when scanned.",
+"ক্রমিক":"Serial",
+"খরচ বা আয়ের বিলের ছবি লাগিয়ে রাখুন — এন্ট্রির পাশে ছোট ছবি দেখা যাবে, চাপ দিলে বড় হবে। ছবি ফোনেই ছোট করে সেভ হয়।":"Attach a photo of an expense or income bill — a small photo shows beside the entry, tap to enlarge. Photos are saved resized on the phone.",
+"খরচের ক্যাটাগরি":"Expense category",
+"খাত / ক্যাটাগরি":"Book / category",
+"খাতা মুছা যায় শুধু তখনই, যখন খাতাটা একদম খালি — ভেতরে কোনো এন্ট্রি থাকলে মুছা যাবে না, তাই কোনো হিসাব হারানোর সুযোগ নেই।":"A book can be deleted only when it is completely empty — if there are entries inside it can't be deleted, so no account can ever be lost.",
+"খাতার নাম":"Book name",
+"খুচরা ৳ 0 • পাইকারি ৳ 0":"Retail ৳ 0 • Wholesale ৳ 0",
+"খুচরা দাম":"Retail price",
+"খুচরা বিক্রি দাম (৳)":"Retail selling price (৳)",
+"খুলুন":"Open",
+"চূড়ান্ত মোট":"Final total",
+"চেক হচ্ছে…":"Checking…",
+"ছবি ফোনেই ছোট করে (সর্বোচ্চ ৬০০px) সেভ হয় — স্টক লিস্টে আর বিলে দেখা যাবে।":"Photos are saved resized on the phone (max 600px) — shown in the stock list and on bills.",
+"ছবি সরান":"Remove photo",
+"ছাড়ের টাকা (অটোমেটিক)":"Discount amount (automatic)",
+"ছাড়ের ধরন":"Discount type",
+"ছাড়ের পরিমাণ":"Discount amount",
+"জমা — এখনই টাকা পেলেন (৳) — না পেলে ফাঁকা রাখুন":"Paid — money received now (৳) — leave empty if not received",
+"জমা / পরিশোধ (৳)":"Paid / payment (৳)",
+"জমা / পরিশোধ (৳) — খালি রাখলে পুরো টাকা":"Paid / payment (৳) — leave empty for the full amount",
+"জিমেইল অথবা ফোন নম্বর":"Gmail or phone number",
+"জিমেইল অথবা ফোন নম্বর — যেকোনো একটা দিয়ে লগইন করলেই শুধু তোমার নিজের হিসাব আসবে। অন্য কারো হিসাব এখানে আসবে না, তোমার হিসাবও অন্য কেউ দেখতে পাবে না।":"Gmail or phone number — log in with either one and only your own accounts appear. Nobody else's accounts come here, and nobody else can see yours.",
+"টাকা (৳)":"Money (৳)",
+"টাকা এলে “আয়”, টাকা গেলে “খরচ” — বাকি যোগ-বিয়োগ অ্যাপ নিজে করবে।":"Money in is “Income”, money out is “Expense” — the app does the rest of the adding and subtracting itself.",
+"টাকার খাতায় খরচ হিসেবে যোগ করুন":"Add to the money ledger as an expense",
+"টাকার তালিকা":"Money list",
+"টাকার পরিমাণ (৳)":"Amount of money (৳)",
+"টাকার হিসাব CSV":"Money accounts CSV",
+"টাকার হিসাবেও অটোমেটিক যোগ করুন":"Also add automatically to the money accounts",
+"ডিলার টাকা দিলে এখানে লিখুন — তার বাকি অটোমেটিক কমে যাবে।":"When a dealer pays, write it here — his due goes down automatically.",
+"ডিলারের নাম":"Dealer name",
+"ডিলারের হিসাব":"Dealer's account",
+"ডেলিভারি / ফেরতের পেমেন্ট মাধ্যম":"Delivery / return payment method",
+"ডেলিভারির তারিখ":"Delivery date",
+"তার নাম, পিস সংখ্যা আর দাম ঠিক করার ও মোছার অপশন খুলবে — পেজ একটুও নড়বে না (যেমন ৳৪৫৫ না ধরে ৳৪৫০ ধরা)। দাম এখনো ঠিক না হলে ফাঁকা রাখতে পারেন, মেমোতে নামটা থাকবে।":"options to fix his name, piece count and price, or delete — the page won't move at all (e.g. taking ৳450 instead of ৳455). If the price isn't fixed yet you can leave it empty; the name will stay in the memo.",
+"তারিখ":"Date",
+"তারিখ বাছুন — হিসাব এখানে দেখা যাবে":"Pick a date — the account will show here",
+"তারিখের ফিল্টার সরান":"Remove date filter",
+"তোমার নাম":"Your name",
+"তোমার নাম লিখুন":"Write your name",
+"তোমার সব হিসাব এই অ্যাকাউন্টে সিঙ্ক হয়ে থাকে। লগআউট করলেও কোনো হিসাব মুছবে না — আবার লগইন করলেই সব ফিরে আসবে।":"All your accounts stay synced to this account. Logging out deletes nothing — log in again and everything comes back.",
+"থেকে হবে — করলেই এই মেমোতে চলে আসবে।":"it will be — do it and it comes into this memo.",
+"দামের ধরন":"Price type",
+"দিন অনুযায়ী পণ্য-বিক্রির লাভ — অটোমেটিক হিসাব থেকে বানানো।":"Day-wise product-sale profit — made from the automatic accounts.",
+"দিনের শুরুতে হাতে কত ছিল আর শেষে গুনে কত পেলেন — লিখলেই অ্যাপ বলে দেবে হিসাব মিললো, কম হলো নাকি বেশি হলো।":"How much you had in hand at the start of the day and how much you counted at the end — write it and the app tells you whether it matched, fell short or was extra.",
+"দিলে কমবে (৳১০০-তে −২% = ৳৯৮)।":"it goes down (at −2% on ৳100 = ৳98).",
+"দিলে বাড়বে (৳১০০-তে +২% = ৳১০২),":"it goes up (at +2% on ৳100 = ৳102),",
+"দ্রষ্টব্য: প্ল্যানের মেয়াদ শেষ হলে ব্যবহারকারীর অ্যাপ আবার অটোমেটিক লক হয়ে যাবে। মালিকের Gmail অ্যাকাউন্ট সবসময় ফ্রি অ্যাক্সেস পায়; PIN শুধু এই প্যানেলটা খোলে — অ্যাপের অ্যাক্সেস দেয় না, আর অন্য ব্যবহারকারীদের তথ্য শুধু মালিকের Gmail লগইনেই লোড হয়।":"Note: when a plan expires, that user's app locks again automatically. The owner's Gmail account always gets free access; the PIN only opens this panel — it doesn't give app access, and other users' data loads only under the owner's Gmail login.",
+"ধরন":"Type",
+"নতুন অ্যাকাউন্ট (সাইন আপ)":"New account (sign up)",
+"নতুন এন্ট্রি সাধারণত চলতি খাতাতেই যায়। পুরনো এন্ট্রি ঠিক করার সময় এখান থেকে অন্য খাতায় সরানোও যায়।":"New entries usually go to the current book. When fixing an old entry, you can also move it to another book from here.",
+"নতুন কর্মচারী যোগ করুন":"Add new staff",
+"নতুন জিমেইল অথবা ফোন নম্বর":"New Gmail or phone number",
+"নতুন জিমেইল বা ফোন নম্বর দিলে এরপর থেকে সেটা দিয়েই লগইন হবে — আপনার সব হিসাব আগের মতোই থাকবে, কিছুই বদলাবে না। যাচাইয়ের জন্য বর্তমান পাসওয়ার্ড লাগবে, আর ইন্টারনেট লাগবে।":"Give a new Gmail or phone number and from then on you'll log in with that — all your accounts stay exactly as before, nothing changes. Your current password is needed for verification, and internet is needed.",
+"নতুন টাকার এন্ট্রি":"New money entry",
+"নতুন পাসওয়ার্ড":"New password",
+"নতুন পাসওয়ার্ড আবার লিখুন":"Write the new password again",
+"নতুন প্রোডাক্ট যোগ করুন":"Add new product",
+"নতুন প্ল্যান রিকোয়েস্ট এলেই Admin বোতামে লাল ব্যাজে সংখ্যা দেখাবে। Telegram-এও জানাতে চাইলে নিচে Bot Token আর Chat ID দিন — এই Admin Panel খোলা থাকা অবস্থায় নতুন রিকোয়েস্ট এলেই Telegram-এ মেসেজ যাবে।":"When a new plan request comes, a red badge number shows on the Admin button. To also be notified on Telegram, give the Bot Token and Chat ID below — while this Admin Panel is open, new requests will message your Telegram.",
+"নতুন বাকি এন্ট্রি":"New due entry",
+"নতুন মানুষ যোগ করুন (কাস্টমার / সাপ্লায়ার)":"Add new person (customer / supplier)",
+"নতুন PIN":"New PIN",
+"নতুন PIN (৪ সংখ্যা)":"New PIN (4 digits)",
+"নতুন PIN আবার লিখুন":"Write the new PIN again",
+"নম্বর সেভ করুন":"Save number",
+"না, বাতিল":"No, cancel",
+"নাম":"Name",
+"নাম লিখুন":"Write name",
+"নাম সেভ করুন":"Save name",
+"নাম, কার্টনে পিস সংখ্যা আর এক কার্টন / এক বক্সের দাম":"Name, pieces per carton and the price of one carton / one box",
+"নিজে আইটেম যোগ করুন":"Add item yourself",
+"নিজে সেভ না করা পর্যন্ত কিছুই সেভ হবে না":"Nothing is saved until you save it yourself",
+"নিশ্চিত করুন":"Confirm",
+"নোট (ঐচ্ছিক)":"Note (optional)",
+"নোট লিখুন":"Write a note",
+"পণ্যের নাম":"Product name",
+"পরিমাণ":"Quantity",
+"পরিমাণের ঘরে কয় বক্স":"how many boxes in the quantity box",
+"পরিশোধের মাধ্যম (“পরিশোধ হয়েছে” চাপলে)":"Payment method (when “Paid” is tapped)",
+"পাইকারি দাম":"Wholesale price",
+"পাইকারি বিক্রি দাম (৳)":"Wholesale selling price (৳)",
+"পাঠানো টাকার পরিমাণ (৳)":"Amount sent (৳)",
+"পার্টনারকে লাভের টাকা দিন":"Give the partner his profit money",
+"পার্টনারের নাম":"Partner name",
+"পার্টনারের বিনিয়োগ আর লাভের ভাগ (%) লিখুন — রিপোর্টের মাসের মোট লাভ থেকে প্রত্যেকের ভাগ অটোমেটিক হিসাব হবে।":"Write each partner's investment and profit share (%) — from the report month's total profit, everyone's share is calculated automatically.",
+"পার্সেন্টেজ":"Percentage",
+"পার্সেন্টেজ শুধু সবার শেষে একবার":"Percentage only once, at the very end",
+"পার্সেন্টেজের টাকা":"Percentage amount",
+"পাসওয়ার্ড":"Password",
+"পাসওয়ার্ড (নিশ্চিত করতে)":"Password (to confirm)",
+"পাসওয়ার্ড দিয়ে লক খুলুন":"Unlock with password",
+"পাসওয়ার্ড ভুলে গেছি?":"Forgot password?",
+"পুরো টাকা":"Full amount",
+"পেমেন্ট করে রিকোয়েস্ট পাঠান":"Pay & send request",
+"পেমেন্ট মাধ্যম":"Payment method",
+"পেমেন্ট মাধ্যম (জমা টাকার)":"Payment method (for the paid amount)",
+"পেমেন্ট মাধ্যম (টাকার খাতার এন্ট্রির জন্য)":"Payment method (for the money-ledger entry)",
+"প্যাক সাইজ":"Pack size",
+"প্রতি এককে লাভ (অটোমেটিক)":"Profit per unit (automatic)",
+"প্রতি কার্টুন মূল্য":"Price per carton",
+"প্রতি কিস্তি (৳)":"Per installment (৳)",
+"প্রতি মাসে কিস্তির তারিখ (১–৩১)":"Installment date each month (1–31)",
+"প্রতি মাসে যে বিল দিতে হয় (ভাড়া, বিদ্যুৎ, ইন্টারনেট…) যোগ করুন — মেয়াদের ৩ দিন আগে থেকে ড্যাশবোর্ডে রিমাইন্ডার দেখাবে, দেরি হলে লাল হবে। “পরিশোধ হয়েছে” চাপলেই খরচের এন্ট্রি অটোমেটিক হবে।":"Add the bills you pay every month (rent, electricity, internet…) — a reminder shows on the dashboard from 3 days before the due date, and turns red when late. Tap “Paid” and the expense entry is made automatically.",
+"প্রথমে নিচের বিকাশ নম্বরে টাকা পাঠান, তারপর ফর্মটা পূরণ করুন।":"First send money to the bKash number below, then fill in the form.",
+"প্রোডাক্ট":"Product",
+"প্রোডাক্ট অনুযায়ী লাভ-ক্ষতি":"Profit–loss by product",
+"প্রোডাক্ট ঠিক করার সময় এখান থেকে অন্য খাতায় সরানো যায় — স্টক ইতিহাসও সাথে যাবে।":"When fixing a product, you can move it to another book from here — the stock history goes with it.",
+"প্রোডাক্টের":"of the product",
+"প্রোডাক্টের ছবি (ঐচ্ছিক)":"Product photo (optional)",
+"প্রোডাক্টের নাম":"Product name",
+"প্রোফাইল ছবি দিন বা বদলান":"Add or change profile photo",
+"প্ল্যান":"Plan",
+"প্ল্যান কেনার ফর্মে এই বিকাশ নম্বরটাই সবাই দেখবে। নম্বর বদলালে এখানে বদলে সেভ করুন — সবার ফর্মে নতুন নম্বর চলে যাবে।":"Everyone sees this bKash number on the plan purchase form. To change it, change and save here — the new number goes to everyone's form.",
+"প্ল্যান, পেমেন্ট রিকোয়েস্ট আর ফ্রি অ্যাক্সেস এখান থেকে নিয়ন্ত্রণ করুন। অন্য ব্যবহারকারীদের তথ্য (রিকোয়েস্ট, ইউজার তালিকা, মেসেজ, ভাউচার) সার্ভার থেকে আসে বলে এই অংশটুকু দেখতে ইন্টারনেট লাগবে — এটাই অ্যাপের একমাত্র অনলাইন-নির্ভর অংশ; নিজের সব হিসাব অফলাইনেই চলে।":"Control plans, payment requests and free access from here. Other users' data (requests, user list, messages, vouchers) comes from the server, so this part needs internet — it's the app's only online-dependent part; all your own accounts run offline.",
+"ফাঁকা রাখা লাইন হিসাবে আসবে না":"a blank line won't count as an account",
+"ফোনে ইনস্টল":"Install on phone",
+"বছর":"Year",
+"বছর বাছাই করলে ১২ মাসের আয়-খরচ-লাভের তালিকা আসবে। অথবা যেকোনো দুই তারিখের মধ্যের হিসাবও আলাদা করে দেখা যাবে।":"Pick a year to get a 12-month income–expense–profit list. Or see the accounts between any two dates separately.",
+"বছরের রিপোর্ট দেখুন":"See yearly report",
+"বন্ধ করুন":"Close",
+"বন্ধু বা পরিচিত দোকানদারকে পাঠান — লিংকে চাপ দিলেই অ্যাপ চলবে, আলাদা করে ডাউনলোড লাগবে না।":"Send to a friend or a shopkeeper you know — tap the link and the app runs, no separate download needed.",
+"বর্তমান পাসওয়ার্ড":"Current password",
+"বর্তমান PIN":"Current PIN",
+"বললেই পরিমাণ বসে যাবে — সেভ করার আগে যাচাই করুন।":"just say it and the quantity fills in — check before saving.",
+"বাকি কত গেল":"How much went as due",
+"বাকি দিলে / নিলে বা টাকা শোধ হলে এখানে লিখুন — কার কাছে কত পাবেন, কাকে কত দিতে হবে, সব অটোমেটিক হিসাব হবে।":"Write here when you give or take a due, or a payment is made — who you get from, who you pay, all calculated automatically.",
+"বাকি হিসাব CSV":"Due accounts CSV",
+"বাকির সীমা (৳) — খালি/০ = সীমা নেই":"Due limit (৳) — empty/0 = no limit",
+"বাতিল":"Cancel",
+"বারকোড (ঐচ্ছিক)":"Barcode (optional)",
+"বারকোড থাকলে বিল করার সময় স্ক্যান করলেই এই প্রোডাক্টটা সাথে সাথে চলে আসবে।":"If there's a barcode, scanning while billing brings this product in right away.",
+"বারকোড নম্বর লিখুন বা স্ক্যান করুন":"Write the barcode number or scan",
+"বিকাশ নম্বর (পার্সোনাল)":"bKash number (personal)",
+"বিক্রি = আয় হিসেবে, নতুন মাল কেনা = খরচ হিসেবে টাকার খাতায় চলে যাবে।":"Sale = goes to the money book as income, buying new goods = as expense.",
+"বিক্রির দামের ধরন":"Sale price type",
+"বিনিয়োগ (৳)":"Investment (৳)",
+"বিনিয়োগের তারিখ":"Investment date",
+"বিবরণ (ঐচ্ছিক)":"Details (optional)",
+"বিবরণ (কার কাছে / কী জন্য)":"Details (from whom / what for)",
+"বিল “✏️ ঠিক” করলে তার স্টক, টাকার খাতা আর বাকির এন্ট্রিও অটোমেটিক ঠিক হয়ে যাবে; বিল মুছলেও সেগুলো একসাথে মুছে যাবে — কোনো হিসাব ঝুলে থাকবে না। নতুন বিল বানানোর ফর্মটা লিখে রেখে গেলে পেজ রিলোড হলেও খসড়াটা থেকে যাবে।":"Fixing a bill with “✏️ Fix” also fixes its stock, money-ledger and due entries automatically; deleting the bill deletes them together — no account is left hanging. If you leave the new-bill form written, the draft stays even if the page reloads.",
+"বিল CSV":"Bills CSV",
+"বিলের নাম":"Bill name",
+"বেতন দিন":"Pay salary",
+"বেতন দিলে সেটা অটোমেটিক টাকার খাতায় “বেতন / মজুরি” খরচ হিসেবে চলে যাবে — আলাদা করে আর লিখতে হবে না, দুবার হিসাব হবে না। অগ্রিম, বোনাস আর ওভারটাইমও একইভাবে দেওয়া যায় (বেতনের বোতামে গিয়ে ধরন বাছুন)। প্রতিটি কর্মচারীর কার্ডেই হাজিরা দেওয়া যায়: তারিখ বেছে ✅ উপস্থিত / ❌ অনুপস্থিত / 🏖️ ছুটি চাপুন — এই মাসে কতদিন উপস্থিত, অনুপস্থিত ও ছুটি, কার্ডেই সারসংক্ষেপ দেখা যাবে।":"Paying salary automatically goes to the money book as a “Salary / wages” expense — no need to write it separately, never counted twice. Advance, bonus and overtime can be given the same way (go to the salary button and pick the type). Attendance can be marked on each staff card: pick a date and tap ✅ Present / ❌ Absent / 🏖️ Leave — this month's present, absent and leave summary shows on the card.",
+"বোতামে চাপ দাও। বোতামে কাজ না হলে: Chrome-এর ⋮ মেনু →":"tap the button. If the button doesn't work: Chrome's ⋮ menu →",
+"ব্যবসার নাম":"Business name",
+"ব্যাকআপ ও ডাউনলোড":"Backup & downloads",
+"ভয়েসে বললে ফর্মে বসে যাবে — সেভ করার আগে যাচাই করুন, অটোমেটিক সেভ হয় না। ভয়েস চিনতে ইন্টারনেট লাগে।":"Speak and it fills the form — check before saving, it never saves automatically. Voice recognition needs internet.",
+"ভয়েসে বললে ফর্মে লেখা হয়ে যাবে —":"Speak and it gets written in the form —",
+"ভয়েসে বললে বিলে বসে যাবে —":"Speak and it goes into the bill —",
+"ভয়েসে হিসাব":"Voice entry",
+"ভিড়ের সময়ের জন্য — প্রোডাক্টে চাপ দিলেই বিলে যোগ হবে। শেষে “বিক্রি শেষ করুন” চাপলেই স্টক, টাকার খাতা আর বাকি — সব অটোমেটিক আপডেট হবে। ইন্টারনেট ছাড়াই চলে।":"For busy times — tap a product and it joins the bill. At the end tap “Finish sale” and stock, money book and dues — everything updates automatically. Works without internet.",
+"মাধ্যম":"Method",
+"মাস অনুযায়ী লাভ (শেষ ৬ মাস)":"Monthly profit (last 6 months)",
+"মাস বাছাই করো — আয়, খরচ, লাভ-ক্ষতি সব অটোমেটিক হিসাব হয়ে আসবে।":"Pick a month — income, expense and profit–loss all come calculated automatically.",
+"মাসিক বেতন (৳)":"Monthly salary (৳)",
+"মাসের কত তারিখে দিতে হয়":"On which date of the month to pay",
+"মাসের বাজেট (৳)":"Month's budget (৳)",
+"মাসের রিপোর্ট":"Monthly report",
+"মাসের লক্ষ্য (৳)":"Monthly target (৳)",
+"মুছুন":"Delete",
+"মূল্য":"Price",
+"মেমো ক্রমিক নং":"Memo serial no.",
+"মেয়াদ (দিন)":"Validity (days)",
+"মেয়াদ শেষের তারিখ (ঐচ্ছিক)":"Expiry date (optional)",
+"মেসেজ":"Message",
+"মোট = ৳ 0":"Total = ৳ 0",
+"মোট = ৳ 0 • ডেলিভারিতে বাকি পাবো = ৳ 0":"Total = ৳ 0 • Due to receive at delivery = ৳ 0",
+"মোট = ৳ 0 • বাকি = ৳ 0":"Total = ৳ 0 • Due = ৳ 0",
+"মোট কিস্তি সংখ্যা":"Total installments",
+"মোট কেনা মূল্য (অটোমেটিক)":"Total buying price (automatic)",
+"মোট টাকা":"Total money",
+"মোট টাকা (৳)":"Total money (৳)",
+"মোবাইল (ঐচ্ছিক)":"Mobile (optional)",
+"মোবাইল নম্বর (ঐচ্ছিক)":"Mobile number (optional)",
+"যাদের ফ্রি দিতে চান তাদের জিমেইল বা ফোন নম্বর লিখুন — তারা কখনো পেওয়াল দেখবে না।":"Write the Gmail or phone number of those you want to give free — they will never see the paywall.",
+"যার সাথে বাকির লেনদেন হয় তার নাম একবার যোগ করলেই হবে — তারপর তার নামে বাকি দেওয়া-নেওয়া ও টাকা শোধের হিসাব চলবে।":"Add the name of the person you have due dealings with just once — then giving dues, taking dues and payments run under his name.",
+"যে ডিলারের সাথে মালের লেনদেন হয় (আইসক্রিম ডিলার, কোম্পানির ডিলার — যে কেউ) তার নাম একবার যোগ করুন। তারপর তার নিজের খাতায় মাল দেওয়া, টাকা পাওয়া আর বাকির হিসাব — সব অটোমেটিক চলবে, খাতা-কলম ধরতে হবে না।":"Add the name of the dealer you trade goods with (ice-cream dealer, company dealer — anyone) just once. Then in his own book, goods given, money received and dues — everything runs automatically, no need to touch pen and paper.",
+"যেকোনো প্রোডাক্টের নামে চাপ দিলেই ঠিক ওই জায়গায়":"Tap any product's name and right there",
+"যেমন: 10":"e.g. 10",
+"যেমন: ১০ বস্তা চাল বাকিতে":"e.g. 10 sacks of rice on due",
+"যেমন: 10000":"e.g. 10000",
+"যেমন: 12":"e.g. 12",
+"যেমন: 123456789":"e.g. 123456789",
+"যেমন: 18":"e.g. 18",
+"যেমন: 2000":"e.g. 2000",
+"যেমন: 200000":"e.g. 200000",
+"যেমন: 450":"e.g. 450",
+"যেমন: 50":"e.g. 50",
+"যেমন: 5000":"e.g. 5000",
+"যেমন: 9HX7K2LM1P":"e.g. 9HX7K2LM1P",
+"যেমন: আলম ট্রেডার্স":"e.g. Alam Traders",
+"যেমন: করিম শেখ":"e.g. Karim Sheikh",
+"যেমন: কাপ আইসক্রিম":"e.g. Cup ice cream",
+"যেমন: গোল্ডেন আইসক্রিম, প্রাণ, স্কয়ার":"e.g. Golden Ice Cream, Pran, Square",
+"যেমন: দোকান / বাড়ি / ডিলার":"e.g. Shop / home / dealer",
+"যেমন: দোকান ভাড়া":"e.g. Shop rent",
+"যেমন: নতুন ফ্রিজ":"e.g. New fridge",
+"যেমন: বিদ্যুৎ / বিল":"e.g. Electricity / bill",
+"যেমন: মিনিকেট চাল":"e.g. Miniket rice",
+"যেমন: রফিক উদ্দিন":"e.g. Rafiq Uddin",
+"যেমন: রহিমের কাছে চাল বিক্রি":"e.g. Sold rice to Rahim",
+"যেমন: সাপ্তাহিক ডেলিভারি":"e.g. Weekly delivery",
+"যেমন: FREE30":"e.g. FREE30",
+"যোগ হবে না বাদ যাবে":"Add or subtract",
+"রসিদ / বিলের ছবি (ঐচ্ছিক)":"Receipt / bill photo (optional)",
+"রিডিম কোড":"Redeem code",
+"লক বন্ধ করুন":"Turn lock off",
+"লক্ষ্য টাকা (৳)":"Target money (৳)",
+"লক্ষ্য বানিয়ে টাকা জমান — জমা দিলে টাকা হাতের ক্যাশ থেকে সঞ্চয়ে চলে যাবে (খরচ হিসেবে গোনা হবে না), তুললে আবার হাতে ফিরে আসবে।":"Set a goal and save money — depositing moves money from hand cash into savings (not counted as an expense); withdrawing brings it back to hand.",
+"লক্ষ্য সেভ করুন":"Save goal",
+"লক্ষ্যের তারিখ (ঐচ্ছিক)":"Goal date (optional)",
+"লক্ষ্যের নাম":"Goal name",
+"লগআউট":"Log out",
+"লগইন":"Log in",
+"লগইন / অ্যাকাউন্ট খুলুন":"Log in / Open account",
+"লগইন / সাইন আপ":"Log in / Sign up",
+"লগইন আছো":"You're logged in",
+"লগইন করলে তোমার হিসাব তোমার অ্যাকাউন্টে সেভ থাকবে — যেকোনো ফোনে লগইন করলেই নিজের হিসাব পেয়ে যাবে। অন্য কারো হিসাব এখানে আসবে না।":"Log in and your accounts stay saved to your account — log in on any phone and you'll get your own accounts. Nobody else's accounts come here.",
+"লগইন করলে হিসাব তোমার অ্যাকাউন্টে সিঙ্ক থাকে — ফোন বদলালেও একই জিমেইল/নম্বর দিয়ে লগইন করলেই সব হিসাব ফিরে আসবে। দুই ফোনে আলাদা আলাদা হিসাব থাকলে লগইনের সময় দুটোই একসাথে যোগ হয়ে যায় — কোনো এন্ট্রিই হারায় না, একটার বদলে আরেকটা বসে না। একটা অ্যাকাউন্টে সর্বোচ্চ ২টি ডিভাইসে লগইন থাকতে পারে। ইন্টারনেট ছাড়াও সব কাজ চলে — অনলাইন হলেই সিঙ্ক হয়ে যায়।":"Log in and your accounts stay synced to your account — change phones and log in with the same Gmail/number and all accounts come back. If two phones hold separate accounts, at login both are added together — no entry is ever lost or replaced. An account can stay logged in on at most 2 devices. Everything works without internet too — it syncs when you're back online.",
+"লগইন করা নেই":"Not logged in",
+"লগইন করুন":"Log in",
+"লগইন থাকলে সব হিসাব তোমার অ্যাকাউন্টে অটোমেটিক সিঙ্ক হয়। চাইলে ব্যাকআপ ফাইলও ডাউনলোড করে রাখতে পারো — ফাইলটা আবার “ফিরিয়ে আনুন” দিয়ে তুললে তার এন্ট্রিগুলো বর্তমান হিসাবের সাথে যোগ হয়ে যাবে — কোনো এন্ট্রি মুছবে না।":"When logged in, all accounts sync to your account automatically. You can also download a backup file — restore that file with “Restore” and its entries are added to the current accounts — no entry is deleted.",
+"লগইনের পর চাইলে ৭ দিনের ফ্রি ট্রায়াল শুরু করা যাবে — নিজে শুরু না করলে ট্রায়াল চালু হবে না; ট্রায়াল শেষে প্ল্যান কিনলেই চলবে। একবার লগইন করলে লগআউট না করা পর্যন্ত লগইন থাকবে। লগইন/সাইন আপের সময় একবার ইন্টারনেট লাগে; হিসাবের সব কাজ অফলাইনেও চলে।":"After logging in you can start a 7-day free trial if you want — if you don't start it yourself the trial won't start; after the trial, just buy a plan. Log in once and you stay logged in until you log out. Internet is needed once for login/sign-up; all account work runs offline too.",
+"লগইনের পাসওয়ার্ড":"Login password",
+"লগইনের পাসওয়ার্ড বদলাতে বর্তমান পাসওয়ার্ডটা লাগবে। বদলানোর পর এই ফোনে লগইন থাকবেই — অন্য ডিভাইসে এরপর থেকে নতুন পাসওয়ার্ডে লগইন করতে হবে।":"To change the login password you need the current password. After changing, this phone stays logged in — other devices will need the new password from then on.",
+"লাভ = (বিক্রি দাম − কেনা দাম) × বিক্রির পরিমাণ — অটোমেটিক।":"Profit = (selling price − buying price) × quantity sold — automatic.",
+"লাভের ভাগ (%)":"Profit share (%)",
+"লিখবেন — পাশের ঘরে মোট দাম নিজে থেকে উঠবে (বক্স × এক কার্টনের দাম)।":"you write — the total price appears in the next box by itself (boxes × one carton's price).",
+"লিস্ট থেকে বাছুন, অথবা নিজের নতুন ক্যাটাগরি লিখলেই সেটা যোগ হয়ে যাবে।":"Pick from the list, or write your own new category and it gets added.",
+"লিস্টে না থাকলে":"If not in the list",
+"লোড হচ্ছে…":"Loading…",
+"লোন নিলে টাকা অটোমেটিক টাকার খাতায় আয়, লোন দিলে খরচ হিসেবে যাবে। কিস্তি দিলে/পেলে সেটাও অটোমেটিক খাতায় যাবে — একই টাকা দুবার হবে না।":"Taking a loan automatically puts income in the money book; giving a loan puts an expense. Paying/receiving an installment also goes to the book automatically — the same money never counts twice.",
+"শুরুর তারিখ":"Start date",
+"শুরুর স্টক (পরিমাণ)":"Starting stock (quantity)",
+"শুরুর স্টক লিখলেই হবে — এরপর বিক্রি / নতুন মাল এলে শুধু সংখ্যা লিখবে, বাকি হিসাব অটোমেটিক।":"Just write the starting stock — after that, for sales / new goods you only write the number, the rest of the account is automatic.",
+"শুরুর স্টকের মোট কেনা মূল্য (অটোমেটিক)":"Total buying price of starting stock (automatic)",
+"শেষ ৩০ দিন":"Last 30 days",
+"শেষ ৭ দিন":"Last 7 days",
+"শেষে গুনে পেলাম (৳)":"Counted at the end (৳)",
+"শোধের তারিখ (ঐচ্ছিক — বাকি দিলে)":"Due date (optional — if a due is given)",
+"শোধের তারিখ দিলে মেয়াদ পার হলেই ওপরে “মেয়াদ পার বকেয়া” তালিকায় লাল হয়ে দেখাবে। ভয়েসে বললে ফর্মে বসে যাবে — সেভ করার আগে যাচাই করুন।":"Give a due date and once it passes it shows in red in the “Overdue dues” list above. Speak and it fills the form — check before saving.",
+"সকালে হাতে ছিল (৳)":"Had in hand in the morning (৳)",
+"সঞ্চয়ে টাকা":"Money in savings",
+"সব ডিলার":"All dealers",
+"সব ডিলার মিলিয়ে কে কত টাকা বাকি রেখেছে — এক নজরে।":"How much each dealer still owes, all together — at a glance.",
+"সব প্রোডাক্ট ও স্টক":"All products & stock",
+"সব বিল":"All bills",
+"সব লোন ও কিস্তির হিসাব":"All loans & installment accounts",
+"সব সেভ করা প্রোডাক্ট ছাপার মতো করে আগে থেকেই সাজানো":"all saved products arranged in advance like print",
+"সবুজ = আয়, লাল = খরচ — মাস অনুযায়ী পাশাপাশি।":"Green = income, red = expense — side by side by month.",
+"সর্বশেষ এন্ট্রি":"Latest entry",
+"সর্বোচ্চ কতজন ব্যবহার করতে পারবে (খালি = সীমাহীন)":"Max how many people can use it (empty = unlimited)",
+"সাইন আপের সময় দেওয়া নামটাই এখানে দেখায় — চাইলে বদলে সেভ করুন।":"The name given at sign-up shows here — change and save if you want.",
+"সাপ্লায়ার অনুযায়ী মোট কেনা":"Total purchases by supplier",
+"সাপ্লায়ারের নাম":"Supplier name",
+"সাপ্লায়ারের WhatsApp নম্বর (ঐচ্ছিক)":"Supplier's WhatsApp number (optional)",
+"সাবধান: অ্যাকাউন্ট মুছলে সার্ভারে থাকা আপনার সব হিসাব চিরতরে মুছে যাবে — ফেরত আনা যাবে না। এই ফোনে থাকা কপিটাও লগআউট হয়ে যাবে। যাচাইয়ের জন্য পাসওয়ার্ড লাগবে।":"Warning: deleting the account permanently deletes all your accounts stored on the server — they cannot be brought back. The copy on this phone will also be logged out. Your password is needed for verification.",
+"সীমাহীন":"Unlimited",
+"সুদ (%) — ঐচ্ছিক, মোট টাকার ওপর":"Interest (%) — optional, on the total money",
+"সেভ করলেই এই টাকা টাকার খাতায় “বেতন / মজুরি” খরচ হিসেবে চলে যাবে। মাসিক বেতন একই মাসে দুবার দেওয়া যাবে না — অগ্রিম / বোনাস / ওভারটাইম যতবার দরকার দেওয়া যাবে।":"Saving sends this money to the money book as a “Salary / wages” expense right away. A monthly salary can't be paid twice in the same month — advance / bonus / overtime can be given as many times as needed.",
+"সেভ করলেই টাকাটা টাকার খাতায় অটোমেটিক চলে যাবে।":"Saving sends the money to the money book automatically right away.",
+"সেভ করলেই টাকাটা টাকার খাতায় খরচ হিসেবে যাবে আর পার্টনারের “লাভ দেওয়া হয়েছে” হিসেবে থেকে যাবে।":"Saving sends the money to the money book as an expense and it stays recorded as the partner's “profit paid”.",
+"সেভ করার আগে যাচাই করুন, অটোমেটিক সেভ হয় না":"Check before saving — it never saves automatically",
+"সেভ হয়ে থাকবে":"will stay saved",
+"স্টক এন্ট্রি":"Stock entry",
+"স্টক কমে গেলেই এই লিস্ট নিজে নিজে তৈরি হয় — কোনটা কতটুকু কিনতে হবে তাও সাজেস্ট করে। চাইলে পরিমাণ বদলানো, নিজে আইটেম যোগ করা বা বাদ দেওয়া যায়।":"This list makes itself when stock runs low — it also suggests how much of each to buy. You can change quantities, add your own items, or remove items.",
+"স্টক হিসাব CSV":"Stock accounts CSV",
+"হিসাব কোথায় থাকে":"Where accounts live",
+"হিসাব খাতা ও প্রোডাক্ট স্টক — সব হিসাব অটোমেটিক":"Account books & product stock — all accounts automatic",
+"হিসাব দেখতে তোমার ৪ সংখ্যার PIN দাও":"Enter your 4-digit PIN to see the accounts",
+"হ্যাঁ, ঠিক আছে":"Yes, that's right",
+"Admin PIN দিন।":"Enter the Admin PIN.",
+"Black Ghost Hisab — হিসাব রিপোর্ট":"Black Ghost Hisab — Accounts report",
+"Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।":"Black Ghost Hisab • Log in and your accounts stay saved to your account — with or without internet, everything works.",
+"BotFather থেকে পাওয়া টোকেন":"Token from BotFather",
+"Chrome ব্রাউজারে এই পেজ খুলে ওপরের":"Open this page in the Chrome browser and at the top",
+"example@gmail.com অথবা 01XXXXXXXXX":"example@gmail.com or 01XXXXXXXXX",
+"PIN বদলান":"Change PIN",
+"PIN ভুলে গেছি?":"Forgot PIN?",
+"PIN ভুলে গেলে সমস্যা নেই — তোমার অ্যাকাউন্টের (লগইনের) পাসওয়ার্ডটা দিলেই লক খুলে যাবে আর পুরনো PIN মুছে যাবে। তারপর চাইলে প্রোফাইল থেকে নতুন PIN সেট করো।":"No problem if you forget the PIN — just give your account (login) password and the lock opens and the old PIN is deleted. Then set a new PIN from Profile if you want.",
+"PIN সেভ করুন":"Save PIN",
+"🆘 সাপোর্ট / যোগাযোগ":"🆘 Support / Contact",
+"Telegram-এ মেসেজ করুন":"Message on Telegram",
+"torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
+"TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
+"ভার্সন 20 (v20)":"Version 20 (v20)",
+"💰 হাতে আছে (মোট ব্যালেন্স)":"💰 In hand (total balance)",
+"মোট আয় (সব সময়)":"Total income (all time)",
+"মোট খরচ (সব সময়)":"Total expense (all time)",
+"আজকের আয়":"Today's income",
+"আজকের খরচ":"Today's expense",
+"আজকের লাভ (পণ্য বিক্রি থেকে)":"Today's profit (from product sales)",
+"📦 মোট প্রোডাক্ট":"📦 Total products",
+"স্টকে মোট পরিমাণ":"Total quantity in stock",
+"স্টকের কেনা মূল্য":"Stock buying value",
+"স্টক বিক্রি হলে পাওয়া যাবে":"If all stock is sold",
+"মোট লাভ (এ পর্যন্ত বিক্রিতে)":"Total profit (sales so far)",
+"🤝 মোট পাবো (বাকি)":"🤝 Total to receive (dues)",
+"🤝 মোট দিতে হবে (বাকি)":"🤝 Total to pay (dues)",
+"⚠️ কম স্টকের প্রোডাক্ট":"⚠️ Low-stock products",
+"আজকে হাতে বাড়ল / কমল":"Net change today",
+"আজকের পণ্য-লাভ":"Today's product profit",
+"সব মিলিয়ে হাতে আছে":"Total in hand",
+"আজকের পেমেন্ট মাধ্যম অনুযায়ী":"By payment method today",
+"আজ কোনো এন্ট্রি নেই":"No entries today",
+"সব প্রোডাক্টের স্টক ঠিক আছে ✅":"All product stock is fine ✅",
+"⚠️ স্টকে নজর দিন":"⚠️ Watch the stock",
+"স্টকের মোট কেনা মূল্য":"Total stock buying value",
+"সব বিক্রি হলে পাওয়া যাবে":"If everything is sold",
+"এ পর্যন্ত মোট লাভ":"Total profit so far",
+"কোনো প্রোডাক্ট নেই — ওপরে নতুন প্রোডাক্ট যোগ করো।":"No products — add a new product above.",
+"কম স্টকের কোনো প্রোডাক্ট নেই ✅":"No low-stock products ✅",
+"মেয়াদ শেষ হতে চলেছে এমন প্রোডাক্ট নেই ✅":"No products nearing expiry ✅",
+"📦 আছে":"📦 In stock",
+"• বিক্রি হয়েছে":"• sold",
+"শুরুতে ছিল":"Started with",
+"+ এলো":"+ came in",
+"− বিক্রি":"− sold",
+"− বের হলো":"− went out",
+"= বাকি":"= left",
+"কেনা":"Buy",
+"• খুচরা":"• Retail",
+"• পাইকারি":"• Wholesale",
+"• স্টকের মূল্য":"• Stock value",
+"মোট বিক্রি:":"Total sold:",
+"• মোট লাভ:":"• Total profit:",
+"স্টক কম!":"Low stock!",
+"⛔ মেয়াদ শেষ!":"⛔ Expired!",
+"এখনো কোনো বিক্রি / মাল আসার এন্ট্রি নেই।":"No sale / stock-in entries yet.",
+"✏️ ঠিক":"✏️ Edit",
+"📥 মাল এলো":"📥 Stock in",
+"📤 নষ্ট/ফেরত":"📤 Damage/Return",
+"📖 হিসাব খুলুন":"📖 Open account",
+"📖 হিসাব":"📖 Account",
+"কোম্পানি দেওয়া নেই":"No company given",
+"দাম দেওয়া হয়নি":"No price set",
+"কারো কাছে কোনো বাকি নেই ✅":"Nobody owes anything ✅",
+"কোনো ডিলার নেই — ওপরে নতুন ডিলার যোগ করুন।":"No dealers — add a new dealer above.",
+"এখনো কোনো প্রোডাক্ট নেই — ওপরে নাম, প্যাক সাইজ আর কার্টনের দাম দিয়ে প্রোডাক্ট যোগ করুন; যোগ করলেই নিচের মেমো টেবিলে সারি হিসেবে চলে আসবে।":"No products yet — add a product above with name, pack size and carton price; once added it appears as a row in the memo table below.",
+"এখনো কোনো লেনদেন নেই — ওপরে প্রোডাক্ট যোগ করে মাল দিন বা টাকা নিন।":"No transactions yet — add products above and give goods or take money.",
+"📦 মোট মাল (সব ডিলার)":"📦 Total goods (all dealers)",
+"🏷️ পার্সেন্টেজ (মোট)":"🏷️ Percentage (total)",
+"💵 মোট পেয়েছি":"💵 Total received",
+"💰 মোট বাকি পাবো (ক্যাশ পাওনা)":"💰 Total due to receive (cash)",
+"🏪 মোট ডিলার":"🏪 Total dealers",
+"✅ প্রোডাক্ট যোগ হয়েছে":"✅ Product added",
+"✅ প্রোডাক্ট আপডেট হয়েছে — স্টক ও লাভ অটোমেটিক হিসাব হয়েছে":"✅ Product updated — stock & profit recalculated automatically",
+"⚠️ প্রোডাক্টের নাম লিখুন":"⚠️ Write the product name",
+"⚠️ আগে একজন ডিলার বাছুন":"⚠️ Pick a dealer first",
+"✅ প্রোডাক্ট ঠিক হয়েছে":"✅ Product fixed",
+"✅ প্রোডাক্ট ঠিক হয়েছে — স্টক ও লাভ অটোমেটিক হিসাব হয়েছে":"✅ Product fixed — stock & profit recalculated automatically",
+"🗑️ প্রোডাক্ট মোছা হয়েছে":"🗑️ Product deleted",
+"🗑️ ডিলার মোছা হয়েছে":"🗑️ Dealer deleted",
+"✅ ডিলার ঠিক হয়েছে":"✅ Dealer fixed",
+"⚠️ ডিলারের নাম লিখুন":"⚠️ Write the dealer name",
+"⚠️ টাকার পরিমাণ লিখুন":"⚠️ Write the amount",
+"অনলাইন":"Online",
+"অফলাইন — ফোনে চলছে":"Offline — running on this phone",
+"আপনি এখনো ফ্রি ট্রায়াল শুরু করেননি। নিচের বোতামে চাপ দিলেই ৭ দিনের ফ্রি ট্রায়াল শুরু হবে — নিজে শুরু না করলে ট্রায়াল চালু হবে না। অথবা চাইলে সরাসরি প্রিমিয়াম প্ল্যানও কিনতে পারেন।":"You have not started your free trial yet. Tap the button below and a 7-day free trial starts — it never starts unless you start it yourself. Or you can buy a premium plan directly.",
+"অ্যাপ কোন ভাষায় দেখাবে — বাংলা নাকি English। বদলালেই পুরো অ্যাপ সেই ভাষায় হয়ে যাবে, আর এই ফোনে সেভ থাকবে।":"Which language the app shows — Bengali or English. Change it and the whole app switches to that language, and it stays saved on this phone.",
+"✓ সেভ করুন":"✓ Save",
+"✕ বন্ধ করুন":"✕ Close",
+"⚠️ ফোনের স্টোরেজ প্রায় ভরে গেছে — নতুন এন্ট্রি এই ফোনে সেভ থাকছে না। কিছু ছবি বা ফাইল মুছে জায়গা করে আবার চেষ্টা করুন।":"⚠️ Phone storage is almost full — new entries are not being saved on this phone. Delete some photos or files to free space and try again."
+};
+var _i18nOrig=new WeakMap();
+function i18nKey(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
+function trStr(s){var k=i18nKey(s);return (LANG==='en'&&I18N_EN[k])?I18N_EN[k]:s;}
+function syncLangUI(){
+  document.querySelectorAll('[data-lang]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-lang')===LANG);});
+  document.documentElement.lang=(LANG==='en'?'en':'bn');
+}
+function applyLang(root){
+  if(!root||!root.querySelectorAll)return;
+  if(LANG==='en'){
+    var tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+      var p=n.parentNode;if(!p)return NodeFilter.FILTER_REJECT;
+      var t=p.nodeName;
+      if(t==='SCRIPT'||t==='STYLE'||t==='OPTION'||t==='TEXTAREA')return NodeFilter.FILTER_REJECT;
+      if(p.closest&&p.closest('#toast'))return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+    var nodes=[];while(tw.nextNode())nodes.push(tw.currentNode);
+    nodes.forEach(function(n){
+      if(!_i18nOrig.has(n))_i18nOrig.set(n,n.nodeValue);
+      var orig=_i18nOrig.get(n),k=i18nKey(orig);
+      if(k&&I18N_EN[k]){
+        var m=/^(\s*)[\s\S]*?(\s*)$/.exec(orig);
+        n.nodeValue=(m?m[1]:'')+I18N_EN[k]+(m?m[2]:'');
+      }
+    });
+    root.querySelectorAll('[placeholder],[aria-label]').forEach(function(el){
+      var store=_i18nOrig.get(el);if(!store){store={};_i18nOrig.set(el,store);}
+      ['placeholder','aria-label'].forEach(function(at){
+        if(!el.hasAttribute(at))return;
+        if(store[at]==null)store[at]=el.getAttribute(at);
+        var en=I18N_EN[i18nKey(store[at])];
+        if(en)el.setAttribute(at,en);
+      });
+    });
+  }else{
+    var tw2=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    var ns=[];while(tw2.nextNode())ns.push(tw2.currentNode);
+    ns.forEach(function(n){if(_i18nOrig.has(n))n.nodeValue=_i18nOrig.get(n);});
+    root.querySelectorAll('[placeholder],[aria-label]').forEach(function(el){
+      var store=_i18nOrig.get(el);if(!store)return;
+      ['placeholder','aria-label'].forEach(function(at){if(store[at]!=null)el.setAttribute(at,store[at]);});
+    });
+  }
+  syncLangUI();
+}
+window.setLang=function(l){
+  LANG=(l==='en')?'en':'bn';
+  try{localStorage.setItem('bgh_lang',LANG);}catch(e){}
+  renderAll();renderAccess();
+  applyLang(document.body);
+  toast(LANG==='en'?'🌐 Language: English':'🌐 ভাষা: বাংলা');
+};
+
 /* ---------- INIT ---------- */
 loadLocal();loadSub();loadReqs();loadBookView();loadLock();
 themeInit();
@@ -6427,6 +7033,7 @@ loadDrafts();
 renderAll();
 netUpdate();
 initFirebase();
+applyLang(document.body);
 setInterval(function(){renderAccess();refreshPendingBadge();if(currentUser&&deviceConfirmed&&!deviceBlocked)syncNow();},60000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&currentUser)syncNow();});
 /* If Firebase never resolves (blocked CDN / very slow network), stop showing
