@@ -862,7 +862,8 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   <section class="page" id="page-order">
     <div class="panel">
       <h2>📋 নতুন অর্ডার নিন</h2>
-      <p class="hint">অগ্রিম টাকা নিলে তা এখনই টাকার খাতায় আয় হিসেবে যাবে। ডেলিভারির সময় বাকি টাকাটাই আয় হবে — অগ্রিম দুবার হিসাব হবে না।</p>
+      <p class="hint">অগ্রিম টাকা নিলে তা এখনই টাকার খাতায় আয় হিসেবে যাবে। ডেলিভারির সময় বাকি টাকাটাই আয় হবে — অগ্রিম দুবার হিসাব হবে না। একজন কাস্টমারের নামে যত খুশি অর্ডার নেওয়া যায় — প্রতিটা অর্ডার তার নিজের তালিকায় আলাদা করে যোগ হয়।</p>
+      <div id="oForBox" style="display:none;border:1.5px solid var(--gold);border-radius:12px;padding:10px 12px;margin:0 0 12px;background:var(--goldbg)"></div>
       <div class="grid2">
         <div class="field"><label for="oCust">কাস্টমারের নাম</label><input type="text" id="oCust" placeholder="নাম লিখুন" /></div>
         <div class="field"><label for="oPhone">মোবাইল (ঐচ্ছিক)</label><input type="tel" id="oPhone" placeholder="01XXXXXXXXX" /></div>
@@ -892,12 +893,23 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <button class="btn ghost" id="oCancel" type="button" style="display:none">বাতিল</button>
       </div>
     </div>
-    <div class="panel">
-      <h2>অপেক্ষমাণ অর্ডার</h2>
-      <div class="searchrow noprint"><input type="search" id="oSearch" placeholder="🔍 কাস্টমার, প্রোডাক্ট বা মোবাইল দিয়ে খুঁজুন…" /></div>
-      <div id="orderPending"></div>
-      <h3 style="margin:16px 0 6px">আগের অর্ডার (ডেলিভারি / বাতিল)</h3>
-      <div id="orderDone"></div>
+    <div class="panel" id="orderListPanel">
+      <div id="orderPeopleView">
+        <h2>👥 কাস্টমারদের অর্ডার</h2>
+        <p class="hint">একজন কাস্টমারের নামে যত খুশি অর্ডার নেওয়া যায় — কোনো সীমা নেই। কাস্টমারের নামে চাপ দিলে শুধু তারই সব অর্ডার আলাদা পেজে খুলবে, সেখানে তার মোট অর্ডার, মোট টাকা, পাওয়া টাকা আর বাকি — সব হিসাব অটোমেটিক দেখা যাবে।</p>
+        <div class="searchrow noprint"><input type="search" id="oSearch" placeholder="🔍 কাস্টমার, প্রোডাক্ট বা মোবাইল দিয়ে খুঁজুন…" /></div>
+        <div id="orderPeople"></div>
+      </div>
+      <div id="orderPersonView" style="display:none">
+        <button class="btn ghost small noprint" type="button" onclick="orderBackToPeople()">← সব কাস্টমার</button>
+        <h2 id="opName" style="margin:12px 0 6px"></h2>
+        <div id="opTotals" style="border:1.5px solid var(--gold);border-radius:12px;padding:6px 12px;background:var(--goldbg);margin-bottom:12px"></div>
+        <button class="btn noprint" type="button" onclick="orderAddForPerson()">➕ এই কাস্টমারের নতুন অর্ডার</button>
+        <h3 style="margin:16px 0 6px">অপেক্ষমাণ অর্ডার</h3>
+        <div id="opPending"></div>
+        <h3 style="margin:16px 0 6px">আগের অর্ডার (ডেলিভারি / বাতিল)</h3>
+        <div id="opDone"></div>
+      </div>
     </div>
   </section>
 
@@ -1068,7 +1080,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 21 (v21)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 22 (v22)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -4318,8 +4330,8 @@ $('oProd').addEventListener('change',function(){
 });
 var editOrderId=null;
 function resetOrderForm(){
-  editOrderId=null;$('oCust').value='';$('oPhone').value='';$('oPname').value='';$('oQty').value='';$('oPrice').value='';$('oAdvance').value='';$('oDdate').value='';$('oDate').value=todayStr();
-  $('oSave').textContent='✅ অর্ডার সেভ করুন';$('oCancel').style.display='none';oCalc();
+  editOrderId=null;orderForKey=null;$('oCust').value='';$('oPhone').value='';$('oPname').value='';$('oQty').value='';$('oPrice').value='';$('oAdvance').value='';$('oDdate').value='';$('oDate').value=todayStr();
+  $('oSave').textContent='✅ অর্ডার সেভ করুন';$('oCancel').style.display='none';oCalc();updateOrderForBox();
 }
 $('oCancel').addEventListener('click',resetOrderForm);
 window.editOrder=function(id){
@@ -4335,6 +4347,9 @@ window.editOrder=function(id){
   toast('✏️ অর্ডারটা ফর্মে এসেছে — বদলে “আপডেট করুন” চাপুন');
 };
 $('oSave').addEventListener('click',function(){
+  /* v22: if the form was opened for one person (or we are on that person's
+     page), the saved order lands in THAT person's list and we stay there. */
+  var keepKey=orderForKey||orderPersonKey;
   var cust=$('oCust').value.trim();
   if(!cust){toast('⚠️ কাস্টমারের নাম লিখুন');$('oCust').focus();return;}
   var p=findProd($('oProd').value);
@@ -4357,6 +4372,7 @@ $('oSave').addEventListener('click',function(){
         DB.txs.push(ntx);o.txId=ntx.id;
       }
       o.cust=cust;o.phone=$('oPhone').value.trim();o.pid=p?p.id:'';o.pname=pname;o.qty=qty;o.price=price;o.advance=adv;o.date=date;o.ddate=$('oDdate').value||'';o.method=$('oMethod').value;o.u=Date.now();
+      if(keepKey)orderPersonKey=orderPersonKeyOf(o);
       resetOrderForm();saveLocal();toast('✅ অর্ডার ঠিক হয়েছে — অগ্রিমের হিসাবও আপডেট হয়েছে');
       return;
     }
@@ -4365,6 +4381,7 @@ $('oSave').addEventListener('click',function(){
   var o={id:uid(),cust:cust,phone:$('oPhone').value.trim(),pid:p?p.id:'',pname:pname,qty:qty,price:price,advance:adv,date:date,ddate:$('oDdate').value||'',status:'pending',method:$('oMethod').value,book:writeBook(),u:Date.now()};
   if(adv>0){var atx={id:uid(),date:date,type:'in',amount:adv,cat:'পণ্য বিক্রি',method:$('oMethod').value,note:'অর্ডার অগ্রিম — '+cust+' ('+pname+')',book:writeBook(),u:Date.now()};o.txId=atx.id;DB.txs.push(atx);}
   DB.orders.push(o);
+  if(keepKey)orderPersonKey=orderPersonKeyOf(o);
   resetOrderForm();
   saveLocal();toast('✅ অর্ডার সেভ হয়েছে'+(adv>0?' — অগ্রিম টাকা খাতায় আয় হয়েছে':''));
 });
@@ -4396,9 +4413,94 @@ window.delOrder=function(id){
     DB.orders=DB.orders.filter(function(x){return x.id!==id;});addTomb('o',id);saveLocal();toast('🗑️ মোছা হয়েছে');
   });
 };
+/* ---------- v22: ORDER BOOK — one person, UNLIMITED orders ----------
+   Storage is UNCHANGED: DB.orders stays the same flat list of order
+   records (same fields, same sync/merge) — nothing is migrated or
+   rewritten. The book now GROUPS those records by person (name + phone)
+   for display: the list shows one card per person with their totals,
+   tapping a person opens that person's own page, and every order inside
+   it stays an individual record that can be delivered / edited /
+   cancelled / deleted on its own. An existing lone order simply shows
+   up as a person with a 1-order list — zero data loss by construction. */
+var orderPersonKey=null;   /* key of the person whose page is open; null = people list */
+var orderPersonList=[];    /* people of the last render (index-based taps) */
+var orderForKey=null;      /* form context: the new order belongs to this person */
+function orderPersonKeyOf(o){return String((o&&o.cust)||'').trim().toLowerCase()+'|'+String((o&&o.phone)||'').trim();}
+function orderPersons(){
+  var map={},list=[];
+  bOrders().slice().sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''))||String(a.id).localeCompare(String(b.id));}).forEach(function(o){
+    var k=orderPersonKeyOf(o),g=map[k];
+    if(!g){g=map[k]={key:k,cust:o.cust||'',phone:o.phone||'',orders:[]};list.push(g);}
+    g.orders.push(o);
+    if(o.phone&&!g.phone)g.phone=o.phone;
+    if(o.cust)g.cust=o.cust;
+  });
+  return list;
+}
+function orderPaidOf(o){
+  if(o.status==='delivered')return orderTotal(o);
+  if(o.status==='pending')return Math.min(num(o.advance),orderTotal(o));
+  return 0;
+}
+function orderDueOf(o){return o.status==='pending'?orderRemaining(o):0;}
+function orderPersonTotals(g){
+  var t={count:g.orders.length,pending:0,amount:0,paid:0,due:0};
+  g.orders.forEach(function(o){
+    if(o.status==='pending')t.pending++;
+    if(o.status!=='cancelled'){t.amount+=orderTotal(o);t.paid+=orderPaidOf(o);t.due+=orderDueOf(o);}
+  });
+  return t;
+}
+function updateOrderForBox(){
+  var box=$('oForBox');if(!box)return;
+  if(orderForKey){
+    box.style.display='';
+    box.innerHTML='👤 এই অর্ডারটা <b>'+esc($('oCust').value||'')+'</b> — তার আগের অর্ডারগুলোর সাথে যোগ হবে, কিছু মুছবে না। <button class="btn small ghost noprint" type="button" onclick="orderClearFor()">✖️ অন্য কাস্টমার</button>';
+    applyLang(box);
+  }else{box.style.display='none';box.innerHTML='';}
+}
+window.orderClearFor=function(){
+  orderForKey=null;$('oCust').value='';$('oPhone').value='';updateOrderForBox();$('oCust').focus();
+};
+function setOrderFormFor(g){
+  resetOrderForm();
+  orderPersonKey=g.key;orderForKey=g.key;
+  $('oCust').value=g.cust;$('oPhone').value=g.phone||'';
+  updateOrderForBox();
+  showPageNoScroll('order');window.scrollTo({top:0,behavior:'smooth'});
+  toast('👤 '+g.cust+' — নতুন অর্ডার লিখুন, আগেরগুলোর সাথে যোগ হবে');
+  setTimeout(function(){var el=$('oPname');if(el)el.focus();},80);
+}
+window.orderAddForIdx=function(i){
+  var g=orderPersonList[i];if(!g)return;
+  setOrderFormFor(g);
+};
+window.orderAddForPerson=function(){
+  if(!orderPersonKey)return;
+  var all=orderPersons(),g=null;
+  for(var i=0;i<all.length;i++)if(all[i].key===orderPersonKey){g=all[i];break;}
+  if(g)setOrderFormFor(g);
+};
+window.openOrderPerson=function(i){
+  var g=orderPersonList[i];if(!g)return;
+  orderPersonKey=g.key;renderOrders();
+  var p=$('orderListPanel');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});
+};
+window.orderBackToPeople=function(){
+  orderPersonKey=null;renderOrders();
+  var p=$('orderListPanel');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});
+};
+function orderPersonCard(g,i){
+  var t=orderPersonTotals(g);
+  return '<div class="rowitem"><div class="r1"><div><button type="button" class="dp-namebtn" onclick="openOrderPerson('+i+')">👤 '+esc(g.cust)+'</button>'+(t.pending?' <span class="badge warn">⏳ '+fmt(t.pending)+'টি অপেক্ষমাণ</span>':'')+
+  '<div class="meta">মোট অর্ডার: '+fmt(t.count)+'টি'+(g.phone?' • 📱 '+esc(g.phone):'')+'</div>'+
+  '<div class="meta">মোট: '+money(t.amount)+' • পাওয়া গেছে: '+money(t.paid)+' • বাকি: <b>'+money(t.due)+'</b></div></div>'+
+  '<div class="amt" aria-hidden="true">›</div></div>'+
+  '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openOrderPerson('+i+')">📋 সব অর্ডার দেখুন</button><button class="btn small ghost" type="button" onclick="orderAddForIdx('+i+')">➕ নতুন অর্ডার</button></div></div>';
+}
 function orderCard(o){
   var stBadge=o.status==='pending'?'<span class="badge warn">⏳ অপেক্ষমাণ</span>':(o.status==='delivered'?'<span class="badge in">✅ ডেলিভারি হয়েছে</span>':'<span class="badge out">বাতিল</span>');
-  return '<div class="rowitem"><div class="r1"><div><b>'+esc(o.cust)+'</b> '+stBadge+'<div class="meta">'+esc(o.pname)+' — '+fmt(num(o.qty))+' × '+money(num(o.price))+' = '+money(orderTotal(o))+'</div>'+
+  return '<div class="rowitem" data-rowid="'+o.id+'"><div class="r1"><div><b>'+esc(o.cust)+'</b> '+stBadge+'<div class="meta">'+esc(o.pname)+' — '+fmt(num(o.qty))+' × '+money(num(o.price))+' = '+money(orderTotal(o))+'</div>'+
   '<div class="meta">অর্ডার: '+esc(o.date)+(o.ddate?' • ডেলিভারি: '+esc(o.ddate):'')+(o.phone?' • '+esc(o.phone):'')+'</div>'+
   '<div class="meta">অগ্রিম: '+money(num(o.advance))+' • বাকি পাবো: <b>'+money(orderRemaining(o))+'</b></div></div></div>'+
   (o.status==='pending'?'<div class="iconbtns noprint"><button class="btn small" type="button" onclick="deliverOrder(\''+o.id+'\')">✅ ডেলিভারি হয়েছে</button><button class="btn small ghost" type="button" onclick="editOrder(\''+o.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="cancelOrder(\''+o.id+'\')">বাতিল</button></div>':'<div class="iconbtns noprint"><button class="btn small danger" type="button" onclick="delOrder(\''+o.id+'\')">🗑️ রেকর্ড মুছুন</button></div>')+'</div>';
@@ -4409,10 +4511,43 @@ function renderOrders(){
   if(cur&&findProd(cur)&&inBook(findProd(cur)))sel.value=cur;
   var oq=($('oSearch').value||'').toLowerCase();
   var omatch=function(o){return !oq||(o.cust||'').toLowerCase().indexOf(oq)>=0||(o.pname||'').toLowerCase().indexOf(oq)>=0||(o.phone||'').indexOf(oq)>=0;};
-  var pend=bOrders().filter(function(o){return o.status==='pending'&&omatch(o);}).slice().sort(function(a,b){return (a.ddate||a.date).localeCompare(b.ddate||b.date);});
-  var done=bOrders().filter(function(o){return o.status!=='pending'&&omatch(o);}).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
-  $('orderPending').innerHTML=pend.length?pend.map(orderCard).join(''):'<div class="empty">কোনো অপেক্ষমাণ অর্ডার নেই।</div>';
-  $('orderDone').innerHTML=done.length?done.map(orderCard).join(''):'<p class="hint" style="margin:0">এখনো কিছু নেই।</p>';
+  var all=orderPersons();
+  var persons=all.filter(function(g){return !oq||(g.cust||'').toLowerCase().indexOf(oq)>=0||(g.phone||'').indexOf(oq)>=0||g.orders.some(omatch);});
+  persons.sort(function(a,b){
+    var ta=orderPersonTotals(a),tb=orderPersonTotals(b);
+    if((tb.due>0)!==(ta.due>0))return tb.due>0?1:-1;
+    if(tb.pending!==ta.pending)return tb.pending-ta.pending;
+    var la=a.orders[a.orders.length-1],lb=b.orders[b.orders.length-1];
+    return String((lb&&lb.date)||'').localeCompare(String((la&&la.date)||''));
+  });
+  orderPersonList=persons;
+  var curG=null;
+  if(orderPersonKey){for(var i=0;i<all.length;i++)if(all[i].key===orderPersonKey){curG=all[i];break;}}
+  var pv=$('orderPeopleView'),dv=$('orderPersonView');
+  if(orderPersonKey&&curG){
+    if(pv)pv.style.display='none';
+    if(dv)dv.style.display='';
+    $('opName').textContent='👤 '+curG.cust+(curG.phone?' • 📱 '+curG.phone:'');
+    var t=orderPersonTotals(curG);
+    $('opTotals').innerHTML='<div class="kv"><span>মোট অর্ডার</span><b>'+fmt(t.count)+'টি</b></div>'+
+    '<div class="kv"><span>মোট টাকা</span><b>'+money(t.amount)+'</b></div>'+
+    '<div class="kv"><span>পাওয়া গেছে (অগ্রিম + ডেলিভারি)</span><b style="color:var(--in)">'+money(t.paid)+'</b></div>'+
+    '<div class="kv"><span>বাকি পাবো</span><b style="color:var(--out)">'+money(t.due)+'</b></div>'+
+    (t.pending?'<div class="kv"><span>অপেক্ষমাণ</span><b>'+fmt(t.pending)+'টি</b></div>':'');
+    /* Search filters the PEOPLE list only — a person's own page always
+       shows ALL of their orders, never a silently filtered subset. */
+    var mine=curG.orders.slice();
+    var pend=mine.filter(function(o){return o.status==='pending';}).slice().sort(function(a,b){return (a.ddate||a.date).localeCompare(b.ddate||b.date);});
+    var done=mine.filter(function(o){return o.status!=='pending';}).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    $('opPending').innerHTML=pend.length?pend.map(orderCard).join(''):'<div class="empty">কোনো অপেক্ষমাণ অর্ডার নেই।</div>';
+    $('opDone').innerHTML=done.length?done.map(orderCard).join(''):'<p class="hint" style="margin:0">এখনো কিছু নেই।</p>';
+  }else{
+    orderPersonKey=null;
+    if(pv)pv.style.display='';
+    if(dv)dv.style.display='none';
+    $('orderPeople').innerHTML=persons.length?persons.map(function(g,i){return orderPersonCard(g,i);}).join(''):(oq?'<div class="empty">খুঁজে পাওয়া যায়নি।</div>':'<div class="empty">এখনো কোনো অর্ডার নেই — ওপরের ফর্মে প্রথম অর্ডার নিন।</div>');
+  }
+  updateOrderForBox();
 }
 
 /* ---------- LOANS / INSTALLMENTS ---------- */
@@ -6982,7 +7117,7 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 21 (v21)":"Version 21 (v21)",
+"ভার্সন 22 (v22)":"Version 22 (v22)",
 "💰 হাতে আছে (মোট ব্যালেন্স)":"💰 In hand (total balance)",
 "মোট আয় (সব সময়)":"Total income (all time)",
 "মোট খরচ (সব সময়)":"Total expense (all time)",
@@ -7077,7 +7212,22 @@ var I18N_EN={
 "মোট প্রোডাক্ট":"Total products",
 "এখনো কিছু বিক্রি হয়নি — প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপুন।":"Nothing sold yet — write a quantity beside a product and tap “🛒 Sell”.",
 "⚠️ কতগুলো বিক্রি করবেন, পরিমাণ লিখুন":"⚠️ Write how many you want to sell",
-"🔄 নতুন বিক্রির হিসাব শুরু হয়েছে":"🔄 A new sale summary has started"
+"🔄 নতুন বিক্রির হিসাব শুরু হয়েছে":"🔄 A new sale summary has started",
+"👥 কাস্টমারদের অর্ডার":"👥 Customers' orders",
+"একজন কাস্টমারের নামে যত খুশি অর্ডার নেওয়া যায় — কোনো সীমা নেই। কাস্টমারের নামে চাপ দিলে শুধু তারই সব অর্ডার আলাদা পেজে খুলবে, সেখানে তার মোট অর্ডার, মোট টাকা, পাওয়া টাকা আর বাকি — সব হিসাব অটোমেটিক দেখা যাবে।":"One customer can have as many orders as you want — there is no limit. Tap a customer's name and only their orders open on their own page, with their total orders, total amount, money received and due — all calculated automatically.",
+"অগ্রিম টাকা নিলে তা এখনই টাকার খাতায় আয় হিসেবে যাবে। ডেলিভারির সময় বাকি টাকাটাই আয় হবে — অগ্রিম দুবার হিসাব হবে না। একজন কাস্টমারের নামে যত খুশি অর্ডার নেওয়া যায় — প্রতিটা অর্ডার তার নিজের তালিকায় আলাদা করে যোগ হয়।":"Advance money taken now goes into the money ledger as income right away. At delivery, only the remaining amount counts as income — the advance is never counted twice. One customer can have as many orders as you want — each order is added separately to their own list.",
+"← সব কাস্টমার":"← All customers",
+"➕ এই কাস্টমারের নতুন অর্ডার":"➕ New order for this customer",
+"📋 সব অর্ডার দেখুন":"📋 See all orders",
+"➕ নতুন অর্ডার":"➕ New order",
+"👤 এই অর্ডারটা":"👤 This order goes to",
+"— তার আগের অর্ডারগুলোর সাথে যোগ হবে, কিছু মুছবে না।":"— it will be added to their previous orders; nothing will be removed.",
+"✖️ অন্য কাস্টমার":"✖️ Different customer",
+"মোট অর্ডার":"Total orders",
+"পাওয়া গেছে (অগ্রিম + ডেলিভারি)":"Received (advance + delivery)",
+"বাকি পাবো":"Due to receive",
+"এখনো কোনো অর্ডার নেই — ওপরের ফর্মে প্রথম অর্ডার নিন।":"No orders yet — take the first order in the form above.",
+"খুঁজে পাওয়া যায়নি।":"Not found."
 };
 var _i18nOrig=new WeakMap();
 function i18nKey(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
