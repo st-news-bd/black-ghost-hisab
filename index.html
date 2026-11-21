@@ -161,6 +161,17 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
 .pindots{display:flex;gap:12px;justify-content:center;margin:10px 0 2px}
 .pindots span{width:16px;height:16px;border-radius:50%;border:2px solid var(--green);display:inline-block}
 .pindots span.f{background:var(--green)}
+/* Note counter (💵 নোট হিসাব): denomination × qty = line total, live */
+.note-grid{display:grid;grid-template-columns:1fr 22px 96px 100px;gap:8px;align-items:center}
+.note-head{font-weight:700;font-size:.85rem;color:var(--muted);padding:0 2px 6px;border-bottom:1.5px solid var(--line)}
+.note-head .note-line-h{text-align:right}
+.note-row{padding:7px 2px;border-bottom:1px solid var(--line)}
+.note-denom{font-weight:800;font-size:1.02rem;white-space:nowrap}
+.note-x{text-align:center;color:var(--muted);font-weight:700}
+.note-row input{text-align:center;font-weight:700;padding:.5rem .3rem}
+.note-line{font-weight:800;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--in)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:420px){.note-grid{grid-template-columns:1fr 16px 76px 86px;gap:6px}.note-denom{font-size:.95rem}.note-line{font-size:.92rem}}
 .printonly{display:none}
 @media print{
   header.top,nav.tabs,.noprint,.toast{display:none!important}
@@ -205,6 +216,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   <nav class="tabs noprint" role="tablist" aria-label="Main">
     <button type="button" data-tab="dash" class="active">🏠 ড্যাশবোর্ড</button>
     <button type="button" data-tab="ledger">💰 টাকার হিসাব</button>
+    <button type="button" data-tab="notes">💵 নোট হিসাব</button>
     <button type="button" data-tab="stock">📦 প্রোডাক্ট স্টক</button>
     <button type="button" data-tab="dues">🤝 বাকি হিসাব</button>
     <button type="button" data-tab="dealer">🧮 হিসাব করুন</button>
@@ -224,6 +236,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <p class="hint" id="bookHint" style="margin:8px 0 0"></p>
     </div>
     <button class="btn gold noprint" id="shareAppBtn" type="button" style="width:100%;margin:0 0 14px;font-size:1.05rem;min-height:3rem">📤 অ্যাপ শেয়ার করুন</button>
+    <button class="btn noprint" id="dashNoteBtn" type="button" style="width:100%;margin:0 0 14px;font-size:1.05rem;min-height:3rem">💵 নোট হিসাব — নোট গুনে মোট টাকা বের করুন</button>
     <div id="dashWarn"></div>
     <div class="panel" id="upcomingPanel" style="display:none">
       <h2>⏰ আসন্ন কিস্তি ও ডেলিভারি</h2>
@@ -398,6 +411,28 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
   </section>
 
+  <!-- NOTE COUNTER -->
+  <section class="page" id="page-notes">
+    <div class="panel" style="margin-top:0">
+      <h2>💵 নোট হিসাব</h2>
+      <p class="hint">হাতে থাকা নোট গুনুন — প্রতিটা নোটের পাশের খালি ঘরে কয়টা আছে লিখলেই ডান পাশে ওই নোটের মোট টাকা আর নিচে সব মিলিয়ে মোট হিসাব অটোমেটিক আসবে। যেমন: ৫০০ টাকা × ৫ = ৳২,৫০০, আর ১০০ টাকা × ১০০ = ৳১০,০০০। গোনা শেষে চাইলে মোট টাকাটা এক চাপে টাকার খাতায় আয় হিসেবে যোগ করতে পারবেন।</p>
+      <div class="note-head note-grid" aria-hidden="true"><span>নোট</span><span></span><span style="text-align:center">কয়টা</span><span class="note-line-h">মোট টাকা</span></div>
+      <div id="noteRows"></div>
+      <h3 style="margin:16px 0 2px">🪙 কয়েন</h3>
+      <div id="coinRows"></div>
+      <div style="margin-top:14px">
+        <div class="kv"><span>মোট নোট ও কয়েন</span><b id="noteCount">0 টি</b></div>
+        <div class="live-total" id="noteGrand" style="margin:8px 0 0">মোট টাকা: ৳ 0</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px" class="noprint">
+        <button class="btn gold" id="notePostBtn" type="button" disabled>💰 খাতায় যোগ করুন</button>
+        <button class="btn ghost" id="noteClearBtn" type="button">🧹 সব মুছুন</button>
+      </div>
+      <p id="notePostMsg" style="margin:10px 0 0;font-weight:700"></p>
+      <p class="hint" style="margin:8px 0 0">গুনতে থাকা হিসাবটা এই ফোনেই সেভ থাকে — পেজ আবার খুললেও থেকে যাবে। খাতায় যোগ করলে ঘরগুলো খালি হয়ে যাবে, যাতে পরের গোনা নতুন করে শুরু হয়।</p>
+    </div>
+  </section>
+
   <!-- LEDGER -->
   <section class="page" id="page-ledger">
     <div class="panel">
@@ -486,7 +521,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel">
       <h2>🧾 বিক্রির হিসাব</h2>
-      <p class="hint">ওপরের তালিকায় প্রতিটা প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপলেই স্টক অটোমেটিক কমবে আর এখানে হিসাব জমা হবে। সব বিক্রি শেষে পার্সেন্টেজ আর জমা লিখে “✅ হিসাব শেষ করুন” চাপুন — তখনই জমা হওয়া টাকাটা টাকার খাতায় আয় যাবে, আর বাকি থাকলে কাস্টমারের নামে বাকি খাতায় উঠবে (নাম লিখতে হবে)। এই হিসাব শুধু এইবারের বিক্রির; মাঝপথে পেজ রিলোড হলেও হিসাবটা থেকে যাবে।</p>
+      <p class="hint">ওপরের তালিকায় প্রতিটা প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপলেই স্টক অটোমেটিক কমবে আর টাকা সঙ্গে সঙ্গে টাকার খাতায় আয় হিসেবে চলে যাবে — আলাদা করে হিসাব শেষ করার জন্য অপেক্ষা করতে হবে না। <b>বিক্রি করলেই টাকা খাতায় চলে গেছে — নিচের অংশ শুধু ছাড়/বাকির জন্য।</b> পার্সেন্টেজ দিলে শুধু ওই বাড়তি/কম অংশটুকু সমন্বয় হবে, আর জমা পুরো টাকার চেয়ে কম হলে বাকি অংশটা কাস্টমারের নামে বাকি খাতায় উঠবে (নাম লিখতে হবে)। এই হিসাব শুধু এইবারের বিক্রির; অ্যাপ আপডেট বা পেজ রিলোড হলেও হিসাবটা থেকে যাবে।</p>
       <div id="saleItems"></div>
       <div id="saleTotals"></div>
       <div class="grid3" style="margin-top:8px">
@@ -501,9 +536,10 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
           <select id="saleMethod"><option value="নগদ">নগদ (ক্যাশ)</option><option>বিকাশ</option><option value="নগদ (Nagad)">নগদ ওয়ালেট (Nagad)</option><option>ব্যাংক</option></select></div>
       </div>
       <div class="live-total" id="saleDueBox">বাকি: ৳ 0</div>
-      <button class="btn noprint" id="saleSettle" type="button" style="margin-top:10px">✅ হিসাব শেষ করুন — জমা খাতায় নিন</button>
+      <p class="hint" style="margin:6px 0 0">জমা খালি রাখলে ধরে নেওয়া হবে পুরো টাকাই জমা হয়েছে। জমা কম লিখলে বাকিটা বাকি হিসেবে যাবে। পার্সেন্টেজ ০ থাকলে কোনো বাড়তি এন্ট্রি হবে না।</p>
+      <button class="btn noprint" id="saleSettle" type="button" style="margin-top:10px">✅ হিসাব শেষ করুন — ছাড়/বাকি মেলান</button>
       <button class="btn ghost noprint" id="saleReset" type="button" style="margin-top:10px">🔄 নতুন বিক্রির হিসাব শুরু করুন</button>
-      <p class="hint" style="margin:6px 0 0">“নতুন হিসাব” বোতামে চাপলে শুধু এই হিসাবটা খালি হবে — হয়ে যাওয়া বিক্রির স্টক কমানো থেকেই যাবে, কিন্তু হিসাব শেষ না করে খালি করলে ওই বিক্রির টাকা টাকার খাতায় যাবে না।</p>
+      <p class="hint" style="margin:6px 0 0">“নতুন হিসাব” বোতামে চাপলে শুধু এই তালিকাটা খালি হবে — বিক্রির টাকা আগেই টাকার খাতায় গেছে, স্টক কমানোও থেকেই যাবে। তবে পার্সেন্টেজ/বাকির সমন্বয় বাকি থাকলে আগে “হিসাব শেষ করুন” চাপুন।</p>
     </div>
     <div class="panel">
       <h2 id="puFormTitle">🛒 কেনা মালের হিসাব</h2>
@@ -1093,7 +1129,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 25 (v25)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 26 (v26)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -1580,9 +1616,9 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </div>
 </div>
 
-<div id="salePendingBar" class="noprint" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;background:#7a4d00;color:#fff;padding:10px 12px;box-shadow:0 -2px 10px rgba(0,0,0,.3);align-items:center;gap:10px;flex-wrap:wrap">
+<div id="salePendingBar" class="noprint" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;background:#0f4d2e;color:#fff;padding:10px 12px;box-shadow:0 -2px 10px rgba(0,0,0,.3);align-items:center;gap:10px;flex-wrap:wrap">
   <span id="salePendingTxt" style="flex:1 1 200px;font-weight:700;font-size:.95rem"></span>
-  <button class="btn small" id="salePendingBtn" type="button" style="background:#fff;color:#7a4d00;font-weight:800">✅ হিসাব শেষ করুন</button>
+  <button class="btn small" id="salePendingBtn" type="button" style="background:#fff;color:#0f4d2e;font-weight:800">ছাড়/বাকি মেলান</button>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -1613,7 +1649,7 @@ function $(id){return document.getElementById(id);}
 /* ---------- DATA (local first, per-account) ---------- */
 /* App name lives in ONE place: change APP_NAME here + <title> + manifest to rename. */
 var APP_NAME='Black Ghost Hisab';
-function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],purchases:[],olist:[],dealers:[],dprods:[],dtxs:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,profilePhoto:'',profilePhotoU:0,bizName:'',bizNameU:0,memoSeq:0,memoSeeded:0,tombs:[],updatedAt:0,rev:0};}
+function blankDB(){return{txs:[],products:[],logs:[],parties:[],dues:[],bills:[],staff:[],pays:[],cats:[],cashdays:[],partners:[],orders:[],loans:[],insts:[],budgets:[],goals:[],rbills:[],rpays:[],atts:[],purchases:[],olist:[],dealers:[],dprods:[],dtxs:[],books:[{id:'main',name:'প্রধান খাতা',u:0}],targetAmt:0,targetU:0,profilePhoto:'',profilePhotoU:0,bizName:'',bizNameU:0,memoSeq:0,memoSeeded:0,tombs:[],updatedAt:0,rev:0,saleSess:null,saleSessU:0};}
 /* ---------- SEPARATE BOOKS (আলাদা খাতা) ----------
    Every entry/product/party/etc. carries a `book` field = the id of the
    book it belongs to. Entries saved before books existed have NO book
@@ -1666,7 +1702,7 @@ function bookName(id){var b=findBook(id);return b?b.name:'প্রধান খ
    rev   = local revision counter, bumped on every save. */
 function normDB(d){
   if(!d||typeof d!=='object')return blankDB();
-  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],purchases:Array.isArray(d.purchases)?d.purchases:[],olist:Array.isArray(d.olist)?d.olist:[],dealers:Array.isArray(d.dealers)?d.dealers:[],dprods:Array.isArray(d.dprods)?d.dprods:[],dtxs:Array.isArray(d.dtxs)?d.dtxs:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),profilePhoto:typeof d.profilePhoto==='string'?d.profilePhoto:'',profilePhotoU:num(d.profilePhotoU),bizName:typeof d.bizName==='string'?d.bizName:'',bizNameU:num(d.bizNameU),memoSeq:num(d.memoSeq),memoSeeded:num(d.memoSeeded),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev)};
+  return{txs:Array.isArray(d.txs)?d.txs:[],products:Array.isArray(d.products)?d.products:[],logs:Array.isArray(d.logs)?d.logs:[],parties:Array.isArray(d.parties)?d.parties:[],dues:Array.isArray(d.dues)?d.dues:[],bills:Array.isArray(d.bills)?d.bills:[],staff:Array.isArray(d.staff)?d.staff:[],pays:Array.isArray(d.pays)?d.pays:[],cats:Array.isArray(d.cats)?d.cats:[],cashdays:Array.isArray(d.cashdays)?d.cashdays:[],partners:Array.isArray(d.partners)?d.partners:[],orders:Array.isArray(d.orders)?d.orders:[],loans:Array.isArray(d.loans)?d.loans:[],insts:Array.isArray(d.insts)?d.insts:[],budgets:Array.isArray(d.budgets)?d.budgets:[],goals:Array.isArray(d.goals)?d.goals:[],rbills:Array.isArray(d.rbills)?d.rbills:[],rpays:Array.isArray(d.rpays)?d.rpays:[],atts:Array.isArray(d.atts)?d.atts:[],purchases:Array.isArray(d.purchases)?d.purchases:[],olist:Array.isArray(d.olist)?d.olist:[],dealers:Array.isArray(d.dealers)?d.dealers:[],dprods:Array.isArray(d.dprods)?d.dprods:[],dtxs:Array.isArray(d.dtxs)?d.dtxs:[],books:normBooks(d.books),targetAmt:num(d.targetAmt),targetU:num(d.targetU),profilePhoto:typeof d.profilePhoto==='string'?d.profilePhoto:'',profilePhotoU:num(d.profilePhotoU),bizName:typeof d.bizName==='string'?d.bizName:'',bizNameU:num(d.bizNameU),memoSeq:num(d.memoSeq),memoSeeded:num(d.memoSeeded),tombs:Array.isArray(d.tombs)?d.tombs:[],updatedAt:num(d.updatedAt),rev:num(d.rev),saleSess:(d.saleSess&&typeof d.saleSess==='object')?d.saleSess:null,saleSessU:num(d.saleSessU)};
 }
 var DB=blankDB();
 var curKey=LS_KEY; /* guest (this-phone-only) key until login */
@@ -1702,7 +1738,7 @@ function mergeData(a,b){
   a.tombs.concat(b.tombs).forEach(function(t){if(t&&!tombSet[t]){tombSet[t]=1;tombs.push(t);}});
   var catSet={},catList=[];
   a.cats.concat(b.cats).forEach(function(c){if(c&&!catSet[c]){catSet[c]=1;catList.push(c);}});
-  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),dealers:mergeArr(a.dealers,b.dealers,'D',tombSet),dprods:mergeArr(a.dprods,b.dprods,'P',tombSet),dtxs:mergeArr(a.dtxs,b.dtxs,'X',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),profilePhoto:(b.profilePhotoU>a.profilePhotoU?b.profilePhoto:a.profilePhoto),profilePhotoU:Math.max(a.profilePhotoU,b.profilePhotoU),bizName:(b.bizNameU>a.bizNameU?b.bizName:a.bizName),bizNameU:Math.max(a.bizNameU,b.bizNameU),memoSeq:Math.max(a.memoSeq,b.memoSeq),memoSeeded:Math.max(a.memoSeeded,b.memoSeeded),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev)};
+  return{txs:mergeArr(a.txs,b.txs,'t',tombSet),products:mergeArr(a.products,b.products,'p',tombSet),logs:mergeArr(a.logs,b.logs,'l',tombSet),parties:mergeArr(a.parties,b.parties,'y',tombSet),dues:mergeArr(a.dues,b.dues,'d',tombSet),bills:mergeArr(a.bills,b.bills,'b',tombSet),staff:mergeArr(a.staff,b.staff,'s',tombSet),pays:mergeArr(a.pays,b.pays,'w',tombSet),cashdays:mergeArr(a.cashdays,b.cashdays,'k',tombSet),partners:mergeArr(a.partners,b.partners,'n',tombSet),orders:mergeArr(a.orders,b.orders,'o',tombSet),loans:mergeArr(a.loans,b.loans,'j',tombSet),insts:mergeArr(a.insts,b.insts,'i',tombSet),budgets:mergeArr(a.budgets,b.budgets,'g',tombSet),goals:mergeArr(a.goals,b.goals,'e',tombSet),rbills:mergeArr(a.rbills,b.rbills,'r',tombSet),rpays:mergeArr(a.rpays,b.rpays,'q',tombSet),atts:mergeArr(a.atts,b.atts,'a',tombSet),purchases:mergeArr(a.purchases,b.purchases,'h',tombSet),olist:mergeArr(a.olist,b.olist,'z',tombSet),dealers:mergeArr(a.dealers,b.dealers,'D',tombSet),dprods:mergeArr(a.dprods,b.dprods,'P',tombSet),dtxs:mergeArr(a.dtxs,b.dtxs,'X',tombSet),books:mergeArr(a.books,b.books,'k2',tombSet),cats:catList,targetAmt:(b.targetU>a.targetU?b.targetAmt:a.targetAmt),targetU:Math.max(a.targetU,b.targetU),profilePhoto:(b.profilePhotoU>a.profilePhotoU?b.profilePhoto:a.profilePhoto),profilePhotoU:Math.max(a.profilePhotoU,b.profilePhotoU),bizName:(b.bizNameU>a.bizNameU?b.bizName:a.bizName),bizNameU:Math.max(a.bizNameU,b.bizNameU),memoSeq:Math.max(a.memoSeq,b.memoSeq),memoSeeded:Math.max(a.memoSeeded,b.memoSeeded),tombs:tombs,updatedAt:Math.max(a.updatedAt,b.updatedAt),rev:Math.max(a.rev,b.rev),saleSess:(b.saleSessU>a.saleSessU?b.saleSess:a.saleSess),saleSessU:Math.max(a.saleSessU,b.saleSessU)};
 }
 function addTomb(p,id){var t=p+id;if(DB.tombs.indexOf(t)<0)DB.tombs.push(t);}
 var persistWarned=false;
@@ -3960,6 +3996,95 @@ function renderCash(){
   }).join('')):'';
 }
 
+/* ---------- NOTE COUNTER (💵 নোট হিসাব) — v26 ----------
+   Scratch cash count: denomination × qty = line total, updated live on
+   every keystroke (input event). Largest notes first, coins last.
+   The in-progress count lives ONLY in localStorage on this phone
+   (key bgh_notecount_v1) — it is never written into DB, so it never
+   syncs to the Firestore user doc and mergeData/blankDB stay untouched.
+   Posting writes exactly ONE normal income tx via saveLocal(), so the
+   entry syncs and shows in the money ledger like any other entry. */
+var NOTE_DENOMS=[1000,500,200,100,50,20,10];
+var COIN_DENOMS=[5,2,1];
+var NOTE_LS_KEY='bgh_notecount_v1';
+function noteQtyOf(d){
+  var el=document.querySelector('.note-qty[data-denom="'+d+'"]');
+  if(!el)return 0;
+  var v=String(el.value||'').trim();
+  if(v==='')return 0; /* empty qty = 0 */
+  var n=parseFloat(v);
+  return (isFinite(n)&&n>0)?n:0; /* non-numeric / negative input ignored */
+}
+function noteTotals(){
+  var total=0,count=0;
+  NOTE_DENOMS.concat(COIN_DENOMS).forEach(function(d){var q=noteQtyOf(d);total+=d*q;count+=q;});
+  return{total:total,count:count};
+}
+function noteSaveLocal(){
+  var o={};
+  document.querySelectorAll('.note-qty').forEach(function(el){var v=String(el.value||'').trim();if(v!=='')o[el.getAttribute('data-denom')]=v;});
+  try{localStorage.setItem(NOTE_LS_KEY,JSON.stringify(o));}catch(e){}
+}
+function noteLoadLocal(){
+  try{var raw=localStorage.getItem(NOTE_LS_KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object')return o;}}catch(e){}
+  return {};
+}
+function noteRowHtml(d,isCoin){
+  return '<div class="note-grid note-row"><span class="note-denom">'+bnNum(d)+' টাকা</span><span class="note-x" aria-hidden="true">×</span><input type="number" class="note-qty" data-denom="'+d+'" inputmode="numeric" min="0" step="1" placeholder="0" aria-label="'+bnNum(d)+' টাকার '+(isCoin?'কয়েন':'নোট')+' কয়টা" /><span class="note-line" data-line="'+d+'">৳ 0</span></div>';
+}
+function noteRecalc(){
+  NOTE_DENOMS.concat(COIN_DENOMS).forEach(function(d){
+    var lineEl=document.querySelector('.note-line[data-line="'+d+'"]');
+    if(lineEl)lineEl.textContent=money(d*noteQtyOf(d));
+  });
+  var t=noteTotals();
+  var g=$('noteGrand');if(g)g.textContent='মোট টাকা: '+money(t.total);
+  var c=$('noteCount');if(c)c.textContent=fmt(t.count)+' টি';
+  var pb=$('notePostBtn');if(pb)pb.disabled=!(t.total>0);
+  noteSaveLocal();
+}
+function buildNoteRows(){
+  var saved=noteLoadLocal();
+  var nr=$('noteRows'),cr=$('coinRows');
+  if(!nr||!cr)return;
+  nr.innerHTML=NOTE_DENOMS.map(function(d){return noteRowHtml(d,false);}).join('');
+  cr.innerHTML=COIN_DENOMS.map(function(d){return noteRowHtml(d,true);}).join('');
+  document.querySelectorAll('.note-qty').forEach(function(el){
+    var d=el.getAttribute('data-denom');
+    if(saved[d]!=null&&String(saved[d]).trim()!=='')el.value=saved[d];
+    el.addEventListener('input',noteRecalc);
+  });
+  noteRecalc();
+}
+function noteClearAll(){
+  document.querySelectorAll('.note-qty').forEach(function(el){el.value='';});
+  noteRecalc();
+}
+$('noteClearBtn').addEventListener('click',function(){
+  var t=noteTotals();
+  if(!(t.count>0)){toast('মোছার মতো কিছু নেই — সব ঘর এমনিতেই খালি');return;}
+  askSure('সব নোটের হিসাব মুছে ফেলবেন? মোট '+money(t.total)+' ('+fmt(t.count)+' টি) গোনা ছিল — সব ঘর খালি হয়ে যাবে।',function(){
+    noteClearAll();
+    var m=$('notePostMsg');if(m)m.textContent='';
+    toast('🧹 সব মোছা হয়েছে — নতুন করে গুনুন');
+  });
+});
+$('notePostBtn').addEventListener('click',function(){
+  var t=noteTotals();
+  if(!(t.total>0)){toast('⚠️ আগে নোট গুনুন — মোট টাকা ৳ ০ হলে খাতায় যোগ হবে না');return;}
+  askSure('গোনা '+money(t.total)+' ('+fmt(t.count)+' টি নোট/কয়েন) টাকার খাতায় আয় হিসেবে যোগ করবেন? বিবরণ: “নোট গোনা — হাতে নগদ”, মাধ্যম: নগদ (ক্যাশ)। যোগ হলে গোনার ঘরগুলো খালি হয়ে যাবে।',function(){
+    var amt=t.total;
+    DB.txs.push({id:uid(),date:todayStr(),type:'in',amount:amt,cat:'নোট গোনা',method:'নগদ',note:'নোট গোনা — হাতে নগদ',book:writeBook(),u:Date.now()});
+    saveLocal();
+    noteClearAll();
+    var m=$('notePostMsg');if(m){m.textContent='✅ '+money(amt)+' টাকার খাতায় আয় হিসেবে যোগ হয়েছে — “টাকার হিসাব” পেজে দেখা যাবে।';m.style.color='var(--in)';}
+    toast('✅ '+money(amt)+' খাতায় যোগ হয়েছে');
+  });
+});
+var dashNoteBtnEl=$('dashNoteBtn');
+if(dashNoteBtnEl)dashNoteBtnEl.addEventListener('click',function(){showPageNoScroll('notes');window.scrollTo({top:0,behavior:'smooth'});});
+buildNoteRows();
+
 /* ---------- MONTHLY SALES TARGET ---------- */
 $('targetSave').addEventListener('click',function(){
   DB.targetAmt=num($('targetInput').value);DB.targetU=Date.now();saveLocal();toast('🎯 বিক্রির লক্ষ্য সেভ হয়েছে');
@@ -6161,15 +6286,14 @@ function renderProducts(){
    total items, total amount, one percentage adjustment at the end
    (adj = sign × total × pct ÷ 100 — the dealer-memo rule: +2% on ৳100 =
    ৳102, −2% = ৳98), জমা (paid), বাকি = (total + adj) − paid.
-   v23 reconciliation: NO money entry is written per tap anymore — v21
-   wrote the FULL amount as cash income on every tap, so the % adjustment
-   and any unpaid part silently vanished and the ledger disagreed with the
-   summary. Money now moves only on "✅ হিসাব শেষ করুন": exactly the PAID
-   part of the %-adjusted total goes to the money ledger with the chosen
-   payment method, and any unpaid remainder becomes a real due entry
-   against the named customer, so it can never vanish. The unsettled
-   session is kept in this phone's storage (per account, like the bill /
-   POS drafts), so a reload mid-sale loses nothing either.
+   v26 reconciliation (owner demand: FULLY automatic): every tap posts
+   its money to the ledger IMMEDIATELY (income = qty × chosen selling
+   price) together with the stock log and the summary line — no settle
+   tap needed. The session itself is stored in the user doc
+   (DB.saleSess, synced), so a reload or an app update mid-session loses
+   nothing. "✅ হিসাব শেষ করুন" is now ADJUSTMENT-ONLY: one % entry and,
+   for a partial জমা, one due entry + one matching income reversal —
+   it never re-posts the sale money, so there is no double-posting.
    v25: the amount is qty × SELLING price (qsPrice — খুচরা p.sell,
    পাইকারি p.wsell; NEVER the কেনা দাম p.buy). A missing / 0 selling
    price BLOCKS the sale with a clear warning and opens the product's
@@ -6232,16 +6356,31 @@ window.qsSetMode=function(id,v){
   if(p&&sp)sp.textContent=qsPriceName(p)+' দাম '+money(qsPrice(p))+' / '+p.unit;
   qsLineRefresh(id);
 };
-/* The unsettled sale session survives reloads (per account, this phone
-   only — same treatment as the bill draft and POS cart). */
-function saveSaleSession(){
-  try{localStorage.setItem(curKey+'_saledraft',JSON.stringify({items:saleSession.items,order:saleSession.order,pct:$('salePct')?$('salePct').value:'',sign:$('salePctSign')?$('salePctSign').value:'1',paid:$('salePaid')?$('salePaid').value:'',cust:$('saleCust')?$('saleCust').value:'',method:$('saleMethod')?$('saleMethod').value:'নগদ'}));}catch(e){}
+/* v26: the sale session lives in the USER DOC (DB.saleSess) so it syncs
+   like all other data and survives reloads AND app updates. The old
+   localStorage draft is kept only as a migration fallback: if the doc
+   has no session yet but an old draft exists, it is adopted once. */
+function saleSessSnapshot(){
+  return{items:JSON.parse(JSON.stringify(saleSession.items||{})),order:(saleSession.order||[]).slice(),pct:$('salePct')?$('salePct').value:'',sign:$('salePctSign')?$('salePctSign').value:'1',paid:$('salePaid')?$('salePaid').value:'',cust:$('saleCust')?$('saleCust').value:'',method:$('saleMethod')?$('saleMethod').value:'নগদ'};
 }
-function clearSaleSession(){try{localStorage.removeItem(curKey+'_saledraft');}catch(e){}}
+function saveSaleSession(){
+  var snap=saleSessSnapshot();
+  DB.saleSess=snap;DB.saleSessU=Date.now();
+  /* Persist the whole doc locally right away (no re-render, no focus
+     loss) so even a %/জমা keystroke survives a reload; the caller's
+     saveLocal() then pushes the same doc to Firestore. */
+  try{persistLocal();}catch(e){}
+  try{localStorage.setItem(curKey+'_saledraft',JSON.stringify(snap));}catch(e){}
+}
+function clearSaleSession(){
+  DB.saleSess=null;DB.saleSessU=Date.now();
+  try{localStorage.removeItem(curKey+'_saledraft');}catch(e){}
+}
 function restoreSaleSession(){
   saleSession={items:{},order:[]};
   var d=null;
-  try{var raw=localStorage.getItem(curKey+'_saledraft');if(raw)d=JSON.parse(raw);}catch(e){}
+  if(DB.saleSess&&typeof DB.saleSess==='object'&&DB.saleSess.items)d=DB.saleSess;
+  if(!d){try{var raw=localStorage.getItem(curKey+'_saledraft');if(raw)d=JSON.parse(raw);}catch(e){}}
   if($('salePct'))$('salePct').value=d?(d.pct||''):'';
   if($('salePctSign'))$('salePctSign').value=(d&&d.sign==='-1')?'-1':'1';
   if($('salePaid'))$('salePaid').value=d?(d.paid||''):'';
@@ -6250,11 +6389,7 @@ function restoreSaleSession(){
   if(d&&d.items&&typeof d.items==='object'&&Array.isArray(d.order)){
     saleSession.items=d.items;
     saleSession.order=d.order.filter(function(k){return !!saleSession.items[k];});
-    /* v25: drafts saved before the per-price-type session keys get
-       their product id / price type filled in (খুচরা — the default).
-       Nothing is dropped and every saved amount stays exactly as it
-       was; only the labels gain the missing pieces. */
-    saleSession.order.forEach(function(k){var it=saleSession.items[k];if(it&&!it.pid)it.pid=k;if(it&&!it.mode)it.mode='rt';});
+    saleSession.order.forEach(function(k){var it=saleSession.items[k];if(it&&!it.pid)it.pid=k;if(it&&!it.mode)it.mode='rt';if(!it.txIds)it.txIds=[];});
   }
   renderSaleSummary();
 }
@@ -6276,58 +6411,86 @@ window.quickSell=function(id){
     qsOpenPriceEditor(p.id,mode);
     return;
   }
-  var total=q*price, d=todayStr();
-  DB.logs.push({id:uid(),pid:p.id,date:d,type:'sale',qty:q,price:price,party:'',book:bookOf(p),u:Date.now(),cost:num(p.buy)});
+  var total=Math.round(q*price*100)/100, d=todayStr();
+  var logId=uid();
+  DB.logs.push({id:logId,pid:p.id,date:d,type:'sale',qty:q,price:price,party:'',book:bookOf(p),u:Date.now(),cost:num(p.buy)});
+  /* v26 FIX 1 — IMMEDIATE POSTING: the money goes to the ledger in THIS
+     tap — income = qty × chosen selling price, method = the জমার মাধ্যম
+     currently chosen in the summary panel (default নগদ). No settle tap
+     is needed for the money to be safe. */
+  var method=($('saleMethod')&&$('saleMethod').value)||'নগদ';
+  var txId=uid();
+  DB.txs.push({id:txId,date:d,type:'in',amount:total,cat:'পণ্য বিক্রি',method:method,note:'পণ্য বিক্রি — '+p.name+' × '+fmt(q),book:bookOf(p),u:Date.now()});
   /* The session line is kept per product AND price type, so a খুচরা
-     sale and a পাইকারি sale of the same product stay two honest lines. */
+     sale and a পাইকারি sale of the same product stay two honest lines.
+     txIds/logIds record exactly what this line already posted, so
+     settle can stay adjustment-only and never double-post. */
   var key=p.id+'|'+mode;
   var it=saleSession.items[key];
-  if(!it){it=saleSession.items[key]={pid:p.id,mode:mode,qty:0,amt:0,price:price};saleSession.order.push(key);}
-  it.qty+=q;it.amt+=total;it.price=price;
+  if(!it){it=saleSession.items[key]={pid:p.id,mode:mode,qty:0,amt:0,price:price,txIds:[],logIds:[]};saleSession.order.push(key);}
+  if(!it.txIds)it.txIds=[];if(!it.logIds)it.logIds=[];
+  it.qty+=q;it.amt+=total;it.price=price;it.txIds.push(txId);it.logIds.push(logId);
   qsQty[p.id]=1;
   saveSaleSession();
   saveLocal();
-  toast('✅ '+p.name+' '+fmt(q)+' '+p.unit+' বিক্রি হয়েছে ('+qsPriceName(p)+' দামে) — '+money(total)+' (স্টক কমে গেছে, নিচের হিসাবে জমা হয়েছে — সব বিক্রি শেষে “✅ হিসাব শেষ করুন” চাপলেই টাকা খাতায় যাবে)');
+  toast('✅ '+p.name+' '+fmt(q)+' '+p.unit+' বিক্রি হয়েছে ('+qsPriceName(p)+' দামে) — '+money(total)+' ✓ খাতায় গেছে (স্টক কমে গেছে, টাকা টাকার খাতায় আয় হয়েছে)');
 };
-/* Settle the session: the books are made to match the bottom summary
-   exactly — paid part (after %) to the money ledger with the chosen
-   method, unpaid remainder to the dues book under the named customer. */
+/* v26 FIX 3 — SETTLE IS ADJUSTMENT-ONLY. The sale money is ALREADY in
+   the ledger (posted by quickSell on every tap), so settle must never
+   re-post it. It posts at most:
+   - ONE % adjustment entry (adj>0 → income, adj<0 → expense/discount);
+   - if জমা < final amount: ONE due entry + ONE income reversal of the
+     same amount, so net ledger income = জমা (paid).
+   জমা left EMPTY means fully paid (the normal case — money already
+   posted in full), so 0% + empty/full জমা = no new entries at all. */
 function settleSale(){
   var c=saleCalc();
   if(!saleSession.order.length){toast('⚠️ আগে কিছু বিক্রি করুন');return;}
-  /* A restored pre-v25 session can still hold ৳ 0 lines (sold while
-     the price bug existed) — say exactly that instead of the old
-     misleading 'আগে কিছু বিক্রি করুন'. */
   if(!(c.amt>0)){toast('⚠️ এই বিক্রিগুলোর মোট টাকা ৳ ০ — প্রোডাক্টে বিক্রি দাম বসানো হয়নি। দাম বসিয়ে ঠিক করুন, নাহলে “🔄 নতুন বিক্রির হিসাব” চেপে হিসাবটা খালি করুন');return;}
   var fin=Math.round(c.fin*100)/100;
-  var paid=Math.round(Math.min(Math.max(num($('salePaid').value),0),Math.max(fin,0))*100)/100;
-  var due=Math.round((fin-paid)*100)/100;
+  var adj=Math.round(c.adj*100)/100;
+  var paid=c.paid; /* effective paid: empty জমা = fin (fully paid) */
+  var due=Math.round((fin-paid)*100)/100;if(due<0)due=0;
   var cust=$('saleCust').value.trim();
   if(due>0&&!cust){toast('⚠️ বাকি '+money(due)+' আছে — কার নামে বাকি যাবে, কাস্টমারের নাম লিখুন');$('saleCust').focus();return;}
   var method=$('saleMethod').value||'নগদ';
   var d=todayStr(),bk=writeBook();
   var names=saleSession.order.map(function(k){var it=saleSession.items[k],p=findProd(it.pid||k);return (p?p.name:'প্রোডাক্ট')+' ×'+fmt(it.qty)+' ('+(it.mode==='ws'?'পাইকারি':'খুচরা')+')';}).join(', ');
-  if(paid>0)DB.txs.push({id:uid(),date:d,type:'in',amount:paid,cat:'পণ্য বিক্রি',method:method,note:'স্টক পেজ বিক্রি — '+names+(cust?' — '+cust:''),book:bk,u:Date.now()});
+  var posted=[];
+  if(Math.abs(adj)>0.004){
+    if(adj>0){DB.txs.push({id:uid(),date:d,type:'in',amount:adj,cat:'পণ্য বিক্রি',method:method,note:'স্টক বিক্রি পার্সেন্টেজ সমন্বয় ('+(c.sign>0?'+':'−')+fmt(c.pct)+'%) — '+names,book:bk,u:Date.now()});posted.push('পার্সেন্টেজ +'+money(adj));}
+    else{DB.txs.push({id:uid(),date:d,type:'out',amount:Math.abs(adj),cat:'বিক্রি ছাড়',method:method,note:'স্টক বিক্রি পার্সেন্টেজ ছাড় ('+fmt(c.pct)+'%) — '+names,book:bk,u:Date.now()});posted.push('ছাড় −'+money(Math.abs(adj)));}
+  }
   if(due>0){
     var party=null;
     bParties().forEach(function(p){if(p.name.toLowerCase()===cust.toLowerCase())party=p;});
     if(!party){party={id:uid(),name:cust,phone:'',kind:'customer',limit:0,book:bk,u:Date.now()};DB.parties.push(party);}
     DB.dues.push({id:uid(),pid:party.id,date:d,type:'give',amount:due,note:'স্টক পেজ বিক্রির বাকি',dueDate:'',book:bookOf(party),u:Date.now()});
+    /* Reversal: the unpaid part was already posted as income by the
+       sale taps — take it back out so net income = paid. */
+    DB.txs.push({id:uid(),date:d,type:'out',amount:due,cat:'পণ্য বিক্রি',method:method,note:'বাকির জন্য আয় সমন্বয় — '+names+' — '+cust,book:bk,u:Date.now()});
+    posted.push('বাকি '+money(due));
   }
   saleSession={items:{},order:[]};
   $('salePct').value='';$('salePaid').value='';$('saleCust').value='';if($('salePctSign'))$('salePctSign').value='1';
   clearSaleSession();
   saveLocal();
-  toast('✅ হিসাব শেষ — জমা '+money(paid)+' টাকার খাতায় গেছে'+(due>0?' • বাকি '+money(due)+' “'+cust+'”-এর নামে বাকি খাতায় গেছে':''));
+  if(!posted.length)toast('✅ হিসাব শেষ — টাকা আগেই খাতায় গেছে, নতুন কোনো এন্ট্রি লাগেনি');
+  else toast('✅ হিসাব শেষ — সমন্বয় হয়েছে: '+posted.join(' • ')+(due>0?' • বাকি “'+cust+'”-এর নামে বাকি খাতায় গেছে':''));
 }
 function saleCalc(){
   var items=0,amt=0;
   saleSession.order.forEach(function(pid){var it=saleSession.items[pid];if(it){items+=num(it.qty);amt+=num(it.amt);}});
+  amt=Math.round(amt*100)/100;
   var pct=num($('salePct')?$('salePct').value:0);
   var sign=($('salePctSign')&&$('salePctSign').value==='-1')?-1:1;
-  var adj=sign*amt*pct/100, fin=amt+adj;
-  var paid=num($('salePaid')?$('salePaid').value:0);
-  return{items:items,amt:amt,pct:pct,sign:sign,adj:adj,fin:fin,paid:paid,due:fin-paid};
+  var adj=Math.round(sign*amt*pct/100*100)/100, fin=Math.round((amt+adj)*100)/100;
+  var rawPaid=$('salePaid')?String($('salePaid').value).trim():'';
+  var hasPaid=rawPaid!=='';
+  var paid=hasPaid?Math.round(Math.min(Math.max(num(rawPaid),0),Math.max(fin,0))*100)/100:fin;
+  if(!saleSession.order.length)paid=hasPaid?num(rawPaid):0;
+  var due=Math.round((fin-paid)*100)/100;
+  return{items:items,amt:amt,pct:pct,sign:sign,adj:adj,fin:fin,paid:paid,hasPaid:hasPaid,due:due};
 }
 function renderSaleSummary(){
   var box=$('saleItems'),tot=$('saleTotals'),due=$('saleDueBox');
@@ -6335,44 +6498,36 @@ function renderSaleSummary(){
   if(!saleSession.order.length){
     box.innerHTML='<p class="hint" style="margin:0">এখনো কিছু বিক্রি হয়নি — প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপুন।</p>';
   }else{
-    box.innerHTML=saleSession.order.map(function(k){
+    box.innerHTML='<p class="hint" style="margin:0 0 4px">বিক্রি করলেই টাকা খাতায় চলে গেছে — নিচের অংশ শুধু ছাড়/বাকির জন্য।</p>'+saleSession.order.map(function(k){
       var it=saleSession.items[k],p=findProd(it.pid||k);
-      /* v25: every line shows its own arithmetic AND the price type
-         used — 'Hghg — 50 পিস × ৳ 20 (খুচরা)' with the line total at
-         the end. A restored older draft carries no unit price; it is
-         derived from amount ÷ qty, which reproduces the same total. */
       var up=num(it.price)>0?num(it.price):(num(it.qty)>0?num(it.amt)/num(it.qty):0);
-      return '<div class="kv"><span>'+esc(p?p.name:'প্রোডাক্ট')+' — '+fmt(it.qty)+(p?' '+esc(p.unit):'')+(up>0?' × '+money(up):'')+' ('+(it.mode==='ws'?'পাইকারি':'খুচরা')+')</span><b>'+money(it.amt)+'</b></div>';
+      /* v26 FIX 4: lines whose money was posted by quickSell (txIds
+         present, or restored v26 sessions) carry ✓ খাতায় গেছে. A
+         restored pre-v26 line has no txIds — it is honestly marked as
+         not-yet-posted instead of pretending. */
+      var postedMark=(it.txIds&&it.txIds.length)?' <span style="color:var(--in);font-weight:700">✓ খাতায় গেছে</span>':'';
+      return '<div class="kv"><span>'+esc(p?p.name:'প্রোডাক্ট')+' — '+fmt(it.qty)+(p?' '+esc(p.unit):'')+(up>0?' × '+money(up):'')+' ('+(it.mode==='ws'?'পাইকারি':'খুচরা')+')'+postedMark+'</span><b>'+money(it.amt)+'</b></div>';
     }).join('');
   }
   var c=saleCalc();
-  /* v25: the FULL chain is always on screen and recalculates live on
-     every sale and every keystroke — মোট বিক্রির টাকা → পার্সেন্টেজ
-     (+/−) → পার্সেন্টেজসহ মোট → জমা → বাকি (the বাকি line is the
-     saleDueBox below). Before, the % rows only appeared after a % was
-     typed, so the automatic calculation was invisible. */
   tot.innerHTML='<div class="kv"><span>মোট বিক্রি হয়েছে</span><b>'+fmt(c.items)+' টি প্রোডাক্ট</b></div>'+
-  '<div class="kv"><span>মোট বিক্রির টাকা</span><b>'+money(c.amt)+'</b></div>'+
+  '<div class="kv"><span>মোট বিক্রির টাকা (✓ খাতায় গেছে)</span><b>'+money(c.amt)+'</b></div>'+
   '<div class="kv"><span>পার্সেন্টেজ ('+(c.sign>0?'＋':'−')+fmt(c.pct)+'%)</span><b>'+(c.adj<0?'− ':'+ ')+money(Math.abs(c.adj))+'</b></div>'+
   '<div class="kv"><span><b>পার্সেন্টেজসহ মোট</b></span><b>'+money(c.fin)+'</b></div>'+
-  '<div class="kv"><span>জমা</span><b>'+money(c.paid)+'</b></div>';
-  due.textContent=c.due>0?('বাকি গেল: '+money(c.due)):(c.due<0?('বাকি নেই — বেশি জমা হয়েছে '+money(-c.due)):('বাকি: '+money(0)+' — পুরো টাকা জমা হয়েছে'));
-  /* v24: while a sale session is still unsettled, an unmissable bar stays
-     fixed at the bottom of the screen showing the pending amount — the
-     owner reported selling from the stock page and the money never
-     reaching the accounts, because the settle panel sits far below the
-     product list and the tap was easy to miss. The settle button itself
-     also carries the pending amount now. Stock and the summary already
-     update on every sell tap; only the money waits for this one tap. */
+  '<div class="kv"><span>জমা'+(c.hasPaid?'':' (খালি = পুরোটাই জমা)')+'</span><b>'+money(c.paid)+'</b></div>';
+  due.textContent=!saleSession.order.length?('বাকি: '+money(0)):(c.due>0?('বাকি গেল: '+money(c.due)+' — হিসাব শেষ করলে বাকি খাতায় উঠবে'):(('বাকি: '+money(0)+' — পুরো টাকা খাতায় গেছে')));
+  /* v26: the bottom bar now CONFIRMS the money is already in the ledger
+     (green, reassuring) instead of warning it is stuck. It only offers
+     the ছাড়/বাকি adjustment jump. */
   var pbar=$('salePendingBar'),ptxt=$('salePendingTxt');
   if(pbar){
     if(saleSession.order.length&&c.amt>0){
       pbar.style.display='flex';
-      if(ptxt)ptxt.textContent='⚠️ বিক্রির হিসাব শেষ হয়নি — মোট '+money(c.fin)+(c.paid>0?(' • জমা '+money(c.paid)):'')+(c.due>0?(' • বাকি '+money(c.due)):'')+' — “হিসাব শেষ করুন” না চাপলে এই টাকা টাকার খাতায় যাবে না';
+      if(ptxt)ptxt.textContent='✓ '+money(c.amt)+' খাতায় গেছে — ছাড়/বাকি থাকলে পাশের বোতামে মেলান, না থাকলে নতুন বিক্রি শুরু করুন';
     }else pbar.style.display='none';
   }
   var stb=$('saleSettle');
-  if(stb)stb.textContent=(saleSession.order.length&&c.amt>0)?('✅ হিসাব শেষ করুন — '+money(c.fin)+' খাতায় নিন'):'✅ হিসাব শেষ করুন — জমা খাতায় নিন';
+  if(stb)stb.textContent=(saleSession.order.length&&c.amt>0)?('✅ হিসাব শেষ করুন — ছাড়/বাকি মেলান ('+money(c.fin)+')'):'✅ হিসাব শেষ করুন — ছাড়/বাকি মেলান';
 }
 ['salePct','salePaid'].forEach(function(id){var el=$(id);if(el)el.addEventListener('input',function(){renderSaleSummary();saveSaleSession();});});
 var sps=$('salePctSign');if(sps)sps.addEventListener('change',function(){renderSaleSummary();saveSaleSession();});
@@ -6394,13 +6549,15 @@ var srs=$('saleReset');if(srs)srs.addEventListener('click',function(){
     if($('saleCust'))$('saleCust').value='';
     if($('salePctSign'))$('salePctSign').value='1';
     clearSaleSession();
-    renderSaleSummary();
-    toast('🔄 নতুন বিক্রির হিসাব শুরু হয়েছে');
+    /* clearSaleSession only nulls DB.saleSess — persist it so the fresh
+       empty session survives reload too (saveLocal re-renders). */
+    saveLocal();
+    toast('🔄 নতুন বিক্রির হিসাব শুরু হয়েছে — আগের বিক্রির টাকা খাতায় আছেই');
   };
-  /* With unsettled sales on the table, clearing is destructive to the
-     ACCOUNTS (the money would never be posted) — so it asks first, like
-     every other consequential action in the app. */
-  if(saleSession.order.length)askSure('হিসাব শেষ না করে খালি করবেন? এই বিক্রিগুলোর টাকা টাকার খাতায় যাবে না, বাকিও কারো নামে উঠবে না। (স্টক কমানো থেকেই যাবে)',doReset);
+  /* v26: clearing no longer loses money (already posted), but a typed
+     %/partial-জমা adjustment would be skipped — warn only then. */
+  var cc=saleCalc();
+  if(saleSession.order.length&&(Math.abs(cc.adj)>0.004||cc.due>0))askSure('পার্সেন্টেজ/বাকির সমন্বয় না করেই নতুন হিসাব শুরু করবেন? বিক্রির টাকা খাতায় গেছেই, কিন্তু ছাড়/বাকির এন্ট্রি হবে না।',doReset);
   else doReset();
 });
 /* Per-product stats for ONE month (sales columns follow the report's
@@ -7719,7 +7876,7 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 25 (v25)":"Version 25 (v25)",
+"ভার্সন 26 (v26)":"Version 26 (v26)",
 "➕ নতুন প্রোডাক্ট এড করুন":"➕ Add a new product",
 "← ফিরে যান":"← Go back",
 "পেমেন্ট মাধ্যম (টাকা শোধ হলে টাকার খাতায় এই মাধ্যমে যাবে)":"Payment method (a due payment lands in the money ledger with this method)",
@@ -7842,7 +7999,14 @@ var I18N_EN={
 "খুঁজে পাওয়া যায়নি।":"Not found.",
 "ডিলারের টাকা টাকার খাতায় যায় না":"Dealer money does not go to the money ledger",
 "— ডিলারের হিসাব এই আলাদা খাতাতেই থাকে (মেমোর জমা আর “টাকা নিন”-এর টাকাও শুধু ডিলারের হিসাবেই থাকে)।":"— the dealer account stays in this separate book (the memo deposit and the “Take money” amounts also stay only in the dealer's account).",
-"ℹ️ ডিলারের টাকা টাকার খাতায় যায় না — এই হিসাব আলাদাই থাকে।":"ℹ️ Dealer money does not go to the money ledger — this account stays separate."
+"ℹ️ ডিলারের টাকা টাকার খাতায় যায় না — এই হিসাব আলাদাই থাকে।":"ℹ️ Dealer money does not go to the money ledger — this account stays separate.",
+"💵 নোট হিসাব":"💵 Note Counter",
+"💵 নোট হিসাব — নোট গুনে মোট টাকা বের করুন":"💵 Note Counter — count notes, get the total",
+"🧹 সব মুছুন":"🧹 Clear All",
+"💰 খাতায় যোগ করুন":"💰 Add to Ledger",
+"🪙 কয়েন":"🪙 Coins",
+"কয়টা":"How many",
+"মোট নোট ও কয়েন":"Total notes & coins"
 };
 var _i18nOrig=new WeakMap();
 function i18nKey(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
