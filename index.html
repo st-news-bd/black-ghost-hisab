@@ -72,6 +72,20 @@ header.top .sub{margin:2px 0 0;opacity:.92;font-size:.92rem}
 nav.tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0 4px;display:flex;gap:8px;flex-wrap:wrap}
 nav.tabs button{flex:1 1 150px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:.65rem .5rem;font-weight:700;min-height:2.9rem;box-shadow:var(--shadow)}
 nav.tabs button.active{background:var(--green);color:#fff;border-color:var(--green)}
+/* v28 — DEDICATED PAGES: home shows the tab grid; inside any section the
+   grid is hidden and ONLY that section shows, topped by a big back bar. */
+body[data-view="dedicated"] nav.tabs{display:none!important}
+#dedicatedBar{display:none;position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0 10px;align-items:center;gap:12px;border-bottom:2px solid var(--line)}
+body[data-view="dedicated"] #dedicatedBar{display:flex}
+#dedicatedBackBtn{flex:0 0 auto;background:var(--green);color:#fff;border:none;border-radius:12px;padding:.8rem 1.2rem;font-weight:800;font-size:1.12rem;min-height:3.4rem;box-shadow:var(--shadow);cursor:pointer}
+#dedicatedBackBtn:active{transform:scale(.97)}
+#dedicatedTitle{font-size:1.22rem;font-weight:800;line-height:1.3}
+body[data-view="dedicated"] footer.note{display:none}
+#page-dealer.dealer-detail-open>*:not(#dlDetail){display:none!important}
+#page-dealer.dealer-detail-open #dlDetail{margin-top:0}
+#page-order.person-open>.panel:first-child{display:none!important}
+.subback{width:100%;font-size:1.05rem;min-height:3.1rem;margin-bottom:12px}
+@media print{#dedicatedBar{display:none!important}body[data-view="dedicated"] footer.note{display:block}}
 section.page{display:none;margin-top:10px}
 section.page.active{display:block}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
@@ -228,6 +242,13 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     <button type="button" data-tab="report">📊 রিপোর্ট ও ব্যাকআপ</button>
     <button type="button" data-tab="settings">⚙️ সেটিংস</button>
   </nav>
+
+  <!-- v28: dedicated-page bar — visible ONLY inside a section (never on
+       home). Big back button returns home (or to the parent sub-screen). -->
+  <div id="dedicatedBar" class="noprint">
+    <button type="button" id="dedicatedBackBtn">← ফিরে যান</button>
+    <div id="dedicatedTitle"></div>
+  </div>
 
   <!-- DASHBOARD -->
   <section class="page active" id="page-dash">
@@ -444,7 +465,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       </div>
       <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
         <h3 style="margin:0 0 6px">📱 অ্যাপের ভার্সন</h3>
-        <div class="kv"><span>বর্তমান ভার্সন</span><b>ভার্সন 27 (v27)</b></div>
+        <div class="kv"><span>বর্তমান ভার্সন</span><b>ভার্সন 28 (v28)</b></div>
         <button class="btn ghost" id="updCheckBtn" type="button" style="margin-top:8px">🔄 নতুন ভার্সন আছে কিনা দেখুন</button>
         <p id="updMsg" style="margin:8px 0 0;font-weight:700"></p>
         <button class="btn gold" id="updRefreshBtn" type="button" style="display:none;margin-top:8px">🔄 এখনই রিফ্রেশ করুন</button>
@@ -547,34 +568,18 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   <!-- STOCK -->
   <section class="page" id="page-stock">
     <div class="panel noprint" style="margin-top:0">
-      <button class="btn" id="addProdBtn" type="button" style="width:100%;font-size:1.05rem">➕ নতুন প্রোডাক্ট এড করুন</button>
+      <button class="btn" id="addProdBtn" type="button" style="width:100%;font-size:1.18rem;min-height:3.6rem">➕ নতুন প্রোডাক্ট এড করুন</button>
     </div>
     <div class="panel" style="margin-top:0">
       <h2>📦 স্টকে মোট কত টাকার মাল আছে</h2>
       <div id="stockValueBox"></div>
     </div>
-            <div class="panel">
+    <div class="panel">
       <h2>সব প্রোডাক্ট ও স্টক</h2>
       <div style="margin-bottom:8px" class="noprint"><button class="btn small ghost" id="stockPrint" type="button">🖨️ স্টক তালিকা প্রিন্ট</button></div>
       <div id="stockSummary"></div>
       <div class="searchrow noprint"><input type="search" id="pSearch" placeholder="🔍 প্রোডাক্ট খুঁজুন…" /><select id="pStockFilter"><option value="all">সব প্রোডাক্ট</option><option value="low">⚠️ শুধু কম স্টক</option><option value="expiry">⏰ মেয়াদ শেষ হতে চলেছে</option></select></div>
       <div id="prodList"></div>
-    </div>
-    <div class="panel">
-      <h2>🏆 সবচেয়ে বেশি বিক্রি</h2>
-      <p class="hint" style="margin:0 0 8px">কোন প্রোডাক্ট সবচেয়ে বেশি বিক্রি হচ্ছে — বিক্রির হিসাব (স্টক লগ) থেকে অটোমেটিক সাজানো।</p>
-      <div class="seg" id="tsSeg" style="max-width:320px;margin-bottom:10px">
-        <button type="button" data-v="week" class="sel-gold">এই সপ্তাহ</button>
-        <button type="button" data-v="month">এই মাস</button>
-      </div>
-      <div id="tsBox"></div>
-    </div>
-    <div class="panel">
-      <h2>⚖️ স্টক মিলানো</h2>
-      <p class="hint">দোকানে গুনে দেখুন আসলে কত আছে — “আসলে কত আছে” ঘরে সংখ্যা লিখলেই পাশে কম/বেশি দেখা যাবে। যেগুলো লিখবেন শুধু সেগুলোর জন্যই “ঠিক করুন” চাপলে অ্যাপের স্টক গোনা সংখ্যায় বদলে যাবে আর সমন্বয়টা প্রোডাক্টের ইতিহাসে থেকে যাবে। ফাঁকা রাখা প্রোডাক্টে হাত দেওয়া হবে না।</p>
-      <div id="rcList"></div>
-      <div class="field" style="margin-top:10px"><label for="rcReason">কারণ (ঐচ্ছিক)</label><input type="text" id="rcReason" placeholder="যেমন: মাসের শেষে গোনা, নষ্ট মাল পাওয়া গেছে…" /></div>
-      <button class="btn noprint" id="rcApply" type="button" style="margin-top:6px">✅ ঠিক করুন — স্টক গোনা সংখ্যায় মেলান</button>
     </div>
     <div class="panel">
       <h2>🧾 বিক্রির হিসাব</h2>
@@ -597,6 +602,22 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <button class="btn noprint" id="saleSettle" type="button" style="margin-top:10px">✅ হিসাব শেষ করুন — ছাড়/বাকি মেলান</button>
       <button class="btn ghost noprint" id="saleReset" type="button" style="margin-top:10px">🔄 নতুন বিক্রির হিসাব শুরু করুন</button>
       <p class="hint" style="margin:6px 0 0">“নতুন হিসাব” বোতামে চাপলে শুধু এই তালিকাটা খালি হবে — বিক্রির টাকা আগেই টাকার খাতায় গেছে, স্টক কমানোও থেকেই যাবে। তবে পার্সেন্টেজ/বাকির সমন্বয় বাকি থাকলে আগে “হিসাব শেষ করুন” চাপুন।</p>
+    </div>
+    <div class="panel">
+      <h2>🏆 সবচেয়ে বেশি বিক্রি</h2>
+      <p class="hint" style="margin:0 0 8px">কোন প্রোডাক্ট সবচেয়ে বেশি বিক্রি হচ্ছে — বিক্রির হিসাব (স্টক লগ) থেকে অটোমেটিক সাজানো।</p>
+      <div class="seg" id="tsSeg" style="max-width:320px;margin-bottom:10px">
+        <button type="button" data-v="week" class="sel-gold">এই সপ্তাহ</button>
+        <button type="button" data-v="month">এই মাস</button>
+      </div>
+      <div id="tsBox"></div>
+    </div>
+    <div class="panel">
+      <h2>⚖️ স্টক মিলানো</h2>
+      <p class="hint">দোকানে গুনে দেখুন আসলে কত আছে — “আসলে কত আছে” ঘরে সংখ্যা লিখলেই পাশে কম/বেশি দেখা যাবে। যেগুলো লিখবেন শুধু সেগুলোর জন্যই “ঠিক করুন” চাপলে অ্যাপের স্টক গোনা সংখ্যায় বদলে যাবে আর সমন্বয়টা প্রোডাক্টের ইতিহাসে থেকে যাবে। ফাঁকা রাখা প্রোডাক্টে হাত দেওয়া হবে না।</p>
+      <div id="rcList"></div>
+      <div class="field" style="margin-top:10px"><label for="rcReason">কারণ (ঐচ্ছিক)</label><input type="text" id="rcReason" placeholder="যেমন: মাসের শেষে গোনা, নষ্ট মাল পাওয়া গেছে…" /></div>
+      <button class="btn noprint" id="rcApply" type="button" style="margin-top:6px">✅ ঠিক করুন — স্টক গোনা সংখ্যায় মেলান</button>
     </div>
     <div class="panel" id="supRemPanel" style="display:none">
       <h2>⏰ সাপ্লায়ার পেমেন্ট রিমাইন্ডার</h2>
@@ -668,7 +689,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   <!-- ADD PRODUCT — dedicated page (v25): the stock page itself shows
        only the top button; the full form lives here with a back button. -->
   <section class="page" id="page-addprod">
-    <div style="margin-bottom:10px"><button class="btn ghost noprint" id="addProdBack" type="button">← ফিরে যান</button></div>
+    <div style="margin-bottom:10px"><button class="btn ghost noprint subback" id="addProdBack" type="button">← ফিরে যান</button></div>
     <div class="panel">
       <h2 id="prodFormTitle">নতুন প্রোডাক্ট যোগ করুন</h2>
       <p class="hint">শুরুর স্টক লিখলেই হবে — এরপর বিক্রি / নতুন মাল এলে শুধু সংখ্যা লিখবে, বাকি হিসাব অটোমেটিক।</p>
@@ -808,6 +829,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div id="dealerList"></div>
     </div>
     <div class="panel" id="dlDetail" style="display:none">
+      <button class="btn ghost noprint subback" id="dlDetailBack" type="button">← ডিলার তালিকায় ফিরে যান</button>
       <h2 id="dlDetailTitle">ডিলারের হিসাব</h2>
       <p class="hint" style="margin:0 0 8px">ℹ️ ডিলারের টাকা টাকার খাতায় যায় না — এই হিসাব আলাদাই থাকে।</p>
       <div id="dlDetailTotals"></div>
@@ -1036,7 +1058,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div id="orderPeople"></div>
       </div>
       <div id="orderPersonView" style="display:none">
-        <button class="btn ghost small noprint" type="button" onclick="orderBackToPeople()">← সব কাস্টমার</button>
+        <button class="btn ghost noprint subback" type="button" onclick="orderBackToPeople()">← সব কাস্টমার</button>
         <h2 id="opName" style="margin:12px 0 6px"></h2>
         <div id="opTotals" style="border:1.5px solid var(--gold);border-radius:12px;padding:6px 12px;background:var(--goldbg);margin-bottom:12px"></div>
         <button class="btn noprint" type="button" onclick="orderAddForPerson()">➕ এই কাস্টমারের নতুন অর্ডার</button>
@@ -1221,7 +1243,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 27 (v27)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 28 (v28)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -2458,19 +2480,87 @@ $('sureNo').addEventListener('click',function(){$('sureModal').classList.remove(
 $('sureModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('open');sureCb=null;}});
 
 /* ---------- TABS ---------- */
+/* v28 — DEDICATED PAGES (display only): home (ড্যাশবোর্ড ট্যাব) shows the
+   green header + the full tab grid exactly as before. Tapping ANY tab —
+   ড্যাশবোর্ড included — opens that section as its OWN page: the tab grid
+   hides, every other section hides, and a bar with the section name + a
+   BIG '← ফিরে যান' button sits on top. Back returns straight home.
+   Sub-screens keep their own level: add-product (back → stock), a
+   dealer's page (back → dealer list, then back → home) and an order
+   person's page (back → people list, then back → home). No data, sync,
+   login or calculation logic changes — only what is visible. */
+var TAB_TITLES={dash:'🏠 ড্যাশবোর্ড',ledger:'💰 টাকার হিসাব',notes:'💵 নোট হিসাব',stock:'📦 প্রোডাক্ট স্টক',dues:'🤝 বাকি হিসাব',dealer:'🧮 হিসাব করুন',bill:'🧾 বিল',pos:'⚡ দ্রুত বিক্রি',order:'📋 অর্ডার বুক',loan:'🏦 লোন / কিস্তি',staff:'👥 বেতন',report:'📊 রিপোর্ট ও ব্যাকআপ',settings:'⚙️ সেটিংস',addprod:'➕ নতুন প্রোডাক্ট'};
+var curTab='dash';
+var isHome=true; /* the untouched home view: grid + dashboard together.
+   ANY tab tap (ড্যাশবোর্ড included) leaves home for a dedicated page;
+   the back button returns here. */
+function activeTabName(){
+  var el=document.querySelector('section.page.active');
+  return el?el.id.replace('page-',''):'dash';
+}
+function syncDedicatedBar(){
+  var tab=activeTabName();
+  curTab=tab;
+  var isDedicated=!isHome;
+  /* A sub-screen with its own list behind it keeps the bar, with the
+     parent section's name. */
+  var title=TAB_TITLES[tab]||'';
+  if(tab==='dealer'&&typeof dlSelId!=='undefined'&&dlSelId){
+    var d=(typeof findDealer==='function')?findDealer(dlSelId):null;
+    title='🏪 '+(d?d.name:'ডিলারের হিসাব');
+  }
+  if(tab==='order'&&typeof orderPersonKey!=='undefined'&&orderPersonKey){
+    var on=$('opName');title=(on&&on.textContent)?on.textContent:'📋 অর্ডার বুক';
+  }
+  document.body.setAttribute('data-view',isDedicated?'dedicated':'home');
+  var t=$('dedicatedTitle');if(t)t.textContent=(typeof trStr==='function')?trStr(title):title;
+  var aw=$('adminWord');if(aw){var wrap=aw.closest('div');if(wrap)wrap.style.display=isDedicated?'none':'';}
+}
+function goHome(){
+  isHome=true;
+  if(typeof dlSelId!=='undefined')dlSelId=null;
+  if(typeof orderPersonKey!=='undefined'&&orderPersonKey){orderPersonKey=null;if(typeof renderOrders==='function')renderOrders();}
+  if(typeof renderDealers==='function')renderDealers();
+  document.querySelectorAll('nav.tabs button').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-tab')==='dash');});
+  document.querySelectorAll('section.page').forEach(function(s){s.classList.remove('active');});
+  var pg=$('page-dash');if(pg)pg.classList.add('active');
+  syncDedicatedBar();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+window.closeDealerDetail=function(){
+  dlSelId=null;
+  renderDealers();
+  syncDedicatedBar();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+(function(){
+  var bb=$('dedicatedBackBtn');
+  if(bb)bb.addEventListener('click',function(){
+    var tab=activeTabName();
+    if(tab==='addprod'){showPageNoScroll('stock');window.scrollTo({top:0,behavior:'smooth'});return;}
+    if(tab==='dealer'&&typeof dlSelId!=='undefined'&&dlSelId){window.closeDealerDetail();return;}
+    if(tab==='order'&&typeof orderPersonKey!=='undefined'&&orderPersonKey){window.orderBackToPeople();syncDedicatedBar();return;}
+    goHome();
+  });
+  var db=$('dlDetailBack');
+  if(db)db.addEventListener('click',function(){window.closeDealerDetail();});
+})();
 document.querySelectorAll('nav.tabs button').forEach(function(b){
   b.addEventListener('click',function(){
-    var tabChanged=!b.classList.contains('active');
+    var tab=b.getAttribute('data-tab');
+    var tabChanged=!b.classList.contains('active')||isHome;
+    isHome=false; /* v28: every tab — ড্যাশবোর্ড too — opens dedicated */
     document.querySelectorAll('nav.tabs button').forEach(function(x){x.classList.remove('active');});
     b.classList.add('active');
     document.querySelectorAll('section.page').forEach(function(s){s.classList.remove('active');});
-    $('page-'+b.getAttribute('data-tab')).classList.add('active');
+    $('page-'+tab).classList.add('active');
     /* v27: opening a page pre-fills its payment-method selects with the
        ⚙️ সেটিংস default method. Only on a real tab change — re-tapping
        the current tab never disturbs a form being filled or edited. */
     if(tabChanged)applyDefMethod();
+    syncDedicatedBar();
     window.scrollTo({top:0,behavior:'smooth'});
-    if(b.getAttribute('data-tab')==='report')setTimeout(renderCharts,60);
+    if(tab==='report')setTimeout(renderCharts,60);
   });
 });
 
@@ -2523,9 +2613,11 @@ function placeFormAfterRender(titleId,listId,editId){
   formToHome(titleId);
 }
 function showPageNoScroll(tab){
+  isHome=false; /* v28: any programmatic jump lands on a dedicated page */
   document.querySelectorAll('nav.tabs button').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-tab')===tab);});
   document.querySelectorAll('section.page').forEach(function(s){s.classList.remove('active');});
   var pg=$('page-'+tab);if(pg)pg.classList.add('active');
+  syncDedicatedBar(); /* v28: programmatic jumps get the same dedicated-page chrome */
 }
 function rowPosBefore(listId,rowId){
   var row=rowId?document.querySelector('#'+listId+' [data-rowid="'+rowId+'"]'):null;
@@ -3336,7 +3428,7 @@ if(updBtn)updBtn.addEventListener('click',function(){
       m.textContent=(LANG==='en'?('🆕 A new version (v'+live+') is available — refresh the page to get it'):('🆕 নতুন ভার্সন এসেছে (v'+bnNum(live)+') — পেজ রিফ্রেশ করলেই নতুন ভার্সন পাবেন'));
       m.style.color='var(--in)';if(rb)rb.style.display='';
     }else{
-      m.textContent=trStr('✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 27)');
+      m.textContent=trStr('✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 28)');
       m.style.color='var(--in)';
     }
   }).catch(function(){
@@ -5132,6 +5224,10 @@ function resetOrderForm(){
 $('oCancel').addEventListener('click',resetOrderForm);
 window.editOrder=function(id){
   var o=findOrder(id);if(!o||o.status==='cancelled')return;
+  /* v28: editing happens in the form, which the person's sub-screen
+     hides — leave the sub-screen first, remembering the person so a
+     save returns to their page (oSave's keepKey does that). */
+  if(orderPersonKey){orderForKey=orderPersonKey;orderPersonKey=null;renderOrders();}
   editOrderId=id;
   $('oCust').value=o.cust;$('oPhone').value=o.phone||'';
   /* The order's items become the form's rows — a pre-v23 single-item order
@@ -5341,7 +5437,10 @@ window.orderClearFor=function(){
 };
 function setOrderFormFor(g){
   resetOrderForm();
-  orderPersonKey=g.key;orderForKey=g.key;
+  /* v28: the form lives on the order book's main screen — leave the
+     person's sub-screen (orderForKey keeps the context, so saving the
+     order returns to that person's page via oSave's keepKey). */
+  orderPersonKey=null;orderForKey=g.key;renderOrders();
   $('oCust').value=g.cust;$('oPhone').value=g.phone||'';
   updateOrderForBox();
   showPageNoScroll('order');window.scrollTo({top:0,behavior:'smooth'});
@@ -5450,6 +5549,11 @@ function renderOrders(){
     $('orderPeople').innerHTML=persons.length?persons.map(function(g,i){return orderPersonCard(g,i);}).join(''):(oq?'<div class="empty">খুঁজে পাওয়া যায়নি।</div>':'<div class="empty">এখনো কোনো অর্ডার নেই — ওপরের ফর্মে প্রথম অর্ডার নিন।</div>');
   }
   updateOrderForBox();
+  /* v28: a person's page is a sub-screen — the new-order form hides,
+     only that person's orders show (people list already hidden above). */
+  var pgO=$('page-order');
+  if(pgO)pgO.classList.toggle('person-open',!!orderPersonKey);
+  syncDedicatedBar();
 }
 
 /* ---------- LOANS / INSTALLMENTS ---------- */
@@ -7296,8 +7400,8 @@ window.openDealer=function(id,focus){
   dlSelId=id;
   showPageNoScroll('dealer');
   renderDealers();
-  var det=$('dlDetail');
-  if(det)setTimeout(function(){det.scrollIntoView({behavior:'smooth',block:'start'});},40);
+  /* v28: the dealer's page IS the screen now — start at its top. */
+  if(!focus)window.scrollTo({top:0,behavior:'smooth'});
   if(focus==='give')setTimeout(function(){var el=$('dgFormTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},260);
   if(focus==='recv')setTimeout(function(){var el=$('drFormTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},260);
 };
@@ -7680,6 +7784,11 @@ function renderDealers(){
       return '<div class="kv"><span>'+esc(x.date)+' • 💵 <b>টাকা পেলাম</b>'+(x.method?' • '+esc(x.method):'')+(x.note?' • '+esc(x.note):'')+'<br><span style="color:var(--muted);font-size:.85rem">'+balTxt+'</span></span><b style="color:var(--in)">− '+money(x.amount)+' <button class="btn small ghost noprint" type="button" onclick="editDtx(\''+x.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delDtx(\''+x.id+'\')">মুছুন</button></b></div>';
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো লেনদেন নেই — ওপরে প্রোডাক্ট যোগ করে মাল দিন বা টাকা নিন।</p>';
   }
+  /* v28: a selected dealer turns the dealer page into that dealer's OWN
+     sub-screen — list, cards and add-form hide; only the detail shows. */
+  var pgD=$('page-dealer');
+  if(pgD)pgD.classList.toggle('dealer-detail-open',!!(dlSelId&&findDealer(dlSelId)&&det.style.display!=='none'));
+  syncDedicatedBar();
 }
 (function(){var s=$('dgPctList');if(s){var h='';for(var i=1;i<=20;i++)h+='<option value="'+i+'"></option>';s.innerHTML=h;}})();
 $('dgDate').value=todayStr();
@@ -8627,7 +8736,7 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 27 (v27)":"Version 27 (v27)",
+"ভার্সন 28 (v28)":"Version 28 (v28)",
 "➕ নতুন প্রোডাক্ট এড করুন":"➕ Add a new product",
 "← ফিরে যান":"← Go back",
 "পেমেন্ট মাধ্যম (টাকা শোধ হলে টাকার খাতায় এই মাধ্যমে যাবে)":"Payment method (a due payment lands in the money ledger with this method)",
@@ -8773,7 +8882,7 @@ var I18N_EN={
 "🔄 এখনই রিফ্রেশ করুন":"🔄 Refresh now",
 "📴 আপডেট চেক করতে ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন":"📴 Checking for updates needs internet — turn it on and try again",
 "⏳ চেক হচ্ছে…":"⏳ Checking…",
-"✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 27)":"✅ You are on the latest version (Version 27)",
+"✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 28)":"✅ You are on the latest version (Version 28)",
 "✅ ব্যবসার নাম সেভ হয়েছে":"✅ Business name saved"
 };
 var _i18nOrig=new WeakMap();
