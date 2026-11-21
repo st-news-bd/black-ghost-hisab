@@ -470,6 +470,9 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
 
   <!-- STOCK -->
   <section class="page" id="page-stock">
+    <div class="panel noprint" style="margin-top:0">
+      <button class="btn" id="addProdBtn" type="button" style="width:100%;font-size:1.05rem">➕ নতুন প্রোডাক্ট এড করুন</button>
+    </div>
     <div class="panel" style="margin-top:0">
       <h2>📦 স্টকে মোট কত টাকার মাল আছে</h2>
       <div id="stockValueBox"></div>
@@ -560,6 +563,12 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
         <div class="field"><label>&nbsp;</label><button class="btn" id="olShare" type="button" style="width:100%;background:#1faa55;color:#fff">🟢 WhatsApp-এ সাপ্লায়ারকে পাঠান</button></div>
       </div>
     </div>
+  </section>
+
+  <!-- ADD PRODUCT — dedicated page (v25): the stock page itself shows
+       only the top button; the full form lives here with a back button. -->
+  <section class="page" id="page-addprod">
+    <div style="margin-bottom:10px"><button class="btn ghost noprint" id="addProdBack" type="button">← ফিরে যান</button></div>
     <div class="panel">
       <h2 id="prodFormTitle">নতুন প্রোডাক্ট যোগ করুন</h2>
       <p class="hint">শুরুর স্টক লিখলেই হবে — এরপর বিক্রি / নতুন মাল এলে শুধু সংখ্যা লিখবে, বাকি হিসাব অটোমেটিক।</p>
@@ -1084,7 +1093,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 24 (v24)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 25 (v25)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -2370,12 +2379,27 @@ $('pSave').addEventListener('click',function(){
   }
   resetProdForm();saveLocal();
   if(wasEditProd)rowPosRestore('prodList',wasEditProd,prodPos);
+  /* v25: the form lives on its own page (page-addprod) — a successful
+     save returns to the stock page, where the product is now listed. */
+  if(!wasEditProd){showPageNoScroll('stock');window.scrollTo(0,0);}
 });
 $('pCancel').addEventListener('click',function(){
   var pos=editProdId?rowPosBefore('prodList',editProdId):null;
   resetProdForm();
   rowPosNudge(pos);
 });
+/* v25: add-product is a DEDICATED page. The stock page itself carries
+   only the one top button ('➕ নতুন প্রোডাক্ট এড করুন') — no form
+   fields there at all. Tapping it opens page-addprod with a fresh,
+   empty form; '← ফিরে যান' returns to the stock page without saving,
+   and a successful save returns there too (see the pSave handler). */
+$('addProdBtn').addEventListener('click',function(){
+  resetProdForm();
+  showPageNoScroll('addprod');
+  window.scrollTo(0,0);
+  setTimeout(function(){var n=$('pName');if(n){try{n.focus({preventScroll:true});}catch(e){}}},80);
+});
+$('addProdBack').addEventListener('click',function(){showPageNoScroll('stock');});
 /* ----- প্রোডাক্ট ঠিক করা এখন ঠিক ওই প্রোডাক্টের কার্ডেই হয় — পেজ নড়ে না, স্ক্রল হয় না,
    নিচের আলাদা ফর্মে যেতে হয় না (ডিলার প্রোডাক্টের v16 প্যাটার্নের মতোই) -----
    নামে বা ✏️ ঠিক বোতামে চাপ দিলে ওই কার্ডের ভেতরেই লেখার ঘর খোলে; ✓ চাপলেই সেভ, ✕ চাপলে বন্ধ।
@@ -2485,6 +2509,10 @@ $('mvSave').addEventListener('click',function(){
   var q=num($('mvQty').value);
   if(!(q>0)){toast('⚠️ পরিমাণ লিখুন');$('mvQty').focus();return;}
   var pr=num($('mvPrice').value), date=$('mvDate').value||todayStr(), party=$('mvParty').value.trim();
+  /* v25: a sale saved with no price is a silent ৳ 0 sale — blocked on
+     this path too, with the warning naming the chosen price type (the
+     price box is right here to fill in). */
+  if(mvType==='sale'&&!(pr>0)){toast('⚠️ '+(mvPriceType==='wholesale'?'পাইকারি':'খুচরা')+' বিক্রি দাম দেওয়া নেই — আগে বিক্রি দাম বসান');$('mvPrice').focus();return;}
   var total=q*pr;
   /* v23: ONE over-stock rule on every sell path — quick sell blocks, bill /
      POS confirm, and this modal confirms too (it used to save silently with
@@ -5223,7 +5251,7 @@ function renderRbills(){
 var mvPriceType='retail';
 function mvApplyPriceType(){
   var p=findProd(mvPid);if(!p)return;
-  if(mvType==='sale')$('mvPrice').value=(mvPriceType==='wholesale'?(num(p.wsell)||num(p.sell)):num(p.sell))||'';
+  if(mvType==='sale')$('mvPrice').value=(mvPriceType==='wholesale'?num(p.wsell):num(p.sell))||'';
   $('mvPriceSeg').querySelectorAll('button').forEach(function(x){x.className=x.getAttribute('data-v')===mvPriceType?'sel-gold':'';});
   $('mvPriceTypeWrap').style.display=mvType==='sale'?'':'none';
   mvUpdate();
@@ -6098,7 +6126,7 @@ function renderProducts(){
     if(f==='expiry'&&!(ei&&(ei.expired||ei.soon)))return false;
     return true;
   });
-  if(!list.length){$('prodList').innerHTML='<div class="empty">'+(f==='low'?'কম স্টকের কোনো প্রোডাক্ট নেই ✅':(f==='expiry'?'মেয়াদ শেষ হতে চলেছে এমন প্রোডাক্ট নেই ✅':'কোনো প্রোডাক্ট নেই — সবার নিচে নতুন প্রোডাক্ট যোগ করো।'))+'</div>';placeFormAfterRender('prodFormTitle','prodList',editProdId);renderSaleSummary();return;}
+  if(!list.length){$('prodList').innerHTML='<div class="empty">'+(f==='low'?'কম স্টকের কোনো প্রোডাক্ট নেই ✅':(f==='expiry'?'মেয়াদ শেষ হতে চলেছে এমন প্রোডাক্ট নেই ✅':'কোনো প্রোডাক্ট নেই — ওপরের “➕ নতুন প্রোডাক্ট এড করুন” বোতামে চাপ দিয়ে যোগ করুন।'))+'</div>';placeFormAfterRender('prodFormTitle','prodList',editProdId);renderSaleSummary();return;}
   $('prodList').innerHTML=list.map(function(p){
     var s=prodStats(p);
     var ei=expiryInfo(p);
@@ -6141,23 +6169,68 @@ function renderProducts(){
    payment method, and any unpaid remainder becomes a real due entry
    against the named customer, so it can never vanish. The unsettled
    session is kept in this phone's storage (per account, like the bill /
-   POS drafts), so a reload mid-sale loses nothing either. */
+   POS drafts), so a reload mid-sale loses nothing either.
+   v25: the amount is qty × SELLING price (qsPrice — খুচরা p.sell,
+   পাইকারি p.wsell; NEVER the কেনা দাম p.buy). A missing / 0 selling
+   price BLOCKS the sale with a clear warning and opens the product's
+   in-place price fields — a ৳ 0 sale is never recorded silently. The
+   bottom summary always shows the full chain (মোট বিক্রির টাকা →
+   পার্সেন্টেজ +/− → পার্সেন্টেজসহ মোট → জমা → বাকি) and every figure
+   recalculates LIVE on each sale and each keystroke. */
 var saleSession={items:{},order:[]};
 var qsQty={};
 var qsMode={};
-function qsPrice(p){return (qsMode[p.id]==='ws'&&num(p.wsell)>0)?num(p.wsell):num(p.sell);}
+/* v25: the price type is chosen per sale — খুচরা by default, পাইকারি
+   when the seller picks it — and qsPrice returns EXACTLY that price.
+   The old fallback (পাইকারি missing → quietly use খুচরা, and the
+   reverse) is gone: it is how a ৳ 0 sale slipped through when only
+   one of the two prices was filled. The chosen price missing now
+   BLOCKS the sale (see quickSell). */
+function qsModeOf(p){return qsMode[p.id]==='ws'?'ws':'rt';}
+function qsPrice(p){return qsModeOf(p)==='ws'?num(p.wsell):num(p.sell);}
+function qsPriceName(p){return qsModeOf(p)==='ws'?'পাইকারি':'খুচরা';}
+/* v25: the line's own arithmetic, shown live next to the sell button —
+   qty × unit selling price = line total, updated on every keystroke in
+   the quantity box and on every price-type change. A product with no
+   selling price says so right there instead of showing a fake ৳ 0. */
+function qsLineText(p){
+  var price=qsPrice(p);
+  if(!(price>0))return '⚠️ '+qsPriceName(p)+' বিক্রি দাম দেওয়া নেই — বিক্রির আগে দাম বসান';
+  var q=num(qsQty[p.id]);if(!(q>0))q=1;
+  return fmt(q)+' × '+money(price)+' = '+money(q*price);
+}
+function qsLineRefresh(id){
+  var p=findProd(id),lt=document.getElementById('qsline-'+id);
+  if(p&&lt)lt.textContent=qsLineText(p);
+}
+/* v25: open the product's in-place edit fields (inside its own card)
+   and put the cursor straight into the MISSING price's box (খুচরা or
+   পাইকারি, whichever the sale was using), so the price can be set on
+   the spot and the sale retried. */
+function qsOpenPriceEditor(id,mode){
+  if(typeof toggleProdOpts==='function')toggleProdOpts(id);
+  var el=document.getElementById('popts-'+id);if(!el)return;
+  try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
+  var s=el.querySelector(mode==='ws'?'.po-wsell':'.po-sell')||el.querySelector('.po-sell');
+  if(s)setTimeout(function(){try{s.focus({preventScroll:true});}catch(e){try{s.focus();}catch(e2){}}if(s.select)try{s.select();}catch(e){}},380);
+}
 function prodSellHtml(p){
   var v=qsQty[p.id];if(v==null||v==='')v=1;
-  var ws=num(p.wsell)>0, mode=(qsMode[p.id]==='ws'&&ws)?'ws':'rt';
+  var mode=qsModeOf(p);
+  /* v25: the price-type picker is ALWAYS here (খুচরা default), and the
+     label beside the button names the price this sale will use —
+     'খুচরা দাম ৳ 20 / পিস' or 'পাইকারি দাম ৳ 15 / পিস' — so which
+     price applies is never a guess. */
   return '<div class="qsell noprint" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1.5px dashed var(--line)"><label for="qs-'+p.id+'" style="font-weight:700">বিক্রির পরিমাণ</label><input type="number" id="qs-'+p.id+'" value="'+esc(v)+'" min="0" step="any" inputmode="decimal" style="width:92px" oninput="qsSetQty(\''+p.id+'\',this.value)" />'+
-  (ws?'<select aria-label="দামের ধরন" onchange="qsSetMode(\''+p.id+'\',this.value)"><option value="rt"'+(mode==='rt'?' selected':'')+'>খুচরা</option><option value="ws"'+(mode==='ws'?' selected':'')+'>পাইকারি</option></select>':'')+
-  '<button class="btn small" type="button" onclick="quickSell(\''+p.id+'\')">🛒 বিক্রি করুন</button><span class="meta" id="qsprice-'+p.id+'">'+(mode==='ws'?'পাইকারি':'খুচরা')+' দাম '+money(qsPrice(p))+' / '+esc(p.unit)+'</span></div>';
+  '<select aria-label="দামের ধরন" onchange="qsSetMode(\''+p.id+'\',this.value)"><option value="rt"'+(mode==='rt'?' selected':'')+'>খুচরা</option><option value="ws"'+(mode==='ws'?' selected':'')+'>পাইকারি</option></select>'+
+  '<button class="btn small" type="button" onclick="quickSell(\''+p.id+'\')">🛒 বিক্রি করুন</button><span class="meta" id="qsprice-'+p.id+'">'+qsPriceName(p)+' দাম '+money(qsPrice(p))+' / '+esc(p.unit)+'</span><span class="meta" id="qsline-'+p.id+'" style="font-weight:700">'+qsLineText(p)+'</span></div>';
 }
-window.qsSetQty=function(id,v){qsQty[id]=v;};
+window.qsSetQty=function(id,v){qsQty[id]=v;qsLineRefresh(id);};
 window.qsSetMode=function(id,v){
   qsMode[id]=v;
   var p=findProd(id),sp=document.getElementById('qsprice-'+id);
-  if(p&&sp)sp.textContent=(v==='ws'&&num(p.wsell)>0?'পাইকারি':'খুচরা')+' দাম '+money(qsPrice(p))+' / '+p.unit;
+  if(p&&sp)sp.textContent=qsPriceName(p)+' দাম '+money(qsPrice(p))+' / '+p.unit;
+  qsLineRefresh(id);
 };
 /* The unsettled sale session survives reloads (per account, this phone
    only — same treatment as the bill draft and POS cart). */
@@ -6176,7 +6249,12 @@ function restoreSaleSession(){
   if($('saleMethod')&&d&&d.method)$('saleMethod').value=d.method;
   if(d&&d.items&&typeof d.items==='object'&&Array.isArray(d.order)){
     saleSession.items=d.items;
-    saleSession.order=d.order.filter(function(pid){return !!saleSession.items[pid];});
+    saleSession.order=d.order.filter(function(k){return !!saleSession.items[k];});
+    /* v25: drafts saved before the per-price-type session keys get
+       their product id / price type filled in (খুচরা — the default).
+       Nothing is dropped and every saved amount stays exactly as it
+       was; only the labels gain the missing pieces. */
+    saleSession.order.forEach(function(k){var it=saleSession.items[k];if(it&&!it.pid)it.pid=k;if(it&&!it.mode)it.mode='rt';});
   }
   renderSaleSummary();
 }
@@ -6187,22 +6265,40 @@ window.quickSell=function(id){
   if(!(q>0)){toast('⚠️ কতগুলো বিক্রি করবেন, পরিমাণ লিখুন');if(inp)inp.focus();return;}
   var st=prodStats(p);
   if(q>st.remaining){toast('⚠️ স্টকে এত নেই! “'+p.name+'” আছে মাত্র '+fmt(st.remaining)+' '+p.unit);return;}
-  var price=qsPrice(p), total=q*price, d=todayStr();
+  var mode=qsModeOf(p), price=qsPrice(p);
+  /* v25: the CHOSEN price missing / 0 BLOCKS the sale. The warning
+     names the exact price that is missing (খুচরা / পাইকারি), the other
+     price is never substituted silently, no stock log is written, and
+     the product's own price fields open in place so the price can be
+     set and the sale retried. A ৳ 0 sale can no longer be recorded. */
+  if(!(price>0)){
+    toast('⚠️ '+qsPriceName(p)+' বিক্রি দাম দেওয়া নেই — আগে প্রোডাক্টে '+qsPriceName(p)+' বিক্রি দাম বসান');
+    qsOpenPriceEditor(p.id,mode);
+    return;
+  }
+  var total=q*price, d=todayStr();
   DB.logs.push({id:uid(),pid:p.id,date:d,type:'sale',qty:q,price:price,party:'',book:bookOf(p),u:Date.now(),cost:num(p.buy)});
-  var it=saleSession.items[p.id];
-  if(!it){it=saleSession.items[p.id]={qty:0,amt:0};saleSession.order.push(p.id);}
-  it.qty+=q;it.amt+=total;
+  /* The session line is kept per product AND price type, so a খুচরা
+     sale and a পাইকারি sale of the same product stay two honest lines. */
+  var key=p.id+'|'+mode;
+  var it=saleSession.items[key];
+  if(!it){it=saleSession.items[key]={pid:p.id,mode:mode,qty:0,amt:0,price:price};saleSession.order.push(key);}
+  it.qty+=q;it.amt+=total;it.price=price;
   qsQty[p.id]=1;
   saveSaleSession();
   saveLocal();
-  toast('✅ '+p.name+' '+fmt(q)+' '+p.unit+' বিক্রি হয়েছে — '+money(total)+' (স্টক কমে গেছে, নিচের হিসাবে জমা হয়েছে — সব বিক্রি শেষে “✅ হিসাব শেষ করুন” চাপলেই টাকা খাতায় যাবে)');
+  toast('✅ '+p.name+' '+fmt(q)+' '+p.unit+' বিক্রি হয়েছে ('+qsPriceName(p)+' দামে) — '+money(total)+' (স্টক কমে গেছে, নিচের হিসাবে জমা হয়েছে — সব বিক্রি শেষে “✅ হিসাব শেষ করুন” চাপলেই টাকা খাতায় যাবে)');
 };
 /* Settle the session: the books are made to match the bottom summary
    exactly — paid part (after %) to the money ledger with the chosen
    method, unpaid remainder to the dues book under the named customer. */
 function settleSale(){
   var c=saleCalc();
-  if(!saleSession.order.length||!(c.amt>0)){toast('⚠️ আগে কিছু বিক্রি করুন');return;}
+  if(!saleSession.order.length){toast('⚠️ আগে কিছু বিক্রি করুন');return;}
+  /* A restored pre-v25 session can still hold ৳ 0 lines (sold while
+     the price bug existed) — say exactly that instead of the old
+     misleading 'আগে কিছু বিক্রি করুন'. */
+  if(!(c.amt>0)){toast('⚠️ এই বিক্রিগুলোর মোট টাকা ৳ ০ — প্রোডাক্টে বিক্রি দাম বসানো হয়নি। দাম বসিয়ে ঠিক করুন, নাহলে “🔄 নতুন বিক্রির হিসাব” চেপে হিসাবটা খালি করুন');return;}
   var fin=Math.round(c.fin*100)/100;
   var paid=Math.round(Math.min(Math.max(num($('salePaid').value),0),Math.max(fin,0))*100)/100;
   var due=Math.round((fin-paid)*100)/100;
@@ -6210,7 +6306,7 @@ function settleSale(){
   if(due>0&&!cust){toast('⚠️ বাকি '+money(due)+' আছে — কার নামে বাকি যাবে, কাস্টমারের নাম লিখুন');$('saleCust').focus();return;}
   var method=$('saleMethod').value||'নগদ';
   var d=todayStr(),bk=writeBook();
-  var names=saleSession.order.map(function(pid){var p=findProd(pid),it=saleSession.items[pid];return (p?p.name:'প্রোডাক্ট')+' ×'+fmt(it.qty);}).join(', ');
+  var names=saleSession.order.map(function(k){var it=saleSession.items[k],p=findProd(it.pid||k);return (p?p.name:'প্রোডাক্ট')+' ×'+fmt(it.qty)+' ('+(it.mode==='ws'?'পাইকারি':'খুচরা')+')';}).join(', ');
   if(paid>0)DB.txs.push({id:uid(),date:d,type:'in',amount:paid,cat:'পণ্য বিক্রি',method:method,note:'স্টক পেজ বিক্রি — '+names+(cust?' — '+cust:''),book:bk,u:Date.now()});
   if(due>0){
     var party=null;
@@ -6239,15 +6335,26 @@ function renderSaleSummary(){
   if(!saleSession.order.length){
     box.innerHTML='<p class="hint" style="margin:0">এখনো কিছু বিক্রি হয়নি — প্রোডাক্টের পাশে পরিমাণ লিখে “🛒 বিক্রি করুন” চাপুন।</p>';
   }else{
-    box.innerHTML=saleSession.order.map(function(pid){
-      var p=findProd(pid),it=saleSession.items[pid];
-      return '<div class="kv"><span>'+esc(p?p.name:'প্রোডাক্ট')+' × '+fmt(it.qty)+(p?' '+esc(p.unit):'')+'</span><b>'+money(it.amt)+'</b></div>';
+    box.innerHTML=saleSession.order.map(function(k){
+      var it=saleSession.items[k],p=findProd(it.pid||k);
+      /* v25: every line shows its own arithmetic AND the price type
+         used — 'Hghg — 50 পিস × ৳ 20 (খুচরা)' with the line total at
+         the end. A restored older draft carries no unit price; it is
+         derived from amount ÷ qty, which reproduces the same total. */
+      var up=num(it.price)>0?num(it.price):(num(it.qty)>0?num(it.amt)/num(it.qty):0);
+      return '<div class="kv"><span>'+esc(p?p.name:'প্রোডাক্ট')+' — '+fmt(it.qty)+(p?' '+esc(p.unit):'')+(up>0?' × '+money(up):'')+' ('+(it.mode==='ws'?'পাইকারি':'খুচরা')+')</span><b>'+money(it.amt)+'</b></div>';
     }).join('');
   }
   var c=saleCalc();
+  /* v25: the FULL chain is always on screen and recalculates live on
+     every sale and every keystroke — মোট বিক্রির টাকা → পার্সেন্টেজ
+     (+/−) → পার্সেন্টেজসহ মোট → জমা → বাকি (the বাকি line is the
+     saleDueBox below). Before, the % rows only appeared after a % was
+     typed, so the automatic calculation was invisible. */
   tot.innerHTML='<div class="kv"><span>মোট বিক্রি হয়েছে</span><b>'+fmt(c.items)+' টি প্রোডাক্ট</b></div>'+
   '<div class="kv"><span>মোট বিক্রির টাকা</span><b>'+money(c.amt)+'</b></div>'+
-  (c.pct>0?'<div class="kv"><span>পার্সেন্টেজ ('+(c.sign>0?'＋':'−')+fmt(c.pct)+'%)</span><b>'+(c.adj<0?'−':'+')+' '+money(Math.abs(c.adj))+'</b></div><div class="kv"><span><b>পার্সেন্টেজসহ মোট</b></span><b>'+money(c.fin)+'</b></div>':'')+
+  '<div class="kv"><span>পার্সেন্টেজ ('+(c.sign>0?'＋':'−')+fmt(c.pct)+'%)</span><b>'+(c.adj<0?'− ':'+ ')+money(Math.abs(c.adj))+'</b></div>'+
+  '<div class="kv"><span><b>পার্সেন্টেজসহ মোট</b></span><b>'+money(c.fin)+'</b></div>'+
   '<div class="kv"><span>জমা</span><b>'+money(c.paid)+'</b></div>';
   due.textContent=c.due>0?('বাকি গেল: '+money(c.due)):(c.due<0?('বাকি নেই — বেশি জমা হয়েছে '+money(-c.due)):('বাকি: '+money(0)+' — পুরো টাকা জমা হয়েছে'));
   /* v24: while a sale session is still unsettled, an unmissable bar stays
@@ -7612,7 +7719,9 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 24 (v24)":"Version 24 (v24)",
+"ভার্সন 25 (v25)":"Version 25 (v25)",
+"➕ নতুন প্রোডাক্ট এড করুন":"➕ Add a new product",
+"← ফিরে যান":"← Go back",
 "পেমেন্ট মাধ্যম (টাকা শোধ হলে টাকার খাতায় এই মাধ্যমে যাবে)":"Payment method (a due payment lands in the money ledger with this method)",
 "কাস্টমারের নাম (বাকি থাকলে যার নামে যাবে)":"Customer name (any leftover due goes under this name)",
 "জমার মাধ্যম":"Method the payment was received by",
