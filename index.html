@@ -1313,7 +1313,12 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <h2>💎 প্ল্যান বেছে নিন</h2>
       <div id="pwPlans"></div>
     </div>
-    <div class="panel">
+    <div class="panel" id="buyWaitPanel" style="display:none">
+      <h2>⏳ অনুরোধ জমা হয়েছে</h2>
+      <p style="font-weight:700;font-size:1.05rem;line-height:1.6;margin:0 0 10px">✅ আপনার অনুরোধ পাঠানো হয়েছে — অনুগ্রহ করে ৪–৫ ঘণ্টা অপেক্ষা করুন। Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে যাবে।</p>
+      <div id="buyWaitReq"></div>
+    </div>
+    <div class="panel" id="buyFormPanel">
       <h2>পেমেন্ট করে রিকোয়েস্ট পাঠান</h2>
       <p class="hint">প্রথমে নিচের বিকাশ নম্বরে টাকা পাঠান, তারপর ফর্মটা পূরণ করুন।</p>
       <div class="kv"><span>বিকাশ নম্বর (পার্সোনাল)</span><b><span id="payNumTxt">01568559982</span> <button class="btn small gold" id="copyPayNum" type="button">📋 কপি</button></b></div>
@@ -1326,6 +1331,19 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       <div class="grid2">
         <div class="field"><label for="buyAmount">পাঠানো টাকার পরিমাণ (৳)</label><input type="number" id="buyAmount" inputmode="decimal" min="0" step="any" placeholder="0" /></div>
         <div class="field"><label for="buyTrx">TrxID (ট্রান্সাকশন আইডি)</label><input type="text" id="buyTrx" placeholder="যেমন: 9HX7K2LM1P" /></div>
+      </div>
+      <div class="field"><label>পেমেন্টের স্ক্রিনশট (ঐচ্ছিক)</label>
+        <input type="file" id="buyShot" accept="image/*" style="display:none" />
+        <input type="file" id="buyShotCam" accept="image/*" capture="environment" style="display:none" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small" id="buyShotCamBtn" type="button">📷 ছবি তুলুন</button>
+          <button class="btn small ghost" id="buyShotGalBtn" type="button">🖼️ গ্যালারি থেকে নিন</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <img id="buyShotPrev" alt="পেমেন্টের স্ক্রিনশট" style="display:none;width:74px;height:74px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line)" />
+          <button class="btn small danger" id="buyShotRm" type="button" style="display:none">ছবি সরান</button>
+        </div>
+        <p class="hint" style="margin:4px 0 0">TrxID অথবা স্ক্রিনশট — যেকোনো একটা দিলেই হবে।</p>
       </div>
       <p id="buyMsg" style="margin:0 0 10px;font-weight:700;color:var(--out)"></p>
       <button class="btn" id="buySend" type="button" style="width:100%">📩 রিকোয়েস্ট পাঠান</button>
@@ -2225,7 +2243,7 @@ function mergeGuest(uid){
      4. writes the merged result back to the cloud.
    So entries made on ANY phone survive, whichever side was edited last, and
    an entry deleted on one phone stays deleted everywhere (tombstones). */
-var syncBusy=false, syncAgain=false;
+var syncBusy=false, syncAgain=false, lastWriteFp=null;
 function syncNow(){
   if(!fbReady||!currentUser)return;
   if(!navigator.onLine){setSync(offlineMode?OFFLINE_SYNC_TXT:'অফলাইন — হিসাব ফোনে সেভ আছে, অনলাইন হলেই সিঙ্ক হবে');return;}
@@ -2263,7 +2281,25 @@ function syncNow(){
       setSync('⚠️ হিসাব অনেক বড় হয়ে গেছে — সিঙ্ক হয়নি। কিছু ছবি (প্রোফাইল / রসিদের ছবি) মুছে বা কমিয়ে আবার চেষ্টা করুন — হিসাব ফোনে সেভ আছে, কিছুই হারায়নি');
       return;
     }
-    userDoc().set(payload).then(function(){finish(true);},function(){finish(false);});
+    /* Sync-quota saving: skip the cloud WRITE when the hisab data is
+       identical to what the last successful write already stored. The
+       fingerprint covers the whole payload EXCEPT the devices array —
+       its lastSeen/loginAt change on every sync, so including it would
+       make every sync look "changed". The READ above still ran in full
+       (merge + plan adoption + device enforcement), so inbound changes
+       are unaffected; only the redundant write is saved. First sync
+       after a page load has no stored fingerprint, so it ALWAYS writes
+       — that write is what registers a new device in the cloud. If
+       fingerprinting throws for any reason, fall back to WRITING
+       (never skip on error). */
+    var fp=null,fpOk=false;
+    try{
+      var fpSrc={};
+      for(var fk in payload){if(fk!=='devices')fpSrc[fk]=payload[fk];}
+      fp=JSON.stringify(fpSrc);fpOk=true;
+    }catch(e){fpOk=false;}
+    if(fpOk&&fp===lastWriteFp){finish(true);return;}
+    userDoc().set(payload).then(function(){if(fpOk)lastWriteFp=fp;finish(true);},function(){finish(false);});
   }).catch(function(){finish(false);});
 }
 /* ---------- DEVICE LIMIT ENFORCEMENT ----------
@@ -3284,13 +3320,20 @@ function renderAccess(){
      trial: never started → offer the opt-in start button; started and
      expired → only the premium path remains. */
   var trialNeverStarted=!isOwner()&&!num(SUB.trialStart);
+  /* A pending plan request auto-opens the buy section on EVERY render —
+     including right after a reload/reopen — so the waiting panel is the
+     first thing a paying user sees, with no tap needed. (pwBuyOpen alone
+     resets to false on every load, which used to hide the panel again.) */
+  var pendReq=PLANREQS.length>0;
   var ht=$('pwHeadTxt');
-  if(ht)ht.textContent=trialNeverStarted
+  if(ht)ht.textContent=pendReq
+    ?'⏳ আপনার প্ল্যানের অনুরোধ জমা হয়েছে — Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে অ্যাপ খুলে যাবে।'
+    :(trialNeverStarted
     ?'আপনি এখনো ফ্রি ট্রায়াল শুরু করেননি। নিচের বোতামে চাপ দিলেই ৭ দিনের ফ্রি ট্রায়াল শুরু হবে — নিজে শুরু না করলে ট্রায়াল চালু হবে না। অথবা চাইলে সরাসরি প্রিমিয়াম প্ল্যানও কিনতে পারেন।'
-    :'আপনার ফ্রি ট্রায়াল শেষ হয়ে গেছে। আবার পুরো অ্যাপ ব্যবহার করতে একটা প্ল্যান কিনুন — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।';
+    :'আপনার ফ্রি ট্রায়াল শেষ হয়ে গেছে। আবার পুরো অ্যাপ ব্যবহার করতে একটা প্ল্যান কিনুন — Admin অনুমোদন দিলেই অ্যাপ খুলে যাবে।');
   var tb=$('pwTrialBtn');if(tb)tb.style.display=(trialNeverStarted&&!pwBuyOpen)?'':'none';
-  $('pwBuySection').style.display=pwBuyOpen?'':'none';
-  $('pwBuyBtn').style.display=pwBuyOpen?'none':'';
+  $('pwBuySection').style.display=(pwBuyOpen||pendReq)?'':'none';
+  $('pwBuyBtn').style.display=(pwBuyOpen||pendReq)?'none':'';
   $('pwCloseBtn').style.display=pwVoluntary?'':'none';
   $('pwPlans').innerHTML=PLANS.map(function(p){return '<div class="kv"><span>💎 <b>'+esc(p.name)+'</b></span><b>'+money(num(p.price))+'</b></div>';}).join('');
   var sel=$('buyPlan'),cur=sel.value;
@@ -3298,6 +3341,18 @@ function renderAccess(){
   if(cur!==''&&num(cur)<PLANS.length)sel.value=cur;
   syncBuyAmount();
   if(currentUser&&!$('buyIdent').value)$('buyIdent').value=currentUser.label.replace('📱 ','');
+  /* While a plan request is pending, the buy form is replaced by the
+     waiting panel (request received — wait 4–5 hours for Admin approval),
+     so the user is never invited to submit a duplicate. The moment the
+     request clears (approve OR reject removes it from planReqs) the form
+     comes back on its own. */
+  var wpEl=$('buyWaitPanel'),bfEl=$('buyFormPanel');
+  if(wpEl)wpEl.style.display=pendReq?'':'none';
+  if(bfEl)bfEl.style.display=pendReq?'none':'';
+  if(pendReq){
+    var wrEl=$('buyWaitReq');
+    if(wrEl)wrEl.innerHTML=PLANREQS.map(function(r){return '<div class="kv"><span>'+esc(r.date||'')+' • '+esc(r.planName||'')+' • '+money(num(r.amount))+(r.trx?' • TrxID: '+esc(r.trx):'')+(r.shot?' • 📷':'')+'</span><b><span class="badge warn">⏳ Admin-এর অপেক্ষায়</span></b></div>';}).join('');
+  }
   var mb=$('myReqBox');
   if(mb){
     if(PLANREQS.length)mb.innerHTML='<h3 style="margin:6px 0 4px">আমার পাঠানো রিকোয়েস্ট</h3>'+PLANREQS.map(function(r){return '<div class="kv"><span>'+esc(r.date||'')+' • '+esc(r.planName||'')+' • '+money(num(r.amount))+' • TrxID: '+esc(r.trx||'')+'</span><b><span class="badge warn">⏳ Admin-এর অপেক্ষায়</span></b></div>';}).join('');
@@ -3349,12 +3404,35 @@ $('buySend').addEventListener('click',function(){
   if(!plan){msg.textContent='⚠️ একটা প্ল্যান বাছুন।';return;}
   if(!name){msg.textContent='⚠️ আপনার নাম লিখুন।';$('buyName').focus();return;}
   if(!(amt>0)){msg.textContent='⚠️ পাঠানো টাকার পরিমাণ লিখুন।';return;}
-  if(!trx){msg.textContent='⚠️ TrxID লিখুন — Admin পেমেন্ট মিলিয়ে দেখবেন।';$('buyTrx').focus();return;}
-  PLANREQS.push({id:uid(),name:name,ident:$('buyIdent').value.trim()||currentUser.label,planName:plan.name,planDays:num(plan.days),method:$('buyMethod').value,trx:trx,amount:amt,date:todayStr(),ts:Date.now()});
+  if(!trx&&!pendingBuyShot){msg.textContent=trStr('⚠️ TrxID লিখুন অথবা পেমেন্টের স্ক্রিনশট দিন — যেকোনো একটা লাগবে।');$('buyTrx').focus();return;}
+  PLANREQS.push({id:uid(),name:name,ident:$('buyIdent').value.trim()||currentUser.label,planName:plan.name,planDays:num(plan.days),method:$('buyMethod').value,trx:trx,shot:pendingBuyShot||'',amount:amt,date:todayStr(),ts:Date.now()});
   PLANREQS_U=Date.now();saveReqs();schedulePush();syncNow();
   $('buyTrx').value='';
+  pendingBuyShot='';$('buyShot').value='';$('buyShotCam').value='';$('buyShotPrev').style.display='none';$('buyShotRm').style.display='none';
   toast('📩 রিকোয়েস্ট পাঠানো হয়েছে — Admin অনুমোদন দিলেই প্ল্যান চালু হবে');
   renderAccess();
+});
+/* Optional payment screenshot on the buy form: same camera/gallery picker
+   and the same on-phone compression (compressPhotoFile, max 600px JPEG)
+   as receipt / product photos. The data URL rides inside the request
+   object (r.shot) so it syncs with planReqs in the user's own doc — the
+   payload size guard in syncNow already protects the 1 MiB doc limit.
+   At submit, TrxID OR screenshot — at least one — is required. */
+var pendingBuyShot='';
+function loadBuyShot(f){
+  compressPhotoFile(f,function(d){
+    if(!d){toast(trStr('⚠️ ছবিটা পড়া যায়নি'));return;}
+    pendingBuyShot=d;
+    $('buyShotPrev').src=d;$('buyShotPrev').style.display='';$('buyShotRm').style.display='';
+    toast(trStr('📷 স্ক্রিনশট তৈরি — রিকোয়েস্ট পাঠালেই Admin দেখতে পাবেন'));
+  });
+}
+$('buyShotCamBtn').addEventListener('click',function(){$('buyShotCam').click();});
+$('buyShotGalBtn').addEventListener('click',function(){$('buyShot').click();});
+$('buyShot').addEventListener('change',function(){loadBuyShot(this.files&&this.files[0]);});
+$('buyShotCam').addEventListener('change',function(){loadBuyShot(this.files&&this.files[0]);});
+$('buyShotRm').addEventListener('click',function(){
+  pendingBuyShot='';$('buyShot').value='';$('buyShotCam').value='';$('buyShotPrev').style.display='none';$('buyShotRm').style.display='none';
 });
 
 /* ---------- APP LOCK (optional 4-digit PIN) ----------
@@ -4035,7 +4113,7 @@ function tgWatchTick(){
     if(!tgSeeded){tgSeeded=true;return;}
     fresh.forEach(function(x){
       var r=x.req;
-      tgSend('🔔 Black Ghost Hisab — নতুন প্ল্যান রিকোয়েস্ট!\n👤 '+String(r.name||'')+' ('+String(x.acct)+')\n💎 প্ল্যান: '+String(r.planName||'')+' ('+fmt(num(r.planDays))+' দিন)\n💰 '+money(num(r.amount))+' • '+String(r.method||'')+'\n🧾 TrxID: '+String(r.trx||''));
+      tgSend('🔔 Black Ghost Hisab — নতুন প্ল্যান রিকোয়েস্ট!\n👤 '+String(r.name||'')+' ('+String(x.acct)+')\n💎 প্ল্যান: '+String(r.planName||'')+' ('+fmt(num(r.planDays))+' দিন)\n💰 '+money(num(r.amount))+' • '+String(r.method||'')+'\n🧾 TrxID: '+String(r.trx||'')+(r.shot?'\n📷 স্ক্রিনশট দেওয়া আছে':''));
     });
     if(fresh.length)tgStatus('🔔 '+fmt(fresh.length)+'টি নতুন রিকোয়েস্ট এসেছে'+(($('tgToken').value||'').trim()?' — Telegram-এ জানানো হয়েছে':' (Telegram টোকেন দিলে সেখানেও যাবে)'),true);
   }).catch(function(){});
@@ -4052,7 +4130,7 @@ function renderAdminReqs(){
   $('admReqCount').textContent=rows.length?'('+fmt(rows.length)+'টি)':'';
   if(!rows.length){$('admReqBox').innerHTML='<p class="hint" style="margin:0">কোনো নতুন রিকোয়েস্ট নেই।</p>';return;}
   $('admReqBox').innerHTML=rows.map(function(x){var r=x.req;
-    return '<div class="rowitem"><div class="r1"><div><b>'+esc(r.name||'')+'</b> <span class="badge warn">⏳ নতুন</span><div class="meta">'+esc(x.acct)+(r.ident?' • '+esc(r.ident):'')+'</div><div class="meta">'+esc(r.date||'')+' • '+esc(r.planName||'')+' ('+fmt(num(r.planDays))+' দিন) • '+esc(r.method||'')+' • TrxID: <b>'+esc(r.trx||'')+'</b></div></div><div class="amt">'+money(num(r.amount))+'</div></div>'+
+    return '<div class="rowitem"><div class="r1"><div><b>'+esc(r.name||'')+'</b> <span class="badge warn">⏳ নতুন</span><div class="meta">'+esc(x.acct)+(r.ident?' • '+esc(r.ident):'')+'</div><div class="meta">'+esc(r.date||'')+' • '+esc(r.planName||'')+' ('+fmt(num(r.planDays))+' দিন) • '+esc(r.method||'')+' • TrxID: <b>'+esc(r.trx||'')+'</b></div>'+(r.shot&&String(r.shot).indexOf('data:image/')===0?'<div style="margin-top:6px"><img src="'+esc(r.shot)+'" alt="স্ক্রিনশট" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1.5px solid var(--line);cursor:pointer" onclick="admViewShot(\''+x.uid+'\',\''+r.id+'\')" /></div>':'')+'</div><div class="amt">'+money(num(r.amount))+'</div></div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:8px"><div class="field" style="margin:0;flex:0 1 130px"><label>কত দিনের প্ল্যান</label><input type="number" id="apprDays_'+r.id+'" value="'+fmt(num(r.planDays)||30)+'" min="1" step="1" /></div>'+
     '<button class="btn small" type="button" onclick="admApprove(\''+x.uid+'\',\''+r.id+'\')">✅ অনুমোদন</button>'+
     '<button class="btn small danger" type="button" onclick="admReject(\''+x.uid+'\',\''+r.id+'\')">❌ বাতিল</button></div></div>';
@@ -4120,6 +4198,15 @@ function renderAdminFree(){
   if(!admIndex.freeList||!admIndex.freeList.length){box.innerHTML='<p class="hint" style="margin:0">ফ্রি তালিকায় কেউ নেই (ওপরে ব্যবহারকারী তালিকা থেকেও ফ্রি দেওয়া যায়)।</p>';return;}
   box.innerHTML=admIndex.freeList.map(function(f){return '<div class="kv"><span>🎁 '+esc(f)+'</span><b><button class="btn small danger" type="button" onclick="admFreeRemove(\''+jsq(f)+'\')">সরান</button></b></div>';}).join('');
 }
+/* Admin: tap a request's payment screenshot thumbnail to see it full-size
+   in the shared photo viewer (same modal as receipt photos). */
+window.admViewShot=function(uid,rid){
+  var shot='';
+  admUsers.forEach(function(rec){if(rec.uid===uid)(rec.data.planReqs||[]).forEach(function(r){if(r.id===rid)shot=r.shot||'';});});
+  if(!shot||String(shot).indexOf('data:image/')!==0)return;
+  $('photoImg').src=shot;
+  $('photoModal').classList.add('open');
+};
 window.admApprove=function(uid,rid){
   var inp=document.getElementById('apprDays_'+rid),days=num(inp&&inp.value);
   /* v24: re-read the user's document fresh before writing (see
@@ -9496,7 +9583,14 @@ var I18N_EN={
 "ধার ফেরত পাওয়া":"Loan repaid (received)",
 "ধার নেওয়া":"Money borrowed",
 "ধার শোধ":"Loan repaid (paid)",
-"সঞ্চয়":"Savings"
+"সঞ্চয়":"Savings",
+"⏳ অনুরোধ জমা হয়েছে":"⏳ Request submitted",
+"✅ আপনার অনুরোধ পাঠানো হয়েছে — অনুগ্রহ করে ৪–৫ ঘণ্টা অপেক্ষা করুন। Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে যাবে।":"✅ Your request has been sent — please wait 4–5 hours. As soon as the Admin approves it, your plan will be activated.",
+"⏳ আপনার প্ল্যানের অনুরোধ জমা হয়েছে — Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে অ্যাপ খুলে যাবে।":"⏳ Your plan request has been submitted — as soon as the Admin approves it, your plan will be activated and the app will open.",
+"পেমেন্টের স্ক্রিনশট (ঐচ্ছিক)":"Payment screenshot (optional)",
+"TrxID অথবা স্ক্রিনশট — যেকোনো একটা দিলেই হবে।":"TrxID or a screenshot — either one is enough.",
+"⚠️ TrxID লিখুন অথবা পেমেন্টের স্ক্রিনশট দিন — যেকোনো একটা লাগবে।":"⚠️ Enter the TrxID or attach the payment screenshot — at least one is required.",
+"📷 স্ক্রিনশট তৈরি — রিকোয়েস্ট পাঠালেই Admin দেখতে পাবেন":"📷 Screenshot ready — the Admin will see it when you send the request"
 };
 var I18N_HI={
 "－ খরচ (টাকা গেল)":"－ खर्च (पैसे गए)",
@@ -10283,7 +10377,14 @@ var I18N_HI={
 "ধার ফেরত পাওয়া":"उधार वापस मिला",
 "ধার নেওয়া":"उधार लिया",
 "ধার শোধ":"उधार चुकाया",
-"সঞ্চয়":"बचत"
+"সঞ্চয়":"बचत",
+"⏳ অনুরোধ জমা হয়েছে":"⏳ अनुरोध जमा हो गया",
+"✅ আপনার অনুরোধ পাঠানো হয়েছে — অনুগ্রহ করে ৪–৫ ঘণ্টা অপেক্ষা করুন। Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে যাবে।":"✅ आपका अनुरोध भेज दिया गया है — कृपया 4–5 घंटे प्रतीक्षा करें। Admin के अनुमोदन देते ही आपका प्लान चालू हो जाएगा।",
+"⏳ আপনার প্ল্যানের অনুরোধ জমা হয়েছে — Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে অ্যাপ খুলে যাবে।":"⏳ आपका प्लान अनुरोध जमा हो गया है — Admin के अनुमोदन देते ही आपका प्लान चालू हो जाएगा और ऐप खुल जाएगा।",
+"পেমেন্টের স্ক্রিনশট (ঐচ্ছিক)":"भुगतान का स्क्रीनशॉट (वैकल्पिक)",
+"TrxID অথবা স্ক্রিনশট — যেকোনো একটা দিলেই হবে।":"TrxID या स्क्रीनशॉट — कोई एक देना ही काफी है।",
+"⚠️ TrxID লিখুন অথবা পেমেন্টের স্ক্রিনশট দিন — যেকোনো একটা লাগবে।":"⚠️ TrxID लिखें या भुगतान का स्क्रीनशॉट दें — कम से कम एक ज़रूरी है।",
+"📷 স্ক্রিনশট তৈরি — রিকোয়েস্ট পাঠালেই Admin দেখতে পাবেন":"📷 स्क्रीनशॉट तैयार है — अनुरोध भेजते ही Admin इसे देख पाएंगे"
 };
 var I18N_UR={
 "－ খরচ (টাকা গেল)":"－ خرچ (رقم گئی)",
@@ -11070,7 +11171,14 @@ var I18N_UR={
 "ধার ফেরত পাওয়া":"ادھار واپس ملا",
 "ধার নেওয়া":"ادھار لیا",
 "ধার শোধ":"ادھار چکایا",
-"সঞ্চয়":"بچت"
+"সঞ্চয়":"بچت",
+"⏳ অনুরোধ জমা হয়েছে":"⏳ درخواست جمع ہو گئی",
+"✅ আপনার অনুরোধ পাঠানো হয়েছে — অনুগ্রহ করে ৪–৫ ঘণ্টা অপেক্ষা করুন। Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে যাবে।":"✅ آپ کی درخواست بھیج دی گئی ہے — براہ کرم 4–5 گھنٹے انتظار کریں۔ Admin کے منظور کرتے ہی آپ کا پلان فعال ہو جائے گا۔",
+"⏳ আপনার প্ল্যানের অনুরোধ জমা হয়েছে — Admin অনুমোদন দিলেই আপনার প্ল্যান চালু হয়ে অ্যাপ খুলে যাবে।":"⏳ آپ کی پلان کی درخواست جمع ہو گئی ہے — Admin کے منظور کرتے ہی آپ کا پلان فعال ہو جائے گا اور ایپ کھل جائے گی۔",
+"পেমেন্টের স্ক্রিনশট (ঐচ্ছিক)":"ادائیگی کا اسکرین شاٹ (اختیاری)",
+"TrxID অথবা স্ক্রিনশট — যেকোনো একটা দিলেই হবে।":"TrxID یا اسکرین شاٹ — کوئی ایک دینا ہی کافی ہے۔",
+"⚠️ TrxID লিখুন অথবা পেমেন্টের স্ক্রিনশট দিন — যেকোনো একটা লাগবে।":"⚠️ TrxID لکھیں یا ادائیگی کا اسکرین شاٹ دیں — کم از کم ایک ضروری ہے۔",
+"📷 স্ক্রিনশট তৈরি — রিকোয়েস্ট পাঠালেই Admin দেখতে পাবেন":"📷 اسکرین شاٹ تیار ہے — درخواست بھیجتے ہی Admin اسے دیکھ سکیں گے"
 };
 var _i18nOrig=new WeakMap();
 function i18nKey(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
@@ -11214,7 +11322,15 @@ renderAll();
 netUpdate();
 initFirebase();
 applyLang(document.body);
-setInterval(function(){renderAccess();refreshPendingBadge();if(currentUser&&deviceConfirmed&&!deviceBlocked)syncNow();},60000);
+setInterval(function(){renderAccess();refreshPendingBadge();},60000);
+/* Sync-quota saving: the periodic cloud sync runs every 5 minutes instead
+   of every minute (Firestore free-plan read/write quota is the binding
+   limit). The local renders above keep their own 60s timer and are NOT
+   slowed. Saves still sync immediately via schedulePush (1.2s), and
+   reopening the app / coming back online still syncs at once — only
+   background cross-device pickup, plan-approval pickup and
+   removed-device logout can now take up to 5 minutes instead of 1. */
+setInterval(function(){if(currentUser&&deviceConfirmed&&!deviceBlocked)syncNow();},300000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&currentUser)syncNow();});
 /* If Firebase never resolves (blocked CDN / very slow network), stop showing
    the loading state and fall back to the login screen + its offline message.
