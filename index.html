@@ -52,7 +52,7 @@ button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]
 button{font:inherit;cursor:pointer}
 input,select,textarea{font:inherit;background:var(--input);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:.55rem .7rem;width:100%}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
-label{font-weight:600;font-size:.92rem;display:block;margin-bottom:.3rem}
+label{font-weight:600;font-size:.88rem;display:block;margin-bottom:.3rem}
 .wrap{max-width:1060px;margin:0 auto;padding:0 14px 110px}
 header.top{background:var(--green);color:#fff;padding:16px 14px 14px;position:sticky;top:0;z-index:30;box-shadow:var(--shadow)}
 header.top .inner{max-width:1060px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -67,7 +67,7 @@ header.top .sub{margin:2px 0 0;opacity:.92;font-size:.92rem}
 .btn.gold{background:var(--gold);color:#221a00}
 .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
 .btn.danger{background:var(--out);color:#fff}
-.btn.small{min-height:2.25rem;padding:.35rem .7rem;font-size:.88rem;border-radius:8px}
+.btn.small{min-height:2.25rem;padding:.3rem .6rem;font-size:.85rem;border-radius:8px}
 .btn:active{transform:scale(.98)}
 nav.tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0 4px;display:flex;gap:8px;flex-wrap:wrap}
 nav.tabs button{flex:1 1 150px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:.65rem .5rem;font-weight:700;min-height:2.9rem;box-shadow:var(--shadow)}
@@ -75,29 +75,35 @@ nav.tabs button.active{background:var(--green);color:#fff;border-color:var(--gre
 /* v28 — DEDICATED PAGES: home shows the tab grid; inside any section the
    grid is hidden and ONLY that section shows, topped by a big back bar. */
 body[data-view="dedicated"] nav.tabs{display:none!important}
-#dedicatedBar{display:none;position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0 10px;align-items:center;gap:12px;border-bottom:2px solid var(--line)}
+#dedicatedBar{display:none;position:sticky;top:0;z-index:20;background:var(--bg);padding:7px 0 6px;align-items:center;gap:12px;border-bottom:2px solid var(--line)}
 body[data-view="dedicated"] #dedicatedBar{display:flex}
 #dedicatedBackBtn{flex:0 0 auto;background:var(--green);color:#fff;border:none;border-radius:12px;padding:.8rem 1.2rem;font-weight:800;font-size:1.12rem;min-height:3.4rem;box-shadow:var(--shadow);cursor:pointer}
 #dedicatedBackBtn:active{transform:scale(.97)}
 #dedicatedTitle{font-size:1.22rem;font-weight:800;line-height:1.3}
 body[data-view="dedicated"] footer.note{display:none}
+/* v29 — inside a dedicated page the whole green header block hides
+   (install button, language toggle, dark mode, online/email pills,
+   app title + subtitle). Nothing is removed: on the home screen
+   (data-view="home") the header shows exactly as before. Only the
+   back bar + section content remain inside a section. */
+body[data-view="dedicated"] header.top{display:none!important}
 #page-dealer.dealer-detail-open>*:not(#dlDetail){display:none!important}
 #page-dealer.dealer-detail-open #dlDetail{margin-top:0}
 #page-order.person-open>.panel:first-child{display:none!important}
 .subback{width:100%;font-size:1.05rem;min-height:3.1rem;margin-bottom:12px}
 @media print{#dedicatedBar{display:none!important}body[data-view="dedicated"] footer.note{display:block}}
-section.page{display:none;margin-top:10px}
+section.page{display:none;margin-top:6px}
 section.page.active{display:block}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
-.card .k{font-size:.88rem;color:var(--muted);font-weight:600}
-.card .v{font-size:1.45rem;font-weight:800;margin-top:2px;word-break:break-word}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px;box-shadow:var(--shadow)}
+.card .k{font-size:.82rem;color:var(--muted);font-weight:600}
+.card .v{font-size:1.3rem;font-weight:800;margin-top:2px;word-break:break-word}
 .card .v small{font-size:.85rem;font-weight:600;color:var(--muted)}
 .v.pos{color:var(--in)}.v.neg{color:var(--out)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-top:12px}
-.panel h2{margin:0 0 4px;font-size:1.12rem}
-.panel h3{margin:14px 0 6px;font-size:1rem}
-.panel .hint{color:var(--muted);font-size:.9rem;margin:0 0 10px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);margin-top:10px}
+.panel h2{margin:0 0 2px;font-size:1rem}
+.panel h3{margin:12px 0 5px;font-size:.93rem}
+.panel .hint{color:var(--muted);font-size:.85rem;margin:0 0 8px;line-height:1.35}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .dgrow4{display:grid;grid-template-columns:1.7fr 1fr .8fr 1.1fr;gap:8px;align-items:start}
@@ -132,28 +138,29 @@ section.page.active{display:block}
 .seg button.sel-in{background:var(--in);border-color:var(--in);color:#fff}
 .seg button.sel-out{background:var(--out);border-color:var(--out);color:#fff}
 .seg button.sel-gold{background:var(--gold);border-color:var(--gold);color:#221a00}
-.live-total{background:var(--goldbg);border:1.5px dashed var(--gold);border-radius:12px;padding:10px 14px;font-weight:800;font-size:1.08rem;text-align:center;margin:6px 0 12px}
-table{width:100%;border-collapse:collapse;font-size:.95rem}
-th,td{padding:.55rem .5rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.live-total{background:var(--goldbg);border:1.5px dashed var(--gold);border-radius:12px;padding:8px 10px;font-weight:800;font-size:1rem;text-align:center;margin:4px 0 6px}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:.42rem .45rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 th{font-size:.85rem;color:var(--muted)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 tr:last-child td{border-bottom:none}
-.badge{display:inline-block;border-radius:999px;padding:.08rem .6rem;font-size:.8rem;font-weight:700}
+.badge{display:inline-block;border-radius:999px;padding:.06rem .55rem;font-size:.76rem;font-weight:700}
 .badge.in{background:var(--inbg);color:var(--in)}.badge.out{background:var(--outbg);color:var(--out)}
 .badge.warn{background:var(--goldbg);color:var(--gold)}
-.rowitem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px;box-shadow:var(--shadow)}
+.rowitem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 11px;margin-bottom:7px;box-shadow:var(--shadow)}
 .rowitem .r1{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.rowitem .amt{font-weight:800;font-size:1.08rem;white-space:nowrap}
-.rowitem .meta{color:var(--muted);font-size:.87rem}
-.rowitem .bal{font-size:.87rem;font-weight:700}
-.iconbtns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.rowitem .amt{font-weight:800;font-size:1rem;white-space:nowrap}
+.rowitem .meta{color:var(--muted);font-size:.82rem;line-height:1.3}
+.rowitem .bal{font-size:.82rem;font-weight:700}
+.iconbtns{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap}
 .iconbtns button{min-height:2.25rem}
-.empty{border:1.5px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted);background:var(--card)}
-.searchrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.empty{border:1.5px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted);background:var(--card)}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+.searchrow input,.searchrow select{min-height:2rem}
 .searchrow>*{flex:1 1 140px}
-.stockbig{font-size:1.6rem;font-weight:800}
-details.logbox{margin-top:8px;border-top:1px solid var(--line);padding-top:8px}
-details.logbox summary{font-weight:700;cursor:pointer;padding:.3rem 0}
+.stockbig{font-size:1.35rem;font-weight:800}
+details.logbox{margin-top:2px;border-top:1px solid var(--line);padding-top:3px}
+details.logbox summary{font-weight:700;cursor:pointer;padding:.1rem 0;font-size:.88rem}
 .modal{position:fixed;inset:0;background:rgba(8,14,10,.62);display:none;align-items:flex-end;justify-content:center;z-index:60;padding:0}
 .modal.open{display:flex}
 .modal .box{background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px 26px}
@@ -161,7 +168,7 @@ details.logbox summary{font-weight:700;cursor:pointer;padding:.3rem 0}
 .modal h2{margin:0 0 4px;font-size:1.15rem}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#12291c;color:#fff;padding:.7rem 1.1rem;border-radius:12px;font-weight:700;z-index:90;display:none;max-width:92vw;text-align:center;box-shadow:var(--shadow)}
 .toast.show{display:block}
-.kv{display:flex;justify-content:space-between;gap:10px;padding:.4rem 0;border-bottom:1px solid var(--line)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:.15rem 0;border-bottom:1px solid var(--line);font-size:.94rem}
 .kv:last-child{border-bottom:none}
 .kv b{font-variant-numeric:tabular-nums;text-align:right}
 footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22px}
@@ -465,7 +472,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       </div>
       <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
         <h3 style="margin:0 0 6px">📱 অ্যাপের ভার্সন</h3>
-        <div class="kv"><span>বর্তমান ভার্সন</span><b>ভার্সন 28 (v28)</b></div>
+        <div class="kv"><span>বর্তমান ভার্সন</span><b>ভার্সন 29 (v29)</b></div>
         <button class="btn ghost" id="updCheckBtn" type="button" style="margin-top:8px">🔄 নতুন ভার্সন আছে কিনা দেখুন</button>
         <p id="updMsg" style="margin:8px 0 0;font-weight:700"></p>
         <button class="btn gold" id="updRefreshBtn" type="button" style="display:none;margin-top:8px">🔄 এখনই রিফ্রেশ করুন</button>
@@ -576,7 +583,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
     </div>
     <div class="panel">
       <h2>সব প্রোডাক্ট ও স্টক</h2>
-      <div style="margin-bottom:8px" class="noprint"><button class="btn small ghost" id="stockPrint" type="button">🖨️ স্টক তালিকা প্রিন্ট</button></div>
+      <div style="margin-bottom:2px" class="noprint"><button class="btn small ghost" id="stockPrint" type="button">🖨️ স্টক তালিকা প্রিন্ট</button></div>
       <div id="stockSummary"></div>
       <div class="searchrow noprint"><input type="search" id="pSearch" placeholder="🔍 প্রোডাক্ট খুঁজুন…" /><select id="pStockFilter"><option value="all">সব প্রোডাক্ট</option><option value="low">⚠️ শুধু কম স্টক</option><option value="expiry">⏰ মেয়াদ শেষ হতে চলেছে</option></select></div>
       <div id="prodList"></div>
@@ -1243,7 +1250,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 28 (v28)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 29 (v29)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -3377,7 +3384,7 @@ function themeInit(){
    • ভার্সন + আপডেট চেক — compares APP_VER with the version in the
      live sw.js cache name, fetched fresh (cache-busting query +
      no-store). Offline / fetch failure gets a clear message. */
-var APP_VER=27;
+var APP_VER=29;
 function bizNameDisplay(){var n=String(DB.bizName||'').trim();return n?n:'Black Ghost Hisab';}
 function syncBizNameInputs(){
   var v=DB.bizName||'';
@@ -3428,7 +3435,7 @@ if(updBtn)updBtn.addEventListener('click',function(){
       m.textContent=(LANG==='en'?('🆕 A new version (v'+live+') is available — refresh the page to get it'):('🆕 নতুন ভার্সন এসেছে (v'+bnNum(live)+') — পেজ রিফ্রেশ করলেই নতুন ভার্সন পাবেন'));
       m.style.color='var(--in)';if(rb)rb.style.display='';
     }else{
-      m.textContent=trStr('✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 28)');
+      m.textContent=trStr('✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 29)');
       m.style.color='var(--in)';
     }
   }).catch(function(){
@@ -3948,7 +3955,7 @@ function admLoadVouchers(){
     if(!rows.length){box.innerHTML='<p class="hint" style="margin:0">এখনো কোনো ভাউচার কোড নেই।</p>';return;}
     box.innerHTML=rows.map(function(v){
       var maxU=num(v.maxUses);
-      return '<div class="rowitem"><div class="r1"><div><b style="font-size:1.05rem">'+esc(v._code)+'</b> '+(v.active===false?'<span class="badge out">বন্ধ</span>':'<span class="badge in">চালু</span>')+
+      return '<div class="rowitem"><div class="r1"><div><b style="font-size:1rem">'+esc(v._code)+'</b> '+(v.active===false?'<span class="badge out">বন্ধ</span>':'<span class="badge in">চালু</span>')+
       '<div class="meta">'+fmt(num(v.days)||30)+' দিনের ফ্রি • ব্যবহার হয়েছে: '+fmt(num(v.uses))+(maxU>0?' / '+fmt(maxU):' (সীমাহীন)')+'</div></div></div>'+
       '<div class="iconbtns">'+(v.active===false?'<button class="btn small" type="button" onclick="vToggle(\''+jsq(v._code)+'\',true)">▶️ চালু করুন</button>':'<button class="btn small ghost" type="button" onclick="vToggle(\''+jsq(v._code)+'\',false)">⏸️ বন্ধ করুন</button>')+
       '<button class="btn small danger" type="button" onclick="vDel(\''+jsq(v._code)+'\')">🗑️ মুছুন</button></div></div>';
@@ -4404,7 +4411,7 @@ function renderDues(){
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো বাকি এন্ট্রি নেই।</p>';
     var od=partyOverdue(p);
     var bought=0;bBills().forEach(function(b){if((b.customer||'').toLowerCase()===p.name.toLowerCase())bought+=num(b.total);});
-    return '<div class="rowitem" data-rowid="'+p.id+'"><div class="r1"><div><b style="font-size:1.08rem">'+esc(p.name)+'</b> '+(over?'<span class="badge out">⚠️ সীমা পার</span>':'')+(od?' <span class="badge out">⛔ মেয়াদ পার বকেয়া</span>':'')+
+    return '<div class="rowitem" data-rowid="'+p.id+'"><div class="r1"><div><b style="font-size:1rem">'+esc(p.name)+'</b> '+(over?'<span class="badge out">⚠️ সীমা পার</span>':'')+(od?' <span class="badge out">⛔ মেয়াদ পার বকেয়া</span>':'')+
     '<div class="meta">'+(kindLbl[p.kind]||'অন্যান্য')+(p.phone?' • '+esc(p.phone):'')+(lim>0?' • বাকির সীমা: '+money(lim):'')+(bought>0?' • মোট কেনাকাটা (বিল): '+money(bought):'')+'</div>'+
     (over?'<div style="color:var(--out);font-weight:700;font-size:.9rem;margin-top:2px">⚠️ সতর্ক: এই মানুষটার বাকি সীমা ('+money(lim)+') পার হয়ে গেছে!</div>':'')+
     '</div><div>'+balHtml+'</div></div>'+
@@ -4978,7 +4985,7 @@ function renderStaff(){
     var cnt={present:0,absent:0,leave:0};atts.forEach(function(a){if(cnt[a.status]!==undefined)cnt[a.status]++;});
     var todayAtt=DB.atts.filter(function(a){return a.sid===s.id&&a.date===todayStr();})[0];
     var histHtml=hist.length?hist.map(function(py){return '<div class="kv"><span>'+esc(py.month)+' • '+esc(SAL_KINDS[py.kind||'salary'])+' • '+esc(py.date)+'</span><b>'+money(py.amount)+' <button class="btn small danger noprint" type="button" onclick="delPay(\''+py.id+'\')">মুছুন</button></b></div>';}).join(''):'<p class="hint" style="margin:0">এখনো কোনো বেতন দেওয়া হয়নি।</p>';
-    return '<div class="rowitem" data-rowid="'+s.id+'"><div class="r1"><div><b style="font-size:1.08rem">'+esc(s.name)+'</b><div class="meta">মাসিক বেতন '+money(s.salary)+(s.phone?' • '+esc(s.phone):'')+'</div></div>'+
+    return '<div class="rowitem" data-rowid="'+s.id+'"><div class="r1"><div><b style="font-size:1rem">'+esc(s.name)+'</b><div class="meta">মাসিক বেতন '+money(s.salary)+(s.phone?' • '+esc(s.phone):'')+'</div></div>'+
     '<div>'+(paid.length?'<span class="badge in">✅ এই মাসের বেতন দেওয়া</span>':'<span class="badge warn">এই মাসের বেতন বাকি</span>')+'</div></div>'+
     '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="paySalary(\''+s.id+'\')">💵 বেতন দিন</button><button class="btn small gold" type="button" onclick="paySalary(\''+s.id+'\',\'advance\')">⏩ অগ্রিম / বোনাস</button><button class="btn small ghost" type="button" onclick="editStaff(\''+s.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delStaff(\''+s.id+'\')">🗑️</button></div>'+
     '<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px"><b>🗓️ হাজিরা</b> <span class="meta">এই মাসে: ✅ '+fmt(cnt.present)+' দিন • ❌ '+fmt(cnt.absent)+' দিন • 🏖️ '+fmt(cnt.leave)+' দিন'+(todayAtt?' • আজ: '+attLbl[todayAtt.status]:'')+'</span>'+
@@ -5690,7 +5697,7 @@ function renderLoans(){
     var ndBadge=nd?(' • পরের কিস্তি: <b>'+esc(nd)+'</b>'+(nd<todayStr()?' <span class="badge out">⛔ মেয়াদ পার</span>':'')):'';
     var intAmt=loanInterestAmt(l);
     var hist=myInsts.length?myInsts.map(function(x){return '<div class="kv"><span>'+esc(x.date)+'</span><b>'+money(x.amount)+' <button class="btn small danger noprint" type="button" onclick="delInst(\''+x.id+'\')">মুছুন</button></b></div>';}).join(''):'<p class="hint" style="margin:0">এখনো কোনো কিস্তি হয়নি।</p>';
-    return '<div class="rowitem"><div class="r1"><div><b style="font-size:1.05rem">'+esc(l.party)+'</b> '+(l.dir==='taken'?'<span class="badge out">লোন নিয়েছি</span>':'<span class="badge in">লোন দিয়েছি</span>')+
+    return '<div class="rowitem"><div class="r1"><div><b style="font-size:.98rem">'+esc(l.party)+'</b> '+(l.dir==='taken'?'<span class="badge out">লোন নিয়েছি</span>':'<span class="badge in">লোন দিয়েছি</span>')+
     '<div class="meta">শুরু: '+esc(l.start)+' • মোট '+money(l.total)+' • প্রতি কিস্তি '+money(l.inst)+(num(l.count)>0?' • মোট '+fmt(num(l.count))+' কিস্তি':'')+(intAmt>0?' • সুদ '+fmt(num(l.interest))+'% = '+money(intAmt)+' (সুদসহ মোট '+money(num(l.total)+intAmt)+')':'')+'</div>'+
     '<div class="meta">দেওয়া হয়েছে: '+money(paid)+' ('+fmt(myInsts.length)+' কিস্তি) • <b>বাকি: '+money(rem)+'</b>'+(left!==null?' • কিস্তি বাকি: '+fmt(left)+'টি':'')+ndBadge+'</div>'+
     '<div style="background:var(--line);border-radius:999px;height:12px;overflow:hidden;margin-top:6px"><div style="height:100%;width:'+pct+'%;background:var(--in)"></div></div></div></div>'+
@@ -6756,7 +6763,7 @@ function renderProducts(){
   var svb=$('stockValueBox');
   if(svb){
     var tq=0;bProducts().forEach(function(p){tq+=prodStats(p).remaining;});
-    svb.innerHTML='<div class="live-total" style="font-size:1.35rem;text-align:center;padding:14px 10px">স্টকে মোট '+money(tv)+' টাকার মাল আছে</div><div class="kv"><span>মোট প্রোডাক্ট</span><b>'+fmt(bProducts().length)+' টি</b></div><div class="kv"><span>মোট পরিমাণ (সব প্রোডাক্ট মিলিয়ে)</span><b>'+fmt(tq)+'</b></div><p class="hint" style="margin:6px 0 0">হিসাবটা প্রতিটা প্রোডাক্টের স্টক × কেনা দাম — স্টক বদলালেই অটোমেটিক বদলে যায়। যার কেনা দাম দেওয়া নেই, তার হিসাব ৳ ০ ধরা হয়।</p>';
+    svb.innerHTML='<div class="live-total" style="font-size:1.02rem;text-align:center;padding:7px 8px">স্টকে মোট '+money(tv)+' টাকার মাল আছে</div><div class="kv"><span>মোট প্রোডাক্ট</span><b>'+fmt(bProducts().length)+' টি</b></div><div class="kv"><span>মোট পরিমাণ (সব প্রোডাক্ট মিলিয়ে)</span><b>'+fmt(tq)+'</b></div><p class="hint" style="margin:3px 0 0;font-size:.8rem;line-height:1.3">হিসাবটা প্রতিটা প্রোডাক্টের স্টক × কেনা দাম — স্টক বদলালেই অটোমেটিক বদলে যায়। যার কেনা দাম দেওয়া নেই, তার হিসাব ৳ ০ ধরা হয়।</p>';
   }
   var list=bProducts().filter(function(p){
     if(q&&p.name.toLowerCase().indexOf(q)<0&&(p.barcode||'').toLowerCase().indexOf(q)<0)return false;
@@ -6770,20 +6777,20 @@ function renderProducts(){
     var s=prodStats(p);
     var ei=expiryInfo(p);
     var expBadge=ei?(ei.expired?' <span class="badge out">⛔ মেয়াদ শেষ!</span>':(ei.soon?' <span class="badge warn">⏰ মেয়াদ '+esc(p.expiry)+' (আর '+fmt(ei.days)+' দিন)</span>':' <span class="badge in">মেয়াদ '+esc(p.expiry)+'</span>')):'';
-    var photoHtml=p.photo?'<img src="'+p.photo+'" alt="'+esc(p.name)+'" style="width:96px;height:96px;object-fit:cover;border-radius:12px;border:1.5px solid var(--line);flex:0 0 auto" />':'<div style="width:96px;height:96px;border-radius:12px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:2.2rem;flex:0 0 auto" aria-hidden="true">📦</div>';
+    var photoHtml=p.photo?'<img src="'+p.photo+'" alt="'+esc(p.name)+'" style="width:48px;height:48px;object-fit:cover;border-radius:10px;border:1.5px solid var(--line);flex:0 0 auto" />':'<div style="width:48px;height:48px;border-radius:10px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex:0 0 auto" aria-hidden="true">📦</div>';
     var logs=bLogs().filter(function(l){return l.pid===p.id;}).slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id);});
     var logHtml=logs.length?logs.map(function(l){
       var lbl=l.recon?'⚖️ স্টক মিলানো':(l.type==='sale'?'🛒 বিক্রি':(l.type==='in'?'📥 মাল এলো':'📤 বের হলো'));
       var sign=l.type==='in'?'+':'−';
       return '<div class="kv"><span>'+esc(l.date)+' • '+lbl+' '+fmt(l.qty)+' '+esc(p.unit)+' × '+money(l.price)+(l.party?' • '+esc(l.party):'')+'</span><b>'+sign+' '+money(num(l.qty)*num(l.price))+' <button class="btn small ghost noprint" type="button" onclick="editLog(\''+l.id+'\')">✏️ ঠিক</button> <button class="btn small danger noprint" type="button" onclick="delLog(\''+l.id+'\')">মুছুন</button></b></div>';
     }).join(''):'<p class="hint" style="margin:0">এখনো কোনো বিক্রি / মাল আসার এন্ট্রি নেই।</p>';
-    return '<div class="rowitem" data-rowid="'+p.id+'"><div style="display:flex;gap:12px;align-items:flex-start">'+photoHtml+
-    '<div style="flex:1;min-width:0"><button type="button" class="dp-namebtn" style="font-size:1.12rem" onclick="toggleProdOpts(\''+p.id+'\')">'+esc(p.name)+'</button>'+(s.remaining<=num(p.low)?' <span class="badge warn">স্টক কম!</span>':'')+expBadge+
-    '<div style="margin-top:4px;font-size:.98rem">📦 আছে <b class="stockbig" style="font-size:1.25rem">'+fmt(s.remaining)+' '+esc(p.unit)+'</b> • বিক্রি হয়েছে '+fmt(s.sold)+' '+esc(p.unit)+'</div>'+
+    return '<div class="rowitem" data-rowid="'+p.id+'"><div style="display:flex;gap:9px;align-items:flex-start">'+photoHtml+
+    '<div style="flex:1;min-width:0"><button type="button" class="dp-namebtn" style="font-size:1rem;line-height:1.3" onclick="toggleProdOpts(\''+p.id+'\')">'+esc(p.name)+'</button>'+(s.remaining<=num(p.low)?' <span class="badge warn">স্টক কম!</span>':'')+expBadge+
+    '<div style="margin-top:2px;font-size:.9rem;line-height:1.3">📦 আছে <b class="stockbig" style="font-size:1.05rem">'+fmt(s.remaining)+' '+esc(p.unit)+'</b> • বিক্রি হয়েছে '+fmt(s.sold)+' '+esc(p.unit)+'</div>'+
     '<div class="meta">শুরুতে ছিল '+fmt(s.opening)+' + এলো '+fmt(s.pin)+' − বিক্রি '+fmt(s.sold)+(s.outQty?' − বের হলো '+fmt(s.outQty):'')+' = বাকি '+fmt(s.remaining)+' '+esc(p.unit)+'</div>'+
     '<div class="meta">কেনা '+money(p.buy)+' • খুচরা '+money(p.sell)+(num(p.wsell)?' • পাইকারি '+money(p.wsell):'')+(p.barcode?' • 🏷️ বারকোড: '+esc(p.barcode):'')+' • স্টকের মূল্য '+money(s.stockValue)+'</div>'+
     '<div class="meta">মোট বিক্রি: '+money(s.soldAmt)+' • মোট লাভ: <b style="color:'+(s.profit>=0?'var(--in)':'var(--out)')+'">'+money(s.profit)+'</b></div></div></div>'+
-    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openMove(\''+p.id+'\',\'sale\')">🛒 বিক্রি</button><button class="btn small gold" type="button" onclick="openMove(\''+p.id+'\',\'in\')">📥 মাল এলো</button><button class="btn small ghost" type="button" onclick="openMove(\''+p.id+'\',\'out\')">📤 নষ্ট/ফেরত</button><button class="btn small ghost" type="button" onclick="editProd(\''+p.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delProd(\''+p.id+'\')">🗑️</button></div>'+prodSellHtml(p)+prodOptsHtml(p)+
+    '<div class="iconbtns noprint"><button class="btn small" type="button" onclick="openMove(\''+p.id+'\',\'sale\')">🛒 বিক্রি</button><button class="btn small gold" type="button" onclick="openMove(\''+p.id+'\',\'in\')">📥 মাল এলো</button><button class="btn small ghost" type="button" onclick="openMove(\''+p.id+'\',\'out\')">📤 নষ্ট/ফেরত</button><button class="btn small ghost" type="button" onclick="editProd(\''+p.id+'\')">✏️ ঠিক</button><button class="btn small danger" type="button" onclick="delProd(\''+p.id+'\')">🗑️</button><button class="btn small ghost" type="button" onclick="toggleQsell(\''+p.id+'\')">🛒 কুইক বিক্রি</button></div>'+'<div id="qsellbox-'+p.id+'" style="display:none">'+prodSellHtml(p)+'</div>'+prodOptsHtml(p)+
     '<details class="logbox"><summary>📜 পুরো ইতিহাস ('+logs.length+' টি এন্ট্রি)</summary>'+logHtml+'</details></div>';
   }).join('');
   placeFormAfterRender('prodFormTitle','prodList',editProdId);
@@ -6859,11 +6866,15 @@ function prodSellHtml(p){
      label beside the button names the price this sale will use —
      'খুচরা দাম ৳ 20 / পিস' or 'পাইকারি দাম ৳ 15 / পিস' — so which
      price applies is never a guess. */
-  return '<div class="qsell noprint" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1.5px dashed var(--line)"><label for="qs-'+p.id+'" style="font-weight:700">বিক্রির পরিমাণ</label><input type="number" id="qs-'+p.id+'" value="'+esc(v)+'" min="0" step="any" inputmode="decimal" style="width:92px" oninput="qsSetQty(\''+p.id+'\',this.value)" />'+
-  '<select aria-label="দামের ধরন" onchange="qsSetMode(\''+p.id+'\',this.value)"><option value="rt"'+(mode==='rt'?' selected':'')+'>খুচরা</option><option value="ws"'+(mode==='ws'?' selected':'')+'>পাইকারি</option></select>'+
+  return '<div class="qsell noprint" style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:6px;padding-top:5px;border-top:1.5px dashed var(--line)"><label for="qs-'+p.id+'" style="font-weight:700">বিক্রির পরিমাণ</label><input type="number" id="qs-'+p.id+'" value="'+esc(v)+'" min="0" step="any" inputmode="decimal" style="width:70px" oninput="qsSetQty(\''+p.id+'\',this.value)" />'+
+  '<select aria-label="দামের ধরন" style="width:auto;max-width:118px" onchange="qsSetMode(\''+p.id+'\',this.value)"><option value="rt"'+(mode==='rt'?' selected':'')+'>খুচরা</option><option value="ws"'+(mode==='ws'?' selected':'')+'>পাইকারি</option></select>'+
   '<button class="btn small" type="button" onclick="quickSell(\''+p.id+'\')">🛒 বিক্রি করুন</button><span class="meta" id="qsprice-'+p.id+'">'+qsPriceName(p)+' দাম '+money(qsPrice(p))+' / '+esc(p.unit)+'</span><span class="meta" id="qsline-'+p.id+'" style="font-weight:700">'+qsLineText(p)+'</span></div>';
 }
 window.qsSetQty=function(id,v){qsQty[id]=v;qsLineRefresh(id);};
+/* v29 compact: the quick-sell strip starts collapsed so more products
+   fit on one screen; the row's '🛒 কুইক বিক্রি' button opens it — the
+   strip itself (ids, handlers, sale-session behaviour) is unchanged. */
+window.toggleQsell=function(id){var el=document.getElementById('qsellbox-'+id);if(el)el.style.display=(el.style.display==='none')?'':'none';};
 window.qsSetMode=function(id,v){
   qsMode[id]=v;
   var p=findProd(id),sp=document.getElementById('qsprice-'+id);
@@ -7708,7 +7719,7 @@ function renderDealers(){
   else $('dealerList').innerHTML=list.map(function(d){
     var t=dealerTotals(d.id);
     var dueHtml=t.due>0.005?'<span class="badge out">বাকি পাবো '+money(t.due)+'</span>':(t.due<-0.005?'<span class="badge warn">বেশি দিয়েছে '+money(-t.due)+'</span>':'<span class="badge in">✅ হিসাব শোধ</span>');
-    return '<div class="rowitem" data-rowid="'+d.id+'"><div class="r1"><div><b style="font-size:1.1rem">'+esc(d.name)+'</b> '+dueHtml+
+    return '<div class="rowitem" data-rowid="'+d.id+'"><div class="r1"><div><b style="font-size:1rem">'+esc(d.name)+'</b> '+dueHtml+
     '<div class="meta">'+(d.company?'🏢 '+esc(d.company):'কোম্পানি দেওয়া নেই')+(d.phone?' • 📱 '+esc(d.phone):'')+'</div>'+
     '<div class="meta">মোট মাল '+money(t.given)+(Math.abs(t.adj)>0.004?' • পার্সেন্টেজ '+signedMoney(t.adj):'')+' • মোট পেয়েছি '+money(t.recv)+(t.ret>0.005?' • ফেরত '+money(t.ret):'')+' • প্রোডাক্ট '+fmt(dealerProds(d.id).length)+' টা</div>'+
     (d.note?'<div class="meta">📝 '+esc(d.note)+'</div>':'')+
@@ -8736,7 +8747,7 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 28 (v28)":"Version 28 (v28)",
+"ভার্সন 29 (v29)":"Version 29 (v29)",
 "➕ নতুন প্রোডাক্ট এড করুন":"➕ Add a new product",
 "← ফিরে যান":"← Go back",
 "পেমেন্ট মাধ্যম (টাকা শোধ হলে টাকার খাতায় এই মাধ্যমে যাবে)":"Payment method (a due payment lands in the money ledger with this method)",
@@ -8882,7 +8893,7 @@ var I18N_EN={
 "🔄 এখনই রিফ্রেশ করুন":"🔄 Refresh now",
 "📴 আপডেট চেক করতে ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন":"📴 Checking for updates needs internet — turn it on and try again",
 "⏳ চেক হচ্ছে…":"⏳ Checking…",
-"✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 28)":"✅ You are on the latest version (Version 28)",
+"✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 29)":"✅ You are on the latest version (Version 29)",
 "✅ ব্যবসার নাম সেভ হয়েছে":"✅ Business name saved"
 };
 var _i18nOrig=new WeakMap();
