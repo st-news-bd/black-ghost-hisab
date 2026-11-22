@@ -472,7 +472,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
       </div>
       <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
         <h3 style="margin:0 0 6px">📱 অ্যাপের ভার্সন</h3>
-        <div class="kv"><span>বর্তমান ভার্সন</span><b>ভার্সন 29 (v29)</b></div>
+        <div class="kv"><span>বর্তমান ভার্সন</span><b>ভার্সন 30 (v30)</b></div>
         <button class="btn ghost" id="updCheckBtn" type="button" style="margin-top:8px">🔄 নতুন ভার্সন আছে কিনা দেখুন</button>
         <p id="updMsg" style="margin:8px 0 0;font-weight:700"></p>
         <button class="btn gold" id="updRefreshBtn" type="button" style="display:none;margin-top:8px">🔄 এখনই রিফ্রেশ করুন</button>
@@ -1250,7 +1250,7 @@ footer.note{color:var(--muted);font-size:.88rem;text-align:center;margin-top:22p
   </section>
 
   <p class="printonly" style="text-align:center;font-weight:700">Black Ghost Hisab — হিসাব রিপোর্ট</p>
-  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 29 (v29)</footer>
+  <footer class="note">Black Ghost Hisab • লগইন করলে হিসাব তোমার অ্যাকাউন্টে সেভ থাকে — ইন্টারনেট থাকুক বা না থাকুক, সব কাজ চলে।<br>ভার্সন 30 (v30)</footer>
   <div class="noprint" style="max-width:340px;margin:14px auto 0;text-align:center">
     <input type="password" id="adminWord" placeholder="" autocomplete="off" aria-label="Admin" style="text-align:center" />
     <button class="btn small ghost" id="adminOpenBtn" type="button" style="margin-top:6px">🔐 Admin Panel<span class="admbadge" id="admBadge1"></span></button>
@@ -2505,6 +2505,111 @@ function activeTabName(){
   var el=document.querySelector('section.page.active');
   return el?el.id.replace('page-',''):'dash';
 }
+/* ---------- v30 — PHONE BACK BUTTON (History API) ----------
+   Problem: the app is one page with no browser-history entries, so the
+   phone's system back button exited the app from ANY screen. Fix: every
+   dedicated page / sub-screen pushes ONE history entry; a popstate
+   listener walks the app back one level per press (dealer detail →
+   dealer list → home; order person → people list → home; add-product →
+   stock → home). The HOME screen is the base entry (replaceState at
+   load, nothing pushed), so back on home still exits normally — it is
+   never trapped. navStack mirrors the entries this app has pushed;
+   popstate rebuilds it from the landed entry's key, so the in-app
+   '← ফিরে যান' button (which calls history.back()) can never desync
+   from the system button. Display-only: no data/sync/login changes. */
+var navStack=['home'];
+var navApplying=false; /* true while popstate is applying a view */
+try{history.replaceState({bgh:'home'},'');}catch(e){}
+function navViewKey(){
+  if(isHome)return 'home';
+  var tab=activeTabName();
+  if(tab==='dealer'&&typeof dlSelId!=='undefined'&&dlSelId)return 'dealer:'+dlSelId;
+  if(tab==='order'&&typeof orderPersonKey!=='undefined'&&orderPersonKey)return 'orderperson:'+orderPersonKey;
+  return 'tab:'+tab;
+}
+function navParentKey(key){
+  if(!key||key==='home')return null;
+  if(key.indexOf('dealer:')===0)return 'tab:dealer';
+  if(key.indexOf('orderperson:')===0)return 'tab:order';
+  if(key==='tab:addprod')return 'tab:stock';
+  return 'home'; /* every other tab's parent is home */
+}
+function navChainFor(key){
+  var chain=['home'];
+  if(key==='home')return chain;
+  var p=navParentKey(key);
+  if(p&&p!=='home')chain.push(p);
+  chain.push(key);
+  return chain;
+}
+function navPushKey(key){
+  navStack.push(key);
+  try{history.pushState({bgh:key},'');}catch(e){}
+}
+function navSync(){
+  if(navApplying)return;
+  var key=navViewKey();
+  var top=navStack[navStack.length-1];
+  if(key===top)return;
+  if(key==='home'){navStack=['home'];return;} /* visual-only return home */
+  var parent=navParentKey(key);
+  if(parent===top){navPushKey(key);return;} /* one level down: list → detail */
+  if(parent&&navParentKey(top)===parent&&key.indexOf('tab:')!==0){
+    /* same sub-screen slot, different item (dealer A → dealer B):
+       replace the current entry instead of stacking a duplicate */
+    navStack[navStack.length-1]=key;
+    try{history.replaceState({bgh:key},'');}catch(e){}
+    return;
+  }
+  if(parent&&parent!=='home'){
+    /* jumped straight into a sub-screen from another section: give the
+       parent list its own entry first, so back lands there, then home */
+    navPushKey(parent);navPushKey(key);return;
+  }
+  navPushKey(key); /* section-to-section jump: one entry for the new view */
+}
+function navApplyView(key){
+  navApplying=true;
+  try{
+    if(key==='home'){goHome();return;}
+    if(key.indexOf('dealer:')===0){
+      var did=key.slice(7);
+      dlSelId=(typeof findDealer==='function'&&findDealer(did))?did:null;
+      showPageNoScroll('dealer');renderDealers();
+      window.scrollTo(0,0);return;
+    }
+    if(key.indexOf('orderperson:')===0){
+      orderPersonKey=key.slice(12);
+      showPageNoScroll('order');renderOrders();
+      window.scrollTo(0,0);return;
+    }
+    var tab=key.slice(4);
+    if(tab==='dealer'){dlSelId=null;showPageNoScroll('dealer');renderDealers();}
+    else if(tab==='order'){orderPersonKey=null;showPageNoScroll('order');renderOrders();}
+    else showPageNoScroll(tab);
+    window.scrollTo(0,0);
+  }finally{navApplying=false;}
+}
+window.addEventListener('popstate',function(e){
+  var key='home';
+  if(e.state&&e.state.bgh)key=String(e.state.bgh);
+  navStack=navChainFor(key);
+  navApplyView(key);
+});
+/* In-app back: step the real history back one entry (popstate applies
+   the view). Falls back to false when this app pushed nothing, so the
+   caller can do its old visual navigation instead. */
+function navGoBack(){
+  if(navStack.length>1){try{history.back();}catch(e){return false;}return true;}
+  return false;
+}
+/* Back out of a sub-screen whose parent is the entry below (add-product
+   → stock after save / '← ফিরে যান' there): history.back() when the
+   sub-screen really is the current entry, else false. */
+function navBackFrom(key){
+  if(navStack[navStack.length-1]===key){try{history.back();}catch(e){return false;}return true;}
+  return false;
+}
 function syncDedicatedBar(){
   var tab=activeTabName();
   curTab=tab;
@@ -2522,6 +2627,7 @@ function syncDedicatedBar(){
   document.body.setAttribute('data-view',isDedicated?'dedicated':'home');
   var t=$('dedicatedTitle');if(t)t.textContent=(typeof trStr==='function')?trStr(title):title;
   var aw=$('adminWord');if(aw){var wrap=aw.closest('div');if(wrap)wrap.style.display=isDedicated?'none':'';}
+  navSync(); /* v30: keep the phone-back history stack in step with the view */
 }
 function goHome(){
   isHome=true;
@@ -2535,6 +2641,9 @@ function goHome(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 window.closeDealerDetail=function(){
+  /* v30: when the dealer detail is the current history entry, step the
+     real history back — popstate reopens the dealer list, in sync. */
+  if(navStack[navStack.length-1].indexOf('dealer:')===0){try{history.back();}catch(e){}return;}
   dlSelId=null;
   renderDealers();
   syncDedicatedBar();
@@ -2543,6 +2652,11 @@ window.closeDealerDetail=function(){
 (function(){
   var bb=$('dedicatedBackBtn');
   if(bb)bb.addEventListener('click',function(){
+    /* v30: the in-app back button steps the real history back one entry
+       (popstate applies the view), so it can never desync from the
+       phone's system back button. The visual fallback below only runs
+       when this app has no pushed entry to step back to. */
+    if(navGoBack())return;
     var tab=activeTabName();
     if(tab==='addprod'){showPageNoScroll('stock');window.scrollTo({top:0,behavior:'smooth'});return;}
     if(tab==='dealer'&&typeof dlSelId!=='undefined'&&dlSelId){window.closeDealerDetail();return;}
@@ -2743,7 +2857,7 @@ $('pSave').addEventListener('click',function(){
   if(wasEditProd)rowPosRestore('prodList',wasEditProd,prodPos);
   /* v25: the form lives on its own page (page-addprod) — a successful
      save returns to the stock page, where the product is now listed. */
-  if(!wasEditProd){showPageNoScroll('stock');window.scrollTo(0,0);}
+  if(!wasEditProd){if(!navBackFrom('tab:addprod'))showPageNoScroll('stock');window.scrollTo(0,0);}
 });
 $('pCancel').addEventListener('click',function(){
   var pos=editProdId?rowPosBefore('prodList',editProdId):null;
@@ -2761,7 +2875,7 @@ $('addProdBtn').addEventListener('click',function(){
   window.scrollTo(0,0);
   setTimeout(function(){var n=$('pName');if(n){try{n.focus({preventScroll:true});}catch(e){}}},80);
 });
-$('addProdBack').addEventListener('click',function(){showPageNoScroll('stock');});
+$('addProdBack').addEventListener('click',function(){if(!navBackFrom('tab:addprod'))showPageNoScroll('stock');});
 /* ----- প্রোডাক্ট ঠিক করা এখন ঠিক ওই প্রোডাক্টের কার্ডেই হয় — পেজ নড়ে না, স্ক্রল হয় না,
    নিচের আলাদা ফর্মে যেতে হয় না (ডিলার প্রোডাক্টের v16 প্যাটার্নের মতোই) -----
    নামে বা ✏️ ঠিক বোতামে চাপ দিলে ওই কার্ডের ভেতরেই লেখার ঘর খোলে; ✓ চাপলেই সেভ, ✕ চাপলে বন্ধ।
@@ -3384,7 +3498,7 @@ function themeInit(){
    • ভার্সন + আপডেট চেক — compares APP_VER with the version in the
      live sw.js cache name, fetched fresh (cache-busting query +
      no-store). Offline / fetch failure gets a clear message. */
-var APP_VER=29;
+var APP_VER=30;
 function bizNameDisplay(){var n=String(DB.bizName||'').trim();return n?n:'Black Ghost Hisab';}
 function syncBizNameInputs(){
   var v=DB.bizName||'';
@@ -3435,7 +3549,7 @@ if(updBtn)updBtn.addEventListener('click',function(){
       m.textContent=(LANG==='en'?('🆕 A new version (v'+live+') is available — refresh the page to get it'):('🆕 নতুন ভার্সন এসেছে (v'+bnNum(live)+') — পেজ রিফ্রেশ করলেই নতুন ভার্সন পাবেন'));
       m.style.color='var(--in)';if(rb)rb.style.display='';
     }else{
-      m.textContent=trStr('✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 29)');
+      m.textContent=trStr('✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 30)');
       m.style.color='var(--in)';
     }
   }).catch(function(){
@@ -5484,6 +5598,9 @@ window.openOrderPerson=function(i){
   var p=$('orderListPanel');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});
 };
 window.orderBackToPeople=function(){
+  /* v30: when the person's page is the current history entry, step the
+     real history back — popstate reopens the people list, in sync. */
+  if(navStack[navStack.length-1].indexOf('orderperson:')===0){try{history.back();}catch(e){}return;}
   orderPersonKey=null;renderOrders();
   var p=$('orderListPanel');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});
 };
@@ -8747,7 +8864,7 @@ var I18N_EN={
 "Telegram-এ মেসেজ করুন":"Message on Telegram",
 "torikul20250@gmail.com — চাপ দিলে মেইল অ্যাপ খুলবে":"torikul20250@gmail.com — tap to open the mail app",
 "TrxID (ট্রান্সাকশন আইডি)":"TrxID (transaction ID)",
-"ভার্সন 29 (v29)":"Version 29 (v29)",
+"ভার্সন 30 (v30)":"Version 30 (v30)",
 "➕ নতুন প্রোডাক্ট এড করুন":"➕ Add a new product",
 "← ফিরে যান":"← Go back",
 "পেমেন্ট মাধ্যম (টাকা শোধ হলে টাকার খাতায় এই মাধ্যমে যাবে)":"Payment method (a due payment lands in the money ledger with this method)",
@@ -8893,7 +9010,7 @@ var I18N_EN={
 "🔄 এখনই রিফ্রেশ করুন":"🔄 Refresh now",
 "📴 আপডেট চেক করতে ইন্টারনেট লাগবে — নেট চালু করে আবার চেষ্টা করুন":"📴 Checking for updates needs internet — turn it on and try again",
 "⏳ চেক হচ্ছে…":"⏳ Checking…",
-"✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 29)":"✅ You are on the latest version (Version 29)",
+"✅ তুমি সর্বশেষ ভার্সনে আছো (ভার্সন 30)":"✅ You are on the latest version (Version 30)",
 "✅ ব্যবসার নাম সেভ হয়েছে":"✅ Business name saved"
 };
 var _i18nOrig=new WeakMap();
